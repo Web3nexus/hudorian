@@ -19,10 +19,8 @@
     RewriteRule ^(node_modules|vendor) - [F,L,NC]
 
     # 3. Route API and Storage requests directly to Laravel backend
-    RewriteCond %{REQUEST_URI} ^/api [NC,OR]
-    RewriteCond %{REQUEST_URI} ^/sanctum [NC,OR]
-    RewriteCond %{REQUEST_URI} ^/storage [NC]
-    RewriteRule ^(.*)$ backend/public/$1 [L,QSA]
+    RewriteRule ^(api|sanctum)(.*)$ backend/public/index.php [L,QSA]
+    RewriteRule ^storage/(.*)$ backend/public/storage/$1 [L,QSA]
 
     # 4. (Optional) If running Next.js via PM2 / Node on local port 3000,
     # uncomment the block below to proxy web requests to Next.js:
