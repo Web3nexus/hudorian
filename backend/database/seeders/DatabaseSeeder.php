@@ -593,6 +593,22 @@ class DatabaseSeeder extends Seeder
             'media_url' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=2000&q=85',
         ]);
 
+        CmsBlock::create([
+            'key' => 'security_settings',
+            'title' => 'Security & Bot Protection Settings',
+            'subtitle' => 'Cloudflare Turnstile, Google reCAPTCHA, and Multi-Factor Authentication',
+            'body' => 'Configure enterprise bot protection and administrative 2FA verification.',
+            'media_url' => '',
+            'payload' => [
+                'captcha_provider' => 'none',
+                'cloudflare_site_key' => '',
+                'cloudflare_secret_key' => '',
+                'google_recaptcha_site_key' => '',
+                'google_recaptcha_secret_key' => '',
+                'two_factor_policy' => 'optional',
+            ],
+        ]);
+
         // Seed a sample past reservation and payment for demo member
         $ibizaRoom = Room::where('slug', 'like', '%ibiza%')->first();
         if ($ibizaRoom) {

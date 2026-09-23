@@ -25,11 +25,15 @@ class User extends Authenticatable
         'city',
         'avatar',
         'is_active',
+        'google2fa_secret',
+        'google2fa_enabled',
+        'google2fa_confirmed_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'google2fa_secret',
     ];
 
     protected function casts(): array
@@ -38,6 +42,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'google2fa_enabled' => 'boolean',
+            'google2fa_confirmed_at' => 'datetime',
         ];
     }
 

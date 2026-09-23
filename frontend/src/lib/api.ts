@@ -1,6 +1,18 @@
 import { House, Room, Event, MembershipPlan, User, Reservation, EventBooking, JournalPost, CmsBlock } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const getBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return '/api/v1';
+    }
+  }
+  return 'http://localhost:8000/api/v1';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 class ApiClient {
   private getAuthToken(): string | null {
@@ -11,6 +23,18 @@ class ApiClient {
   private getAdminToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('hudorian_admin_token');
+  }
+
+  private getBaseUrl(): string {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    if (typeof window !== 'undefined') {
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return '/api/v1';
+      }
+    }
+    return 'http://localhost:8000/api/v1';
   }
 
   private async request<T>(
@@ -30,7 +54,8 @@ class ApiClient {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const baseUrl = this.getBaseUrl();
+      const res = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers,
       });
@@ -191,12 +216,91 @@ class ApiClient {
     return this.request<{ data: JournalPost; related: JournalPost[] }>(`/journal/${slug}`);
   }
 
-  // --- SecureGate Admin ---
-  async adminLogin(email: string, password: string): Promise<{ status: string; requires_mfa: boolean; mfa_token: string }> {
-    return this.request('/admin/auth/login', {
+  // --- Security & Bot Protection ---
+  async getSecurityConfig(): Promise<{
+    captcha_provider: 'none' | 'cloudflare_turnstile' | 'google_recaptcha';
+    cloudflare_site_key?: string | null;
+    google_recaptcha_site_key?: string | null;
+  }> {
+    return this.request('/security/config');
+  }
+
+  async getAdminSecuritySettings(): Promise<{
+    settings: {
+      captcha_provider: 'none' | 'cloudflare_turnstile' | 'google_recaptcha';
+      cloudflare_site_key?: string;
+      cloudflare_secret_key?: string;
+      google_recaptcha_site_key?: string;
+      google_recaptcha_secret_key?: string;
+    };
+    current_admin_2fa: {
+      enabled: boolean;
+      confirmed_at?: string | null;
+    };
+  }> {
+    return this.request('/admin/security/settings', {}, true);
+  }
+
+  async updateAdminSecuritySettings(data: {
+    captcha_provider: string;
+    cloudflare_site_key?: string;
+    cloudflare_secret_key?: string;
+    google_recaptcha_site_key?: string;
+    google_recaptcha_secret_key?: string;
+  }): Promise<{ message: string; settings: unknown }> {
+    return this.request('/admin/security/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  async setupAdmin2fa(): Promise<{ secret: string; otpauth_uri: string; qr_code_url: string }> {
+    return this.request('/admin/security/2fa/setup', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+    }, true);
+  }
+
+  async confirmAdmin2fa(secret: string, code: string): Promise<{ message: string; google2fa_enabled: boolean }> {
+    return this.request('/admin/security/2fa/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ secret, code }),
+    }, true);
+  }
+
+  async disableAdmin2fa(password: string): Promise<{ message: string; google2fa_enabled: boolean }> {
+    return this.request('/admin/security/2fa/disable', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }, true);
+  }
+
+  // --- SecureGate Admin ---
+  async adminLogin(email: string, password: string, captchaToken?: string): Promise<{
+    status?: string;
+    requires_mfa: boolean;
+    mfa_token?: string;
+    token?: string;
+    admin?: User;
+  }> {
+    const res = await this.request<{
+      status?: string;
+      requires_mfa: boolean;
+      mfa_token?: string;
+      token?: string;
+      admin?: User;
+    }>('/admin/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, captcha_token: captchaToken }),
     });
+
+    if (!res.requires_mfa && res.token && res.admin) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hudorian_admin_token', res.token);
+        localStorage.setItem('hudorian_admin', JSON.stringify(res.admin));
+      }
+    }
+
+    return res;
   }
 
   async adminVerifyMfa(mfaToken: string, code: string): Promise<{ token: string; admin: User }> {

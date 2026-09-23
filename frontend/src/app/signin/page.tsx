@@ -108,12 +108,6 @@ function SignInContent() {
                 Apply for candidacy
               </Link>
             </p>
-
-            <p className="text-[11px] text-[#96754B] pt-2">
-              <Link href="/securegate/login" className="hover:underline">
-                Are you an administrator? SecureGate Admin Clearance →
-              </Link>
-            </p>
           </div>
         </div>
       </main>

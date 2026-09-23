@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\Security\TotpService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,15 @@ class SecureGateTest extends TestCase
         $this->seed();
     }
 
-    public function test_admin_login_triggers_mfa_challenge(): void
+    public function test_public_security_config_returns_default_none(): void
+    {
+        $response = $this->getJson('/api/v1/security/config');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('captcha_provider', 'none');
+    }
+
+    public function test_admin_login_without_2fa_grants_immediate_access(): void
     {
         $response = $this->postJson('/api/v1/admin/auth/login', [
             'email' => 'admin@hudorian.com',
@@ -24,13 +33,55 @@ class SecureGateTest extends TestCase
         ]);
 
         $response->assertStatus(200)
+            ->assertJsonPath('requires_mfa', false)
+            ->assertJsonStructure(['token', 'admin'])
+            ->assertJsonPath('admin.role', 'super_admin');
+    }
+
+    public function test_admin_with_2fa_enabled_challenges_and_verifies_totp(): void
+    {
+        $totpService = app(TotpService::class);
+        $secret = $totpService->generateSecret(32);
+
+        $admin = User::where('email', 'admin@hudorian.com')->first();
+        $admin->google2fa_secret = $secret;
+        $admin->google2fa_enabled = true;
+        $admin->google2fa_confirmed_at = now();
+        $admin->save();
+
+        $loginRes = $this->postJson('/api/v1/admin/auth/login', [
+            'email' => 'admin@hudorian.com',
+            'password' => 'password123',
+        ]);
+
+        $loginRes->assertStatus(200)
             ->assertJsonPath('status', 'mfa_required')
             ->assertJsonPath('requires_mfa', true)
             ->assertJsonStructure(['mfa_token']);
+
+        $mfaToken = $loginRes->json('mfa_token');
+        $validCode = $totpService->calculateCode($secret);
+
+        $verifyRes = $this->postJson('/api/v1/admin/auth/verify-mfa', [
+            'mfa_token' => $mfaToken,
+            'code' => $validCode,
+        ]);
+
+        $verifyRes->assertStatus(200)
+            ->assertJsonStructure(['token', 'admin'])
+            ->assertJsonPath('admin.role', 'super_admin');
     }
 
-    public function test_admin_mfa_verification_issues_secure_session(): void
+    public function test_admin_2fa_rejects_invalid_code(): void
     {
+        $totpService = app(TotpService::class);
+        $secret = $totpService->generateSecret(32);
+
+        $admin = User::where('email', 'admin@hudorian.com')->first();
+        $admin->google2fa_secret = $secret;
+        $admin->google2fa_enabled = true;
+        $admin->save();
+
         $loginRes = $this->postJson('/api/v1/admin/auth/login', [
             'email' => 'admin@hudorian.com',
             'password' => 'password123',
@@ -40,12 +91,11 @@ class SecureGateTest extends TestCase
 
         $verifyRes = $this->postJson('/api/v1/admin/auth/verify-mfa', [
             'mfa_token' => $mfaToken,
-            'code' => '888888',
+            'code' => '999999',
         ]);
 
-        $verifyRes->assertStatus(200)
-            ->assertJsonStructure(['token', 'admin'])
-            ->assertJsonPath('admin.role', 'super_admin');
+        $verifyRes->assertStatus(422)
+            ->assertJsonPath('error', 'MFA Verification Failed');
     }
 
     public function test_non_admin_cannot_access_securegate_routes(): void
@@ -60,4 +110,3 @@ class SecureGateTest extends TestCase
             ->assertJsonPath('error', 'Forbidden');
     }
 }
-

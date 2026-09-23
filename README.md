@@ -122,10 +122,10 @@ Base URL: `/api/v1`
    - Uses Laravel Sanctum tokens. Passwords hashed using bcrypt (cost 12).
    - Frontend stores token in localStorage and injects `Authorization: Bearer <token>` into API requests.
 2. **SecureGate Admin Authentication**:
-   - Dual-checkpoint architecture.
-   - Step 1: Admin credentials validated against rate limiter (locks after 5 failed attempts for 15 minutes).
-   - Step 2: System generates a cryptographic `mfa_token` and triggers secondary verification (TOTP/MFA code).
-   - Step 3: Admin submits code (dev demo code: `888888`), granting an elevated admin-scoped token (`admin:*`).
+   - High-security architecture with optional RFC 6238 Google Authenticator (TOTP) and Cloudflare Turnstile / Google reCAPTCHA bot protection (both OFF by default).
+   - Step 1: Admin credentials validated against rate limiter and optional CAPTCHA challenge.
+   - Step 2: If 2FA is enabled on the admin account, a cryptographic `mfa_token` is issued requiring real 6-digit TOTP confirmation. If 2FA is disabled (default), session grants immediate elevated admin access.
+   - Step 3: Admin manages Turnstile/reCAPTCHA API keys and enables personal Google Authenticator with QR code setup from `/securegate/security`.
    - Every administrative API endpoint enforces `auth:sanctum` and `securegate` middleware.
 
 ---
@@ -201,7 +201,6 @@ DB_CONNECTION=sqlite
 SECUREGATE_API_KEY=
 SECUREGATE_SECRET=
 SECUREGATE_ENDPOINT=
-SECUREGATE_DEMO_MFA=888888
 
 STRIPE_KEY=
 STRIPE_SECRET=
@@ -224,7 +223,7 @@ php artisan migrate:fresh --seed
 php artisan serve --port=8000
 ```
 *Demo Accounts seeded:*
-- **Super Admin**: `admin@hudorian.com` / `password123` (MFA Code: `888888`)
+- **Super Admin**: `admin@hudorian.com` / `password123` (2FA OFF by default; can be activated in `/securegate/security`)
 - **Member**: `member@hudorian.com` / `password123`
 - **Applicant**: `applicant@hudorian.com` / `password123`
 
@@ -287,8 +286,9 @@ Zero TypeScript errors, zero lint warnings.
 
 ---
 
-## 14. Known Limitations
+## 14. Bot Protection & 2FA Management
 
-- Production deployment of SecureGate requires provisioning enterprise vendor API credentials in `backend/.env`. In the local environment, the provided `SecureGateAdapter` performs local cryptographic challenges with development MFA code `888888`.
+- Cloudflare Turnstile & Google reCAPTCHA bot challenges and Google Authenticator 2FA are **OFF by default**, ensuring immediate out-of-the-box administrator accessibility.
+- Administrators can configure their Cloudflare/Google site keys & secret keys, and bind their Google Authenticator app via QR code directly in the SecureGate panel under `/securegate/security`.
 - Payment transactions utilize `MockPaymentGateway` with transaction recording and VAT invoice issuance. Connecting live Stripe accounts requires configuring `STRIPE_KEY` and `STRIPE_SECRET`.
 

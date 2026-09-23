@@ -4,6 +4,7 @@ namespace App\Services\SecureGate;
 
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Services\Security\TotpService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -14,13 +15,15 @@ class SecureGateAdapter implements SecureGateServiceInterface
     protected ?string $secret;
     protected ?string $endpoint;
     protected AuditLogger $auditLogger;
+    protected TotpService $totpService;
 
-    public function __construct(AuditLogger $auditLogger)
+    public function __construct(AuditLogger $auditLogger, TotpService $totpService)
     {
         $this->apiKey = config('services.securegate.api_key', env('SECUREGATE_API_KEY'));
         $this->secret = config('services.securegate.secret', env('SECUREGATE_SECRET'));
         $this->endpoint = config('services.securegate.endpoint', env('SECUREGATE_ENDPOINT'));
         $this->auditLogger = $auditLogger;
+        $this->totpService = $totpService;
     }
 
     public function authenticateAdmin(string $email, string $password, ?string $mfaCode = null, array $deviceContext = []): array
@@ -98,14 +101,33 @@ class SecureGateAdapter implements SecureGateServiceInterface
         // Reset rate limiter on successful password verification
         Cache::forget($rateKey);
 
-        // SecureGate MFA requirement for administrative operations
+        // If Google Authenticator 2FA is NOT enabled on this admin, grant access immediately
+        if (! $user->google2fa_enabled) {
+            $token = $user->createToken('securegate-admin-session', ['admin:*'], now()->addHours(8))->plainTextToken;
+
+            $this->auditLogger->log(
+                $user,
+                'admin.login_success',
+                'User',
+                $user->id,
+                ['ip' => $ip, 'user_agent' => $userAgent, 'mfa' => 'disabled']
+            );
+
+            return [
+                'success' => true,
+                'user' => $user,
+                'requires_mfa' => false,
+                'token' => $token,
+                'mfa_token' => null,
+                'error' => null,
+            ];
+        }
+
+        // If 2FA is enabled, generate MFA challenge session
         $mfaToken = Str::random(64);
-        // Default demo / development code: 123456 or generated 6 digits
-        $mfaSecretCode = env('SECUREGATE_DEMO_MFA', '888888');
 
         Cache::put('securegate:mfa:' . $mfaToken, [
             'user_id' => $user->id,
-            'code' => $mfaSecretCode,
             'ip' => $ip,
         ], now()->addMinutes(10));
 
@@ -121,6 +143,7 @@ class SecureGateAdapter implements SecureGateServiceInterface
             'success' => true,
             'user' => $user,
             'requires_mfa' => true,
+            'token' => null,
             'mfa_token' => $mfaToken,
             'error' => null,
         ];
@@ -139,15 +162,6 @@ class SecureGateAdapter implements SecureGateServiceInterface
             ];
         }
 
-        if ($code !== $payload['code'] && $code !== '888888') {
-            return [
-                'success' => false,
-                'user' => null,
-                'token' => null,
-                'error' => 'Invalid SecureGate multi-factor authentication code.',
-            ];
-        }
-
         $user = User::find($payload['user_id']);
         if (! $user) {
             return [
@@ -155,6 +169,16 @@ class SecureGateAdapter implements SecureGateServiceInterface
                 'user' => null,
                 'token' => null,
                 'error' => 'User not found.',
+            ];
+        }
+
+        // Validate using RFC 6238 TOTP Google Authenticator service
+        if (empty($user->google2fa_secret) || ! $this->totpService->verify($user->google2fa_secret, $code)) {
+            return [
+                'success' => false,
+                'user' => null,
+                'token' => null,
+                'error' => 'Invalid Google Authenticator code. Please check your app and try again.',
             ];
         }
 

@@ -90,6 +90,7 @@ export default function SecureGateLayout({
   const navItems = [
     { label: 'Executive Overview', href: '/securegate', icon: LayoutDashboard },
     { label: 'CMS & Site Studio', href: '/securegate/cms', icon: Sliders, badge: 'DYNAMIC' },
+    { label: 'Security & Auth Keys', href: '/securegate/security', icon: ShieldCheck, badge: 'PROTECTION' },
     { label: 'Membership Queue', href: '/securegate/applications', icon: FileCheck },
     { label: 'Member Registry', href: '/securegate/members', icon: Users },
     { label: 'Houses & Inventory', href: '/securegate/houses', icon: Building2 },

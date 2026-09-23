@@ -66,7 +66,6 @@ const defaultFooterNav = {
         { label: 'Tiers & Privileges', href: '/membership' },
         { label: 'Apply for Membership', href: '/membership/apply' },
         { label: 'Member Portal', href: '/member' },
-        { label: 'SecureGate Access', href: '/securegate/login' },
       ],
     },
     {

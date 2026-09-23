@@ -201,13 +201,6 @@ export default function Navbar() {
                 >
                   Apply for Membership
                 </Link>
-                <Link
-                  href="/securegate/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-6 py-3 rounded-full border border-white/20 text-white font-medium text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition"
-                >
-                  SecureGate
-                </Link>
               </div>
             </div>
           </div>

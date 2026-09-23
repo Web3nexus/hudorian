@@ -25,6 +25,7 @@
   "/securegate/members/page": "/securegate/members",
   "/securegate/page": "/securegate",
   "/securegate/payments/page": "/securegate/payments",
+  "/securegate/security/page": "/securegate/security",
   "/shop/page": "/shop",
   "/signin/page": "/signin",
   "/stays/page": "/stays",

@@ -25,6 +25,7 @@
   "/securegate/members/page": "app/securegate/members/page.js",
   "/securegate/page": "app/securegate/page.js",
   "/securegate/payments/page": "app/securegate/payments/page.js",
+  "/securegate/security/page": "app/securegate/security/page.js",
   "/shop/page": "app/shop/page.js",
   "/signin/page": "app/signin/page.js",
   "/stays/page": "app/stays/page.js",

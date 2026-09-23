@@ -63,6 +63,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
 
+    // Public Security Configuration (for Cloudflare / reCAPTCHA widget on login)
+    Route::get('/security/config', [AdminAuthController::class, 'getPublicConfig']);
+
     // Admin SecureGate Authentication Checkpoints
     Route::post('/admin/auth/login', [AdminAuthController::class, 'login']);
     Route::post('/admin/auth/verify-mfa', [AdminAuthController::class, 'verifyMfa']);
@@ -121,5 +124,12 @@ Route::prefix('v1')->group(function () {
         // CMS & Site Configuration
         Route::put('/cms/blocks/{key}', [CmsController::class, 'update']);
         Route::post('/cms/batch', [CmsController::class, 'batchUpdate']);
+
+        // Security, Cloudflare/reCAPTCHA Keys & 2FA
+        Route::get('/security/settings', [AdminAuthController::class, 'getSecuritySettings']);
+        Route::put('/security/settings', [AdminAuthController::class, 'updateSecuritySettings']);
+        Route::post('/security/2fa/setup', [AdminAuthController::class, 'setup2fa']);
+        Route::post('/security/2fa/confirm', [AdminAuthController::class, 'confirm2fa']);
+        Route::post('/security/2fa/disable', [AdminAuthController::class, 'disable2fa']);
     });
 });

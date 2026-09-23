@@ -205,6 +205,12 @@
       "namedRegex": "^/securegate/payments(?:/)?$"
     },
     {
+      "page": "/securegate/security",
+      "regex": "^/securegate/security(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/securegate/security(?:/)?$"
+    },
+    {
       "page": "/shop",
       "regex": "^/shop(?:/)?$",
       "routeKeys": {},

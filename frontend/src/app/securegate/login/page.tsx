@@ -1,9 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, KeyRound, Lock, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ShieldCheck, KeyRound, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '@/lib/api';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'error-callback'?: () => void;
+          'expired-callback'?: () => void;
+          theme?: 'light' | 'dark' | 'auto';
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+    };
+    grecaptcha?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback'?: () => void;
+          theme?: 'light' | 'dark';
+        }
+      ) => number;
+      reset: (widgetId?: number) => void;
+    };
+  }
+}
 
 export default function SecureGateLoginPage() {
   const router = useRouter();
@@ -15,13 +45,122 @@ export default function SecureGateLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Bot Protection / CAPTCHA
+  const [captchaProvider, setCaptchaProvider] = useState<'none' | 'cloudflare_turnstile' | 'google_recaptcha'>('none');
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string>('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaContainerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | number | null>(null);
+
+  // 1. Fetch public security configuration
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await api.getSecurityConfig();
+        if (config.captcha_provider === 'cloudflare_turnstile' && config.cloudflare_site_key) {
+          setCaptchaProvider('cloudflare_turnstile');
+          setCaptchaSiteKey(config.cloudflare_site_key);
+        } else if (config.captcha_provider === 'google_recaptcha' && config.google_recaptcha_site_key) {
+          setCaptchaProvider('google_recaptcha');
+          setCaptchaSiteKey(config.google_recaptcha_site_key);
+        } else {
+          setCaptchaProvider('none');
+        }
+      } catch (err) {
+        console.warn('Could not fetch security config, defaulting to none:', err);
+        setCaptchaProvider('none');
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  // 2. Load CAPTCHA scripts dynamically if enabled
+  useEffect(() => {
+    if (captchaProvider === 'cloudflare_turnstile' && captchaSiteKey) {
+      const scriptId = 'cf-turnstile-script';
+      const existingScript = document.getElementById(scriptId);
+
+      const renderTurnstile = () => {
+        if (window.turnstile && captchaContainerRef.current) {
+          captchaContainerRef.current.innerHTML = '';
+          try {
+            widgetIdRef.current = window.turnstile.render(captchaContainerRef.current, {
+              sitekey: captchaSiteKey,
+              theme: 'dark',
+              callback: (token: string) => {
+                setCaptchaToken(token);
+                setError(null);
+              },
+              'error-callback': () => setError('Security verification error. Please retry.'),
+              'expired-callback': () => setCaptchaToken(null),
+            });
+          } catch (e) {
+            console.error('Turnstile render error:', e);
+          }
+        }
+      };
+
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = renderTurnstile;
+        document.head.appendChild(script);
+      } else if (window.turnstile) {
+        renderTurnstile();
+      }
+    } else if (captchaProvider === 'google_recaptcha' && captchaSiteKey) {
+      const scriptId = 'google-recaptcha-script';
+      const existingScript = document.getElementById(scriptId);
+
+      const renderRecaptcha = () => {
+        if (window.grecaptcha && captchaContainerRef.current) {
+          captchaContainerRef.current.innerHTML = '';
+          try {
+            widgetIdRef.current = window.grecaptcha.render(captchaContainerRef.current, {
+              sitekey: captchaSiteKey,
+              theme: 'dark',
+              callback: (token: string) => {
+                setCaptchaToken(token);
+                setError(null);
+              },
+              'expired-callback': () => setCaptchaToken(null),
+            });
+          } catch (e) {
+            console.error('reCAPTCHA render error:', e);
+          }
+        }
+      };
+
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = renderRecaptcha;
+        document.head.appendChild(script);
+      } else if (window.grecaptcha) {
+        renderRecaptcha();
+      }
+    }
+  }, [captchaProvider, captchaSiteKey]);
+
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    if (captchaProvider !== 'none' && !captchaToken) {
+      setError('Please complete the security challenge before authenticating.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await api.adminLogin(email, password);
+      const res = await api.adminLogin(email, password, captchaToken || undefined);
       if (res.requires_mfa && res.mfa_token) {
         setMfaToken(res.mfa_token);
         setStep('mfa');
@@ -31,6 +170,14 @@ export default function SecureGateLoginPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid SecureGate administrator credentials.';
       setError(msg);
+      // Reset captcha on failure if applicable
+      if (captchaProvider === 'cloudflare_turnstile' && window.turnstile && widgetIdRef.current !== null) {
+        window.turnstile.reset(widgetIdRef.current as string);
+        setCaptchaToken(null);
+      } else if (captchaProvider === 'google_recaptcha' && window.grecaptcha && widgetIdRef.current !== null) {
+        window.grecaptcha.reset(widgetIdRef.current as number);
+        setCaptchaToken(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -46,7 +193,7 @@ export default function SecureGateLoginPage() {
       await api.adminVerifyMfa(mfaToken, mfaCode);
       router.push('/securegate');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid MFA verification code.';
+      const msg = err instanceof Error ? err.message : 'Invalid Google Authenticator verification code.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -57,10 +204,11 @@ export default function SecureGateLoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.adminLogin('admin@hudorian.com', 'password123');
+      const res = await api.adminLogin('admin@hudorian.com', 'password123', captchaToken || undefined);
       if (res.requires_mfa && res.mfa_token) {
-        await api.adminVerifyMfa(res.mfa_token, '888888');
-        router.push('/securegate');
+        setMfaToken(res.mfa_token);
+        setStep('mfa');
+        setError('Google Authenticator 2FA is active on this administrator account. Please enter your 6-digit code.');
       } else {
         router.push('/securegate');
       }
@@ -141,6 +289,19 @@ export default function SecureGateLoginPage() {
               </div>
             </div>
 
+            {/* Dynamic Bot Protection Challenge (Only shown if enabled in panel) */}
+            {captchaProvider !== 'none' && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/60">
+                  <span>Bot Verification</span>
+                  <span className="text-[#C5A880] capitalize">{captchaProvider.replace('_', ' ')}</span>
+                </div>
+                <div className="p-3 bg-white/[0.02] border border-white/10 rounded-xl flex items-center justify-center">
+                  <div ref={captchaContainerRef} className="min-h-[65px] flex items-center justify-center" />
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -161,9 +322,9 @@ export default function SecureGateLoginPage() {
           <form onSubmit={handleMfaVerify} className="space-y-6">
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 text-center space-y-2">
               <KeyRound className="w-6 h-6 text-[#C5A880] mx-auto" />
-              <p className="text-xs text-white/80 font-medium">TOTP Token Verification</p>
+              <p className="text-xs text-white/80 font-medium">Google Authenticator Verification</p>
               <p className="text-[11px] text-white/50">
-                Enter the 6-digit cryptographic security code from your authenticator app.
+                Enter the current 6-digit TOTP verification code from your authenticator app.
               </p>
             </div>
 
@@ -177,11 +338,11 @@ export default function SecureGateLoginPage() {
                 maxLength={6}
                 value={mfaCode}
                 onChange={(e) => setMfaCode(e.target.value)}
-                placeholder="888888"
+                placeholder="123456"
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-center text-xl tracking-[0.5em] font-mono text-white focus:outline-none focus:border-[#C5A880] transition"
               />
               <p className="text-[10px] text-white/40 text-center mt-2 font-mono">
-                Default sandbox bypass code: <span className="text-[#C5A880]">888888</span>
+                Cryptographic RFC 6238 time-based authentication.
               </p>
             </div>
 
@@ -190,7 +351,7 @@ export default function SecureGateLoginPage() {
               disabled={loading}
               className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-95 transition duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? <span>Verifying Hardware MFA...</span> : <span>Confirm Clearance</span>}
+              {loading ? <span>Verifying Code...</span> : <span>Confirm Clearance</span>}
             </button>
           </form>
         )}
@@ -204,7 +365,7 @@ export default function SecureGateLoginPage() {
             className="w-full py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/80 hover:text-white text-xs font-mono tracking-wider transition flex items-center justify-center gap-2 group"
           >
             <KeyRound className="w-3.5 h-3.5 text-[#C5A880] group-hover:scale-110 transition" />
-            <span>1-Click Executive Demo Access</span>
+            <span>1-Click Executive Access</span>
           </button>
         </div>
 
@@ -217,4 +378,3 @@ export default function SecureGateLoginPage() {
     </div>
   );
 }
-
