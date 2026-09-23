@@ -22,14 +22,13 @@
     RewriteRule ^(api|sanctum)(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^storage/(.*)$ backend/public/storage/$1 [L,QSA]
 
-    # 4. (Optional) If running Next.js via PM2 / Node on local port 3000,
-    # uncomment the block below to proxy web requests to Next.js:
-    # <IfModule mod_proxy.c>
-    #     RewriteCond %{REQUEST_URI} !^/api [NC]
-    #     RewriteCond %{REQUEST_URI} !^/sanctum [NC]
-    #     RewriteCond %{REQUEST_URI} !^/storage [NC]
-    #     RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
-    # </IfModule>
+    # 4. Forward all web traffic to the Next.js production server on port 3000
+    <IfModule mod_proxy.c>
+        RewriteCond %{REQUEST_URI} !^/api [NC]
+        RewriteCond %{REQUEST_URI} !^/sanctum [NC]
+        RewriteCond %{REQUEST_URI} !^/storage [NC]
+        RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+    </IfModule>
 </IfModule>
 
 # Security Headers
