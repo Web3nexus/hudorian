@@ -12,18 +12,6 @@
       "priority": true,
       "statusCode": 308,
       "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
-    },
-    {
-      "source": "/admin",
-      "destination": "/securegate",
-      "statusCode": 307,
-      "regex": "^(?!/_next)/admin(?:/)?$"
-    },
-    {
-      "source": "/admin/:path*",
-      "destination": "/securegate/:path*",
-      "statusCode": 307,
-      "regex": "^(?!/_next)/admin(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
     }
   ],
   "headers": [],

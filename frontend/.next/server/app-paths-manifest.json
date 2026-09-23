@@ -6,9 +6,7 @@
   "/icon.png/route": "app/icon.png/route.js",
   "/estates/page": "app/estates/page.js",
   "/experiences/page": "app/experiences/page.js",
-  "/houses/[slug]/page": "app/houses/[slug]/page.js",
   "/houses/page": "app/houses/page.js",
-  "/journal/[slug]/page": "app/journal/[slug]/page.js",
   "/journal/page": "app/journal/page.js",
   "/member/bookings/page": "app/member/bookings/page.js",
   "/member/page": "app/member/page.js",
@@ -29,7 +27,9 @@
   "/securegate/payments/page": "app/securegate/payments/page.js",
   "/shop/page": "app/shop/page.js",
   "/signin/page": "app/signin/page.js",
-  "/stays/[slug]/page": "app/stays/[slug]/page.js",
   "/stays/page": "app/stays/page.js",
-  "/terms/page": "app/terms/page.js"
+  "/terms/page": "app/terms/page.js",
+  "/houses/[slug]/page": "app/houses/[slug]/page.js",
+  "/journal/[slug]/page": "app/journal/[slug]/page.js",
+  "/stays/[slug]/page": "app/stays/[slug]/page.js"
 }

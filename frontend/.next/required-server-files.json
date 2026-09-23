@@ -68,7 +68,7 @@
       "qualities": [
         75
       ],
-      "unoptimized": false,
+      "unoptimized": true,
       "customCacheHandler": false
     },
     "devIndicators": {
@@ -97,7 +97,7 @@
     "compiler": {},
     "expireTime": 31536000,
     "staticPageGenerationTimeout": 60,
-    "output": "standalone",
+    "output": "export",
     "modularizeImports": {
       "@mui/icons-material": {
         "transform": "@mui/icons-material/{{member}}"
@@ -326,19 +326,7 @@
       "root": "/Users/vincent/Herd/hudorian/frontend"
     },
     "distDirRoot": ".next",
-    "supportsImmutableAssets": false,
-    "_originalRedirects": [
-      {
-        "source": "/admin",
-        "destination": "/securegate",
-        "permanent": false
-      },
-      {
-        "source": "/admin/:path*",
-        "destination": "/securegate/:path*",
-        "permanent": false
-      }
-    ]
+    "supportsImmutableAssets": false
   },
   "appDir": "/Users/vincent/Herd/hudorian/frontend",
   "relativeAppDir": "",

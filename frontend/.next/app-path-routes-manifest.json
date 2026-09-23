@@ -6,9 +6,7 @@
   "/icon.png/route": "/icon.png",
   "/estates/page": "/estates",
   "/experiences/page": "/experiences",
-  "/houses/[slug]/page": "/houses/[slug]",
   "/houses/page": "/houses",
-  "/journal/[slug]/page": "/journal/[slug]",
   "/journal/page": "/journal",
   "/member/bookings/page": "/member/bookings",
   "/member/page": "/member",
@@ -29,7 +27,9 @@
   "/securegate/payments/page": "/securegate/payments",
   "/shop/page": "/shop",
   "/signin/page": "/signin",
-  "/stays/[slug]/page": "/stays/[slug]",
   "/stays/page": "/stays",
-  "/terms/page": "/terms"
+  "/terms/page": "/terms",
+  "/houses/[slug]/page": "/houses/[slug]",
+  "/journal/[slug]/page": "/journal/[slug]",
+  "/stays/[slug]/page": "/stays/[slug]"
 }

@@ -1,8 +1,8 @@
 # ======================================================================
 # HUDORIAN Root Live Hosting Configuration (.htaccess)
 # ======================================================================
-# Designed for Apache, LiteSpeed, cPanel, and VPS environments hosting
-# the Laravel backend alongside the Next.js frontend.
+# Serves static frontend directly (Like React) and routes /api directly
+# to the Laravel PHP backend. ZERO Node daemons or port proxies needed.
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -13,22 +13,27 @@
         RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     </IfModule>
 
-    # 2. Block direct access to hidden files, git, and env
+    # 2. Block direct access to hidden files and sensitive backend folders
     RewriteRule ^(\.git|\.env|composer\.(json|lock)|package\.(json|lock)) - [F,L,NC]
-    RewriteRule ^(backend/(app|bootstrap|config|database|resources|routes|storage|tests)) - [F,L,NC]
-    RewriteRule ^(node_modules|vendor) - [F,L,NC]
+    RewriteRule ^backend/(app|bootstrap|config|database|resources|routes|storage|tests) - [F,L,NC]
+    RewriteRule ^(vendor|node_modules) - [F,L,NC]
 
     # 3. Route API and Storage requests directly to Laravel backend
     RewriteRule ^(api|sanctum)(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^storage/(.*)$ backend/public/storage/$1 [L,QSA]
 
-    # 4. Forward all web traffic to the Next.js production server on port 3000
-    <IfModule mod_proxy.c>
-        RewriteCond %{REQUEST_URI} !^/api [NC]
-        RewriteCond %{REQUEST_URI} !^/sanctum [NC]
-        RewriteCond %{REQUEST_URI} !^/storage [NC]
-        RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
-    </IfModule>
+    # 4. Clean URLs for Static Frontend Pages (e.g. /houses -> houses.html)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/$1.html -f [OR]
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule ^(.*)$ $1.html [L]
+
+    # 5. Clean URLs for nested directories (e.g. /securegate/login -> securegate/login.html)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^(.*)$ $1/index.html [L]
 </IfModule>
 
 # Security Headers
@@ -39,6 +44,15 @@
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Disable Directory Browsing
-Options -Indexes
+# Caching for Static Assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
 
+DirectoryIndex index.html index.php
+Options -Indexes

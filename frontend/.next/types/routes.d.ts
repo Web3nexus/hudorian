@@ -4,15 +4,13 @@
 type AppRoutes = "/" | "/estates" | "/experiences" | "/houses" | "/houses/[slug]" | "/journal" | "/journal/[slug]" | "/member" | "/member/bookings" | "/member/payments" | "/member/profile" | "/membership" | "/membership/apply" | "/privacy" | "/privacy/data" | "/securegate" | "/securegate/applications" | "/securegate/audit-logs" | "/securegate/cms" | "/securegate/houses" | "/securegate/login" | "/securegate/members" | "/securegate/payments" | "/shop" | "/signin" | "/stays" | "/stays/[slug]" | "/terms"
 type PageRoutes = never
 type LayoutRoutes = "/"
-type RedirectRoutes = "/admin" | "/admin/[[...path]]"
+type RedirectRoutes = never
 type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
 
 
 interface ParamMap {
   "/": {}
-  "/admin": {}
-  "/admin/[[...path]]": { "path"?: string[]; }
   "/estates": {}
   "/experiences": {}
   "/houses": {}
