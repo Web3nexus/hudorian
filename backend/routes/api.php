@@ -56,6 +56,7 @@ Route::prefix('v1')->group(function () {
 
     // CMS Blocks
     Route::get('/cms/blocks', [CmsController::class, 'blocks']);
+    Route::get('/cms-blocks', [CmsController::class, 'blocks']);
     Route::get('/cms/blocks/{key}', [CmsController::class, 'show']);
 
     // Public Authentication
