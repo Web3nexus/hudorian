@@ -59,12 +59,12 @@ export default function Navbar() {
             >
               <Menu className="w-5 h-5 stroke-[1.5]" />
             </button>
-            <nav className="hidden lg:flex items-center space-x-7 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/80">
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.15em] xl:tracking-[0.2em] font-medium text-[#141414]/80">
               {leftNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-black transition"
+                  className="hover:text-black transition whitespace-nowrap"
                 >
                   {item.label}
                 </Link>
@@ -82,10 +82,10 @@ export default function Navbar() {
                 <img
                   src={brand.logo_image_url}
                   alt={brand.logo_text || 'HUDORIAN'}
-                  className="h-11 md:h-14 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition duration-300"
+                  className="h-10 md:h-12 xl:h-14 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition duration-300"
                 />
               ) : (
-                <span className="font-serif-luxury text-2xl md:text-3xl font-medium tracking-[0.3em] uppercase text-[#141414]">
+                <span className="font-serif-luxury text-xl md:text-2xl xl:text-3xl font-medium tracking-[0.3em] uppercase text-[#141414]">
                   {brand.logo_text || 'HUDORIAN'}
                 </span>
               )}
@@ -93,13 +93,13 @@ export default function Navbar() {
           </div>
 
           {/* Right: Right Links, Sign In / Member Dashboard */}
-          <div className="flex items-center space-x-5 md:space-x-7">
-            <nav className="hidden md:flex items-center space-x-7 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/80">
+          <div className="flex items-center space-x-4 xl:space-x-6">
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.15em] xl:tracking-[0.2em] font-medium text-[#141414]/80">
               {rightNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-black transition"
+                  className="hover:text-black transition whitespace-nowrap"
                 >
                   {item.label}
                 </Link>

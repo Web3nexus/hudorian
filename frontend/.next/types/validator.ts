@@ -171,6 +171,33 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../src/app/royal-family/houses/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-family/houses">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-family/houses/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/royal-family/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-family">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-family/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/royal-houses/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-houses">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-houses/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/securegate/applications/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/securegate/applications">> = Specific

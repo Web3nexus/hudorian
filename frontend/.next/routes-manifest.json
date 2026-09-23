@@ -157,6 +157,24 @@
       "namedRegex": "^/privacy/data(?:/)?$"
     },
     {
+      "page": "/royal-family",
+      "regex": "^/royal\\-family(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/royal\\-family(?:/)?$"
+    },
+    {
+      "page": "/royal-family/houses",
+      "regex": "^/royal\\-family/houses(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/royal\\-family/houses(?:/)?$"
+    },
+    {
+      "page": "/royal-houses",
+      "regex": "^/royal\\-houses(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/royal\\-houses(?:/)?$"
+    },
+    {
       "page": "/securegate",
       "regex": "^/securegate(?:/)?$",
       "routeKeys": {},

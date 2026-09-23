@@ -476,13 +476,15 @@ class DatabaseSeeder extends Seeder
             'title' => 'Header Navigation Menus',
             'payload' => [
                 'items' => [
-                    ['label' => 'Houses', 'href' => '/houses', 'order' => 1, 'is_active' => true],
-                    ['label' => 'Estates', 'href' => '/estates', 'order' => 2, 'is_active' => true],
-                    ['label' => 'Stays', 'href' => '/stays', 'order' => 3, 'is_active' => true],
-                    ['label' => 'Experiences', 'href' => '/experiences', 'order' => 4, 'is_active' => true],
-                    ['label' => 'Membership', 'href' => '/membership', 'order' => 5, 'is_active' => true],
-                    ['label' => 'Journal', 'href' => '/journal', 'order' => 6, 'is_active' => true],
-                    ['label' => 'Boutique', 'href' => '/shop', 'order' => 7, 'is_active' => true],
+                    ['label' => 'The Royal Family', 'href' => '/royal-family', 'order' => 1, 'is_active' => true],
+                    ['label' => 'Royal Houses', 'href' => '/royal-houses', 'order' => 2, 'is_active' => true],
+                    ['label' => 'Houses', 'href' => '/houses', 'order' => 3, 'is_active' => true],
+                    ['label' => 'Estates', 'href' => '/estates', 'order' => 4, 'is_active' => true],
+                    ['label' => 'Stays', 'href' => '/stays', 'order' => 5, 'is_active' => true],
+                    ['label' => 'Experiences', 'href' => '/experiences', 'order' => 6, 'is_active' => true],
+                    ['label' => 'Membership', 'href' => '/membership', 'order' => 7, 'is_active' => true],
+                    ['label' => 'Journal', 'href' => '/journal', 'order' => 8, 'is_active' => true],
+                    ['label' => 'Boutique', 'href' => '/shop', 'order' => 9, 'is_active' => true],
                 ],
             ],
         ]);
@@ -494,6 +496,15 @@ class DatabaseSeeder extends Seeder
                 'copyright' => '© 2026 HUDORIAN Private Members Club. All rights reserved.',
                 'tagline' => 'An invitation-only assembly of extraordinary spaces and discerning patrons.',
                 'sections' => [
+                    [
+                        'title' => 'The Uzih Dynasty',
+                        'links' => [
+                            ['label' => 'The Royal Family', 'href' => '/royal-family'],
+                            ['label' => 'Royal Houses & Heirs', 'href' => '/royal-houses'],
+                            ['label' => 'Reda House', 'href' => '/royal-houses#reda-house'],
+                            ['label' => 'The Family of Victors', 'href' => '/royal-houses#family-of-victors'],
+                        ],
+                    ],
                     [
                         'title' => 'Houses & Sanctuaries',
                         'links' => [
