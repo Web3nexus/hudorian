@@ -1,0 +1,31 @@
+# ======================================================================
+# HUDORIAN Backend Root Protection & Rewrite (.htaccess)
+# ======================================================================
+# If your live web server (e.g. cPanel / Apache) document root points to
+# the backend directory instead of backend/public, this file redirects
+# all requests to the public/ folder safely and shields your sensitive files.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent direct access to sensitive files
+    RewriteRule ^(\.env|composer\.(json|lock)|package\.(json|lock)|phpunit\.xml|artisan) - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests)/ - [F,L,NC]
+
+    # Rewrite all traffic into the public folder
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Block all access to hidden files and sensitive extensions
+<FilesMatch "^\.(env|git|htaccess|htpasswd|ini|log|sh|sql|yml|yaml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+Options -Indexes

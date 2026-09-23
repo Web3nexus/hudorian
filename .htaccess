@@ -1,0 +1,47 @@
+# ======================================================================
+# HUDORIAN Root Live Hosting Configuration (.htaccess)
+# ======================================================================
+# Designed for Apache, LiteSpeed, cPanel, and VPS environments hosting
+# the Laravel backend alongside the Next.js frontend.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Force HTTPS
+    <IfModule mod_ssl.c>
+        RewriteCond %{HTTPS} off
+        RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    </IfModule>
+
+    # 2. Block direct access to hidden files, git, and env
+    RewriteRule ^(\.git|\.env|composer\.(json|lock)|package\.(json|lock)) - [F,L,NC]
+    RewriteRule ^(backend/(app|bootstrap|config|database|resources|routes|storage|tests)) - [F,L,NC]
+    RewriteRule ^(node_modules|vendor) - [F,L,NC]
+
+    # 3. Route API and Storage requests directly to Laravel backend
+    RewriteCond %{REQUEST_URI} ^/api [NC,OR]
+    RewriteCond %{REQUEST_URI} ^/sanctum [NC,OR]
+    RewriteCond %{REQUEST_URI} ^/storage [NC]
+    RewriteRule ^(.*)$ backend/public/$1 [L,QSA]
+
+    # 4. If mod_proxy is enabled and Next.js runs on local port 3000:
+    # Forward all other requests to the Next.js production server
+    <IfModule mod_proxy.c>
+        RewriteCond %{REQUEST_URI} !^/api [NC]
+        RewriteCond %{REQUEST_URI} !^/sanctum [NC]
+        RewriteCond %{REQUEST_URI} !^/storage [NC]
+        RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+    </IfModule>
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Disable Directory Browsing
+Options -Indexes
+
