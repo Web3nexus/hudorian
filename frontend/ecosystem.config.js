@@ -2,21 +2,16 @@ module.exports = {
   apps: [
     {
       name: 'hudorian-frontend',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3000',
+      script: '.next/standalone/server.js',
       cwd: './',
-      instances: 'max',
-      exec_mode: 'cluster',
+      instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '500M',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
-      },
-      env_production: {
-        NODE_ENV: 'production',
-        PORT: 3000,
+        HOSTNAME: '0.0.0.0',
       },
       error_file: './logs/pm2-error.log',
       out_file: './logs/pm2-out.log',
