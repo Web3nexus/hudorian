@@ -24,14 +24,14 @@
     RewriteCond %{REQUEST_URI} ^/storage [NC]
     RewriteRule ^(.*)$ backend/public/$1 [L,QSA]
 
-    # 4. If mod_proxy is enabled and Next.js runs on local port 3000:
-    # Forward all other requests to the Next.js production server
-    <IfModule mod_proxy.c>
-        RewriteCond %{REQUEST_URI} !^/api [NC]
-        RewriteCond %{REQUEST_URI} !^/sanctum [NC]
-        RewriteCond %{REQUEST_URI} !^/storage [NC]
-        RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
-    </IfModule>
+    # 4. (Optional) If running Next.js via PM2 / Node on local port 3000,
+    # uncomment the block below to proxy web requests to Next.js:
+    # <IfModule mod_proxy.c>
+    #     RewriteCond %{REQUEST_URI} !^/api [NC]
+    #     RewriteCond %{REQUEST_URI} !^/sanctum [NC]
+    #     RewriteCond %{REQUEST_URI} !^/storage [NC]
+    #     RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+    # </IfModule>
 </IfModule>
 
 # Security Headers
