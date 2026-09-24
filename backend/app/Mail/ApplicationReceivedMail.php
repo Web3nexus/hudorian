@@ -39,3 +39,4 @@ class ApplicationReceivedMail extends Mailable
         );
     }
 }
+

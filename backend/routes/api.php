@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\HouseController;
 use App\Http\Controllers\Api\V1\JournalController;
 use App\Http\Controllers\Api\V1\MemberPortalController;
 use App\Http\Controllers\Api\V1\MembershipController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\StayController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,13 @@ Route::prefix('v1')->group(function () {
     // Public Security Configuration (for Cloudflare / reCAPTCHA widget on login)
     Route::get('/security/config', [AdminAuthController::class, 'getPublicConfig']);
 
+    // Payment Gateways (Flutterwave, Paystack, Manual Wire)
+    Route::get('/payments/config', [PaymentController::class, 'config']);
+    Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
+    Route::post('/payments/verify', [PaymentController::class, 'verify']);
+    Route::post('/payments/webhook/flutterwave', [PaymentController::class, 'webhookFlutterwave']);
+    Route::post('/payments/webhook/paystack', [PaymentController::class, 'webhookPaystack']);
+
     // Admin SecureGate Authentication Checkpoints
     Route::post('/admin/auth/login', [AdminAuthController::class, 'login']);
     Route::post('/admin/auth/verify-mfa', [AdminAuthController::class, 'verifyMfa']);
@@ -116,8 +124,12 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('/events', AdminEventController::class);
 
         // Payments & Refunds
+        Route::get('/payments/settings', [AdminPaymentController::class, 'getSettings']);
+        Route::put('/payments/settings', [AdminPaymentController::class, 'updateSettings']);
         Route::get('/payments', [AdminPaymentController::class, 'index']);
         Route::get('/payments/{id}', [AdminPaymentController::class, 'show']);
+        Route::post('/payments/{id}/approve', [AdminPaymentController::class, 'approve']);
+        Route::post('/payments/{id}/reject', [AdminPaymentController::class, 'reject']);
         Route::post('/payments/{id}/refund', [AdminPaymentController::class, 'refund']);
 
         // Immutable Audit Trail

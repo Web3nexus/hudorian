@@ -35,7 +35,7 @@
   "/signin/page": "/signin",
   "/stays/page": "/stays",
   "/terms/page": "/terms",
-  "/houses/[slug]/page": "/houses/[slug]",
   "/journal/[slug]/page": "/journal/[slug]",
+  "/houses/[slug]/page": "/houses/[slug]",
   "/stays/[slug]/page": "/stays/[slug]"
 }

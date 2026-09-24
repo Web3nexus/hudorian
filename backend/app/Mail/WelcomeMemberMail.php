@@ -46,3 +46,4 @@ class WelcomeMemberMail extends Mailable
         );
     }
 }
+

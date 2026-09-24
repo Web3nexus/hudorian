@@ -32,6 +32,11 @@ function MembershipApplicationContent() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedAppId, setSubmittedAppId] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<any>(null);
+  const [paymentSettlement, setPaymentSettlement] = useState<'review_first' | 'flutterwave' | 'paystack' | 'manual'>('review_first');
+  const [wireReference, setWireReference] = useState('');
+  const [wireBank, setWireBank] = useState('');
+  const [wireNotes, setWireNotes] = useState('');
 
   // Form State
   const [formData, setFormData] = useState({
@@ -51,6 +56,12 @@ function MembershipApplicationContent() {
   });
 
   useEffect(() => {
+    // Load payment config
+    api.getPaymentConfig()
+      .then((res) => {
+        if (res && res.data) setPaymentConfig(res.data);
+      })
+      .catch(() => {});
     // Load plans from API
     api.getMembershipPlans()
       .then((res) => {
@@ -114,6 +125,32 @@ function MembershipApplicationContent() {
       const res = await api.submitApplication(formData);
       setSubmittedAppId(res.application.id);
       localStorage.removeItem('hudorian_app_progress');
+
+      // If instant settlement was chosen, initialize payment
+      if (paymentSettlement !== 'review_first') {
+        const currentUrl = typeof window !== 'undefined' ? `${window.location.origin}/member/payments` : '';
+        const payRes = await api.initializePayment({
+          gateway: paymentSettlement,
+          membership_plan_id: formData.membership_plan_id,
+          redirect_url: currentUrl,
+          email: formData.email,
+          name: `${formData.first_name} ${formData.last_name}`,
+          phone: formData.phone,
+          transfer_reference: wireReference || undefined,
+          sender_bank: wireBank || undefined,
+          proof_notes: wireNotes || undefined,
+        });
+
+        if (paymentSettlement === 'flutterwave' && payRes.checkout_url) {
+          window.location.href = payRes.checkout_url;
+          return;
+        }
+        if (paymentSettlement === 'paystack' && payRes.authorization_url) {
+          window.location.href = payRes.authorization_url;
+          return;
+        }
+      }
+
       setStep(7); // Confirmation
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Application submission failed. Please verify your details.';
@@ -529,10 +566,157 @@ function MembershipApplicationContent() {
               </div>
             </div>
 
+            {/* Payment Settlement Preference */}
+            <div className="space-y-3 pt-2">
+              <span className="text-xs uppercase tracking-wider text-black/60 font-medium block">
+                Treasury Settlement Preference
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <label
+                  onClick={() => setPaymentSettlement('review_first')}
+                  className={`p-3.5 rounded-xs border block cursor-pointer transition ${
+                    paymentSettlement === 'review_first'
+                      ? 'border-[#141414] bg-[#F4EFEA]'
+                      : 'border-[#E8E2D8] bg-[#FAF8F5] hover:border-black/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="settlement"
+                      checked={paymentSettlement === 'review_first'}
+                      onChange={() => setPaymentSettlement('review_first')}
+                      className="accent-black"
+                    />
+                    <span className="font-semibold text-black">Committee Review First</span>
+                  </div>
+                  <p className="text-[11px] text-black/60 mt-1 pl-5">
+                    Dues will only be charged after official Admissions Committee confirmation.
+                  </p>
+                </label>
+
+                {paymentConfig?.flutterwave?.enabled !== false && (
+                  <label
+                    onClick={() => setPaymentSettlement('flutterwave')}
+                    className={`p-3.5 rounded-xs border block cursor-pointer transition ${
+                      paymentSettlement === 'flutterwave'
+                        ? 'border-[#141414] bg-[#F4EFEA]'
+                        : 'border-[#E8E2D8] bg-[#FAF8F5] hover:border-black/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="settlement"
+                        checked={paymentSettlement === 'flutterwave'}
+                        onChange={() => setPaymentSettlement('flutterwave')}
+                        className="accent-black"
+                      />
+                      <span className="font-semibold text-black">Flutterwave Instant</span>
+                    </div>
+                    <p className="text-[11px] text-black/60 mt-1 pl-5">
+                      Settle membership dues now via Card, Mobile Money, or Bank Transfer.
+                    </p>
+                  </label>
+                )}
+
+                {paymentConfig?.paystack?.enabled !== false && (
+                  <label
+                    onClick={() => setPaymentSettlement('paystack')}
+                    className={`p-3.5 rounded-xs border block cursor-pointer transition ${
+                      paymentSettlement === 'paystack'
+                        ? 'border-[#141414] bg-[#F4EFEA]'
+                        : 'border-[#E8E2D8] bg-[#FAF8F5] hover:border-black/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="settlement"
+                        checked={paymentSettlement === 'paystack'}
+                        onChange={() => setPaymentSettlement('paystack')}
+                        className="accent-black"
+                      />
+                      <span className="font-semibold text-black">Paystack Instant</span>
+                    </div>
+                    <p className="text-[11px] text-black/60 mt-1 pl-5">
+                      Settle membership dues now via Card, Apple Pay, or USSD.
+                    </p>
+                  </label>
+                )}
+
+                {paymentConfig?.manual?.enabled !== false && (
+                  <label
+                    onClick={() => setPaymentSettlement('manual')}
+                    className={`p-3.5 rounded-xs border block cursor-pointer transition ${
+                      paymentSettlement === 'manual'
+                        ? 'border-[#141414] bg-[#F4EFEA]'
+                        : 'border-[#E8E2D8] bg-[#FAF8F5] hover:border-black/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="settlement"
+                        checked={paymentSettlement === 'manual'}
+                        onChange={() => setPaymentSettlement('manual')}
+                        className="accent-black"
+                      />
+                      <span className="font-semibold text-black">Manual Bank Wire</span>
+                    </div>
+                    <p className="text-[11px] text-black/60 mt-1 pl-5">
+                      Direct wire to HUDORIAN Treasury with verification code.
+                    </p>
+                  </label>
+                )}
+              </div>
+
+              {/* Manual Bank Wire Details if Selected */}
+              {paymentSettlement === 'manual' && (
+                <div className="bg-[#FAF8F5] p-4 rounded-xs border border-[#E8E2D8] space-y-3 text-xs mt-3">
+                  <div className="space-y-1 font-mono text-[11px] text-black/80">
+                    <div>Bank: <span className="font-semibold">{paymentConfig?.manual?.bank_name || 'Barclays Private Bank'}</span></div>
+                    <div>Account: <span className="font-semibold">{paymentConfig?.manual?.account_name || 'HUDORIAN SANCTUARY LIMITED'}</span></div>
+                    <div>IBAN: <span className="font-semibold">{paymentConfig?.manual?.iban || 'GB29BARC20000088291048'}</span></div>
+                    <div>SWIFT / BIC: <span className="font-semibold">{paymentConfig?.manual?.swift_bic || 'BARCGB22'}</span></div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-black/60 block mb-1">
+                        Wire Transfer Reference Code *
+                      </label>
+                      <input
+                        type="text"
+                        required={paymentSettlement === 'manual'}
+                        placeholder="e.g. WIRE-884920 or Full Name"
+                        value={wireReference}
+                        onChange={(e) => setWireReference(e.target.value)}
+                        className="w-full p-2.5 rounded-xs bg-white border border-[#E8E2D8] text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-black/60 block mb-1">
+                        Sending Bank Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. UBS, Chase Private"
+                        value={wireBank}
+                        onChange={(e) => setWireBank(e.target.value)}
+                        className="w-full p-2.5 rounded-xs bg-white border border-[#E8E2D8] text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="p-4 bg-[#F4EFEA] rounded-xs text-[11px] text-black/70 flex items-start gap-2">
               <ShieldCheck className="w-4 h-4 text-[#96754B] shrink-0 mt-0.5" />
               <span>
-                By submitting, you agree to the HUDORIAN House Code and confirm that membership privileges will only be billed following committee approval.
+                {paymentSettlement === 'review_first'
+                  ? 'By submitting, you agree to the HUDORIAN House Code and confirm that membership privileges will only be billed following committee approval.'
+                  : 'By submitting, you authorize your membership dues settlement. Official digital pass and welcome dossier are issued upon Treasury confirmation.'}
               </span>
             </div>
 

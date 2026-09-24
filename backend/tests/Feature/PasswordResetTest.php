@@ -102,3 +102,4 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422);
     }
 }
+

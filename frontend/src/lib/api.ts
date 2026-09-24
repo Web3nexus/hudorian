@@ -388,9 +388,74 @@ class ApiClient {
     }, true);
   }
 
-  // --- Admin Financials & Inventory ---
-  async getAdminPayments(): Promise<unknown> {
-    return this.request('/admin/payments', {}, true);
+  // --- Payment Gateways & Membership Checkout ---
+  async getPaymentConfig(): Promise<{ data: any }> {
+    return this.request<{ data: any }>('/payments/config');
+  }
+
+  async initializePayment(data: {
+    gateway: 'flutterwave' | 'paystack' | 'manual';
+    membership_plan_id: number;
+    redirect_url?: string;
+    email?: string;
+    name?: string;
+    phone?: string;
+    transfer_reference?: string;
+    sender_bank?: string;
+    sender_account_name?: string;
+    transfer_date?: string;
+    proof_notes?: string;
+  }): Promise<any> {
+    return this.request('/payments/initialize', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async verifyPayment(data: {
+    gateway: 'flutterwave' | 'paystack';
+    reference?: string;
+    transaction_id?: string;
+  }): Promise<any> {
+    return this.request('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // --- Admin Financials & Payment Settings ---
+  async getAdminPayments(params?: { status?: string; provider?: string; search?: string }): Promise<any> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.provider) searchParams.append('provider', params.provider);
+    if (params?.search) searchParams.append('search', params.search);
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/payments${qs}`, {}, true);
+  }
+
+  async getAdminPaymentSettings(): Promise<{ settings: any }> {
+    return this.request<{ settings: any }>('/admin/payments/settings', {}, true);
+  }
+
+  async updateAdminPaymentSettings(settings: any): Promise<{ message: string; settings: any }> {
+    return this.request<{ message: string; settings: any }>('/admin/payments/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    }, true);
+  }
+
+  async approveManualPayment(id: number, notes?: string): Promise<any> {
+    return this.request(`/admin/payments/${id}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ notes }),
+    }, true);
+  }
+
+  async rejectManualPayment(id: number, reason: string): Promise<any> {
+    return this.request(`/admin/payments/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }, true);
   }
 
   async refundPayment(id: number, reason?: string): Promise<unknown> {

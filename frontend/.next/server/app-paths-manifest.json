@@ -35,7 +35,7 @@
   "/signin/page": "app/signin/page.js",
   "/stays/page": "app/stays/page.js",
   "/terms/page": "app/terms/page.js",
-  "/houses/[slug]/page": "app/houses/[slug]/page.js",
   "/journal/[slug]/page": "app/journal/[slug]/page.js",
+  "/houses/[slug]/page": "app/houses/[slug]/page.js",
   "/stays/[slug]/page": "app/stays/[slug]/page.js"
 }
