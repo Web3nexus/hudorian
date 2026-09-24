@@ -5,8 +5,21 @@ import Link from 'next/link';
 import { Shield, Lock, Eye, FileText, CheckCircle2, Globe, Building2, UserCheck, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
+import { useCms } from '@/lib/cms';
 
 export default function PrivacyPolicyPage() {
+  const { getPageContent } = useCms();
+  const cmsContent = getPageContent('page_privacy', {
+    title: 'Privacy Policy & Patron Confidentiality',
+    subtitle: 'Legal Charter & Data Governance',
+    body: 'HUDORIAN Club Limited is committed to unyielding discretion, cryptographic security, and transparency. This policy sets out our rigorous data governance standards under the Nigeria Data Protection Act 2023 (NDPA) and international hospitality data privacy conventions.',
+    payload: {
+      jurisdiction: 'Federal Republic of Nigeria',
+      regulator: 'NDPC (Nigeria Data Protection Commission)',
+      effective_date: 'September 2026',
+    },
+  });
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <Navbar />
@@ -16,23 +29,23 @@ export default function PrivacyPolicyPage() {
         <section className="max-w-4xl mx-auto px-6 md:px-10 mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#96754B]/10 text-[#96754B] text-[11px] uppercase tracking-[0.25em] font-semibold mb-4">
             <Shield className="w-3.5 h-3.5" />
-            Legal Charter & Data Governance
+            {cmsContent.subtitle || 'Legal Charter & Data Governance'}
           </div>
 
           <h1 className="font-serif-luxury text-4xl sm:text-6xl text-[#141414] font-light tracking-tight leading-[1.1] mb-6">
-            Privacy Policy & Patron Confidentiality
+            {cmsContent.title || 'Privacy Policy & Patron Confidentiality'}
           </h1>
 
           <p className="text-base sm:text-lg text-black/70 font-light leading-relaxed mb-6">
-            HUDORIAN Club Limited is committed to unyielding discretion, cryptographic security, and transparency. This policy sets out our rigorous data governance standards under the <strong className="font-medium text-black">Nigeria Data Protection Act 2023 (NDPA)</strong> and international hospitality data privacy conventions.
+            {cmsContent.body || 'HUDORIAN Club Limited is committed to unyielding discretion, cryptographic security, and transparency. This policy sets out our rigorous data governance standards under the Nigeria Data Protection Act 2023 (NDPA) and international hospitality data privacy conventions.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-6 text-xs text-black/50 border-t border-b border-[#E8E2D8] py-3 font-mono">
-            <span>Jurisdiction: Federal Republic of Nigeria</span>
+            <span>Jurisdiction: {cmsContent.payload?.jurisdiction || 'Federal Republic of Nigeria'}</span>
             <span>•</span>
-            <span>Regulator: NDPC (Nigeria Data Protection Commission)</span>
+            <span>Regulator: {cmsContent.payload?.regulator || 'NDPC (Nigeria Data Protection Commission)'}</span>
             <span>•</span>
-            <span>Effective Date: September 2026</span>
+            <span>Effective Date: {cmsContent.payload?.effective_date || 'September 2026'}</span>
           </div>
         </section>
 

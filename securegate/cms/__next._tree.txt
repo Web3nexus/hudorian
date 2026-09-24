@@ -1,3 +1,3 @@
-:HL["/_next/static/css/89b971f5b8097b13.css","style"]
+:HL["/_next/static/css/07b1c84d82a8b814.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"securegate","param":null,"prefetchHints":4192,"slots":{"children":{"name":"cms","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"D64zvizE6nLd0wxsOkGL_"}
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"securegate","param":null,"prefetchHints":4192,"slots":{"children":{"name":"cms","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"m9aHt91o6C1GVaPVQljT8"}

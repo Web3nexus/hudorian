@@ -16,6 +16,10 @@ import {
   FileText,
   Building,
   RefreshCw,
+  Crown,
+  Shield,
+  HeartHandshake,
+  Users,
 } from 'lucide-react';
 import SecureGateLayout from '@/components/securegate/SecureGateLayout';
 import { api } from '@/lib/api';
@@ -24,12 +28,12 @@ import { CmsBlock, HeaderNavItem, FooterSection, BrandSettings } from '@/types';
 
 export default function SecureGateCmsStudioPage() {
   const { blocks: liveBlocks, refreshCms } = useCms();
-  const [activeTab, setActiveTab] = useState<'brand' | 'menus' | 'heroes' | 'story'>('heroes');
+  const [activeTab, setActiveTab] = useState<'heroes' | 'royal' | 'legal' | 'brand' | 'menus'>('heroes');
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Editable States
+  // 1. Brand Identity State
   const [brand, setBrand] = useState<BrandSettings>({
     logo_type: 'image',
     logo_text: 'HUDORIAN',
@@ -41,6 +45,7 @@ export default function SecureGateCmsStudioPage() {
     currency_symbol: '₦',
   });
 
+  // 2. Navigation Menus State
   const [headerNav, setHeaderNav] = useState<HeaderNavItem[]>([
     { label: 'Houses', href: '/houses', order: 1, is_active: true },
     { label: 'Estates', href: '/estates', order: 2, is_active: true },
@@ -54,6 +59,7 @@ export default function SecureGateCmsStudioPage() {
   const [footerCopyright, setFooterCopyright] = useState('© 2026 HUDORIAN Private Members Club. All rights reserved.');
   const [footerTagline, setFooterTagline] = useState('An invitation-only assembly of extraordinary spaces and discerning patrons.');
 
+  // 3. Page Heroes & Sanctuaries State
   const [heroes, setHeroes] = useState<Record<string, { title: string; subtitle: string; media_url: string; body?: string; cta_text?: string; cta_link?: string }>>({
     page_home: {
       title: 'A private world of extraordinary places.',
@@ -101,14 +107,100 @@ export default function SecureGateCmsStudioPage() {
     },
   });
 
-  // Sync state from CMS context when loaded
+  // 4. Royal Houses & Dynastic Allies State
+  const [royalHouses, setRoyalHouses] = useState({
+    title: 'The Royal Houses of Uzih & Dynastic Allies',
+    subtitle: 'The sovereign cadet houses established by the royal children of the Uzih dynasty and the historic allied families standing in eternal fellowship with the realm.',
+    media_url: '/images/hudorian-seal.png',
+    cadet_houses: [
+      {
+        id: 'reda-house',
+        name: 'Reda House',
+        founder: 'Founded by Prince Reda of Uzih',
+        role: 'Princely Cadet House & Maritime Domain',
+        tagline: 'A sovereign coastal sanctuary championing oceanic stewardship, naval architecture, and seafaring exploration.',
+        description: 'Established under royal charter by Prince Reda, eldest royal son of the House of Uzih. Reda House stands atop majestic Mediterranean cliff lines, serving as the international headquarters for royal yachting regattas, deep-ocean ecological research, and high-level diplomatic assemblies.',
+        hero_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80',
+        location: 'The Reda Coastal Citadel, Balearic Isles',
+        motto: 'Honor, Vision, Endurance',
+      },
+      {
+        id: 'aria-house',
+        name: 'Aria House',
+        founder: 'Founded by Princess Aria of Uzih',
+        role: 'Princely Cadet House of Fine Arts & Wellness',
+        tagline: 'An ethereal sanctuary of classical symphony, rare botanical gardens, and restorative mind-body sanctuaries.',
+        description: 'Curated under the patronage of Princess Aria, this house merges centuries-old botanical knowledge with acoustic perfection. Featuring an amphitheater carved from native stone and greenhouse conservatories housing endangered Mediterranean and Asian flora.',
+        hero_image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
+        location: 'The Aria Botanical Sanctuary, Andalusia',
+        motto: 'Grace in Sovereignty',
+      },
+      {
+        id: 'tarek-house',
+        name: 'Tarek House',
+        founder: 'Founded by Prince Tarek of Uzih',
+        role: 'Princely Cadet House & Equestrian Domain',
+        tagline: 'The ancestral equestrian seat dedicated to champion thoroughbred breeding, polo heritage, and highland stewardship.',
+        description: 'Founded by Prince Tarek, this sprawling country domain is revered worldwide for its champion bloodstock stud, Olympic-standard jumping arenas, and historic hunting lodges set among rolling forested hills.',
+        hero_image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1600&q=80',
+        location: 'The Tarek Equestrian Grounds, Sierra Foothills',
+        motto: 'Strength Through Integrity',
+      },
+    ],
+    dynastic_allies: [
+      {
+        id: 'family-of-victors',
+        name: 'The Family of Victors',
+        dynasty: 'House of Victor',
+        alliance_type: 'Sovereign Treaty Alliance & Companions of Honor',
+        tagline: 'An illustrious noble dynasty bound to the House of Uzih through generations of mutual covenant and global enterprise.',
+        description: 'The Family of Victors represents one of the most storied aristocratic alliances of the realm. United with the Uzih royal dynasty by historic concordats, the Victors command venerable estates, private aviation fleet networks, and pioneering philanthropic foundations across five continents.',
+        hero_image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80',
+        seat: 'The Citadel of Victors & Grand Estate',
+        motto: 'Invictus in Aeternum (Victorious in Eternity)',
+      },
+    ],
+  });
+
+  // 5. The Royal Family Lineage State
+  const [royalFamily, setRoyalFamily] = useState({
+    title: 'The Uzih Royal Family',
+    subtitle: 'Anchoring the sovereign heritage of HUDORIAN through centuries of noble stewardship, patronages in the arts, and the enduring grace of the House of Uzih.',
+    media_url: '/images/hudorian-seal.png',
+    royal_head: {
+      title: 'His Royal Majesty',
+      name: 'Sovereign Head of the Uzih Royal Dynasty',
+      role: 'Patriarch & Custodian of the Imperial Lineage',
+      bio: 'Guiding the House of Uzih with steadfast honor and timeless wisdom. His Majesty has spearheaded the preservation of ancestral heritage, sovereign patronages in cultural arts, and the modern international expansion of the HUDORIAN sanctuaries across global capitals.',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+    },
+  });
+
+  // 6. Privacy & Legal State
+  const [privacy, setPrivacy] = useState({
+    title: 'Privacy Policy & Patron Confidentiality',
+    subtitle: 'Legal Charter & Data Governance',
+    body: 'HUDORIAN Club Limited is committed to unyielding discretion, cryptographic security, and transparency. This policy sets out our rigorous data governance standards under the Nigeria Data Protection Act 2023 (NDPA) and international hospitality data privacy conventions.',
+    jurisdiction: 'Federal Republic of Nigeria',
+    regulator: 'NDPC (Nigeria Data Protection Commission)',
+    effective_date: 'September 2026',
+  });
+
+  // 7. Terms & House Rules State
+  const [terms, setTerms] = useState({
+    title: 'Membership Terms & By-Laws',
+    subtitle: 'House Rules & Code of Fellowship',
+    body: 'HUDORIAN is conceived as an oasis of creative freedom, privacy, and civil discourse. To preserve the sanctuary character of our Houses and Estates, every candidate and patron agrees to abide by this House Code.',
+  });
+
+  // Sync state from live CMS context
   useEffect(() => {
     if (liveBlocks['brand_settings']) {
       const b = liveBlocks['brand_settings'];
       setBrand({
-        logo_type: b.payload?.logo_type || 'text',
+        logo_type: b.payload?.logo_type || 'image',
         logo_text: b.title || b.payload?.logo_text || 'HUDORIAN',
-        logo_image_url: b.media_url || b.payload?.logo_image_url || '',
+        logo_image_url: b.media_url || b.payload?.logo_image_url || '/images/hudorian-seal.png',
         tagline: b.subtitle || b.payload?.tagline || '',
         concierge_email: b.payload?.concierge_email || 'concierge@hudorian.com',
         concierge_phone: b.payload?.concierge_phone || '+234 (0) 1 888 4836',
@@ -130,7 +222,7 @@ export default function SecureGateCmsStudioPage() {
       }
     }
 
-    // Load page hero blocks
+    // Load page heroes
     const pageKeys = ['page_home', 'page_houses', 'page_estates', 'page_stays', 'page_experiences', 'page_membership', 'page_journal', 'page_shop'];
     setHeroes((prev) => {
       const next = { ...prev };
@@ -149,7 +241,79 @@ export default function SecureGateCmsStudioPage() {
       });
       return next;
     });
+
+    // Load Royal Houses
+    if (liveBlocks['page_royal_houses']) {
+      const rh = liveBlocks['page_royal_houses'];
+      setRoyalHouses((prev) => ({
+        title: rh.title || prev.title,
+        subtitle: rh.subtitle || prev.subtitle,
+        media_url: rh.media_url || prev.media_url,
+        cadet_houses: rh.payload?.cadet_houses || prev.cadet_houses,
+        dynastic_allies: rh.payload?.dynastic_allies || prev.dynastic_allies,
+      }));
+    }
+
+    // Load Royal Family
+    if (liveBlocks['page_royal_family']) {
+      const rf = liveBlocks['page_royal_family'];
+      setRoyalFamily((prev) => ({
+        title: rf.title || prev.title,
+        subtitle: rf.subtitle || prev.subtitle,
+        media_url: rf.media_url || prev.media_url,
+        royal_head: rf.payload?.royal_head || prev.royal_head,
+      }));
+    }
+
+    // Load Privacy
+    if (liveBlocks['page_privacy']) {
+      const p = liveBlocks['page_privacy'];
+      setPrivacy((prev) => ({
+        title: p.title || prev.title,
+        subtitle: p.subtitle || prev.subtitle,
+        body: p.body || prev.body,
+        jurisdiction: p.payload?.jurisdiction || prev.jurisdiction,
+        regulator: p.payload?.regulator || prev.regulator,
+        effective_date: p.payload?.effective_date || prev.effective_date,
+      }));
+    }
+
+    // Load Terms
+    if (liveBlocks['page_terms']) {
+      const t = liveBlocks['page_terms'];
+      setTerms((prev) => ({
+        title: t.title || prev.title,
+        subtitle: t.subtitle || prev.subtitle,
+        body: t.body || prev.body,
+      }));
+    }
   }, [liveBlocks]);
+
+  const handleHeroChange = (pageKey: string, field: string, val: string) => {
+    setHeroes((prev) => ({
+      ...prev,
+      [pageKey]: {
+        ...prev[pageKey],
+        [field]: val,
+      },
+    }));
+  };
+
+  const handleCadetHouseChange = (idx: number, field: string, val: string) => {
+    setRoyalHouses((prev) => {
+      const list = [...prev.cadet_houses];
+      list[idx] = { ...list[idx], [field]: val };
+      return { ...prev, cadet_houses: list };
+    });
+  };
+
+  const handleAllyChange = (idx: number, field: string, val: string) => {
+    setRoyalHouses((prev) => {
+      const list = [...prev.dynastic_allies];
+      list[idx] = { ...list[idx], [field]: val };
+      return { ...prev, dynastic_allies: list };
+    });
+  };
 
   const handleSaveAll = async () => {
     setSaving(true);
@@ -190,6 +354,42 @@ export default function SecureGateCmsStudioPage() {
             sections: liveBlocks['navigation_footer']?.payload?.sections || [],
           },
         },
+        {
+          key: 'page_royal_houses',
+          title: royalHouses.title,
+          subtitle: royalHouses.subtitle,
+          media_url: royalHouses.media_url,
+          payload: {
+            cadet_houses: royalHouses.cadet_houses,
+            dynastic_allies: royalHouses.dynastic_allies,
+          },
+        },
+        {
+          key: 'page_royal_family',
+          title: royalFamily.title,
+          subtitle: royalFamily.subtitle,
+          media_url: royalFamily.media_url,
+          payload: {
+            royal_head: royalFamily.royal_head,
+          },
+        },
+        {
+          key: 'page_privacy',
+          title: privacy.title,
+          subtitle: privacy.subtitle,
+          body: privacy.body,
+          payload: {
+            jurisdiction: privacy.jurisdiction,
+            regulator: privacy.regulator,
+            effective_date: privacy.effective_date,
+          },
+        },
+        {
+          key: 'page_terms',
+          title: terms.title,
+          subtitle: terms.subtitle,
+          body: terms.body,
+        },
       ];
 
       // Add heroes
@@ -209,47 +409,13 @@ export default function SecureGateCmsStudioPage() {
 
       await api.batchUpdateCmsBlocks(batchPayload);
       await refreshCms();
-      setSuccessMessage('CMS changes published successfully! Public pages updated in real time.');
+      setSuccessMessage('Sanctuary CMS updates published successfully! Changes reflect on the public site instantly.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to publish CMS updates.';
       setErrorMessage(msg);
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleAddNavItem = () => {
-    setHeaderNav((prev) => [
-      ...prev,
-      {
-        label: 'New Link',
-        href: '/houses',
-        order: prev.length + 1,
-        is_active: true,
-      },
-    ]);
-  };
-
-  const handleRemoveNavItem = (idx: number) => {
-    setHeaderNav((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleNavItemChange = (idx: number, field: keyof HeaderNavItem, value: any) => {
-    setHeaderNav((prev) => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], [field]: value };
-      return next;
-    });
-  };
-
-  const handleHeroChange = (key: string, field: string, val: string) => {
-    setHeroes((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field]: val,
-      },
-    }));
   };
 
   const pagesConfig = [
@@ -265,14 +431,14 @@ export default function SecureGateCmsStudioPage() {
 
   return (
     <SecureGateLayout
-      title="Dynamic CMS Studio"
-      subtitle="Full control over brand identity, page heroes, images, copy, and top/footer navigation menus."
+      title="Sanctuary Editorial & CMS Studio"
+      subtitle="Complete management of imagery, house lore, cadet branches, dynastic alliances, legal charters, and brand identity."
       actions={
         <div className="flex items-center gap-3">
           <button
             onClick={handleSaveAll}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-[#B8976C]/15 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-[#B8976C]/15 disabled:opacity-50 cursor-pointer"
           >
             {saving ? (
               <>
@@ -282,7 +448,7 @@ export default function SecureGateCmsStudioPage() {
             ) : (
               <>
                 <Save className="w-3.5 h-3.5" />
-                <span>Publish CMS Changes</span>
+                <span>Publish All Changes</span>
               </>
             )}
           </button>
@@ -302,7 +468,7 @@ export default function SecureGateCmsStudioPage() {
               target="_blank"
               className="font-mono underline text-emerald-200 hover:text-white flex items-center gap-1"
             >
-              Inspect Public Site <ExternalLink className="w-3 h-3" />
+              Inspect Live Sanctuary <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         )}
@@ -318,19 +484,43 @@ export default function SecureGateCmsStudioPage() {
         <div className="flex items-center gap-2 border-b border-white/5 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('heroes')}
-            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'heroes'
                 ? 'bg-white/10 text-white font-semibold'
                 : 'text-white/50 hover:text-white hover:bg-white/5'
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>Page Heroes & Images</span>
+            <span>Sanctuary Pages & Heroes</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('royal')}
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'royal'
+                ? 'bg-white/10 text-white font-semibold'
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Crown className="w-3.5 h-3.5 text-[#C5A880]" />
+            <span>Royal Houses, Allies & Lineage</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('legal')}
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'legal'
+                ? 'bg-white/10 text-white font-semibold'
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5 text-[#C5A880]" />
+            <span>Governance, Privacy & Terms</span>
           </button>
 
           <button
             onClick={() => setActiveTab('brand')}
-            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'brand'
                 ? 'bg-white/10 text-white font-semibold'
                 : 'text-white/50 hover:text-white hover:bg-white/5'
@@ -342,30 +532,18 @@ export default function SecureGateCmsStudioPage() {
 
           <button
             onClick={() => setActiveTab('menus')}
-            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'menus'
                 ? 'bg-white/10 text-white font-semibold'
                 : 'text-white/50 hover:text-white hover:bg-white/5'
             }`}
           >
             <Menu className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>Header & Footer Menus</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('story')}
-            className={`px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 ${
-              activeTab === 'story'
-                ? 'bg-white/10 text-white font-semibold'
-                : 'text-white/50 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>Manifesto & Texts</span>
+            <span>Navigation & Footers</span>
           </button>
         </div>
 
-        {/* TAB 1: HEROES & IMAGES */}
+        {/* TAB 1: HEROES & SANCTUARY PAGES */}
         {activeTab === 'heroes' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -394,7 +572,7 @@ export default function SecureGateCmsStudioPage() {
                       </a>
                     </div>
 
-                    {/* Image Preview & URL */}
+                    {/* Image URL & Preview */}
                     <div className="space-y-2">
                       <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
                         Hero Background Image URL
@@ -407,7 +585,6 @@ export default function SecureGateCmsStudioPage() {
                         className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A880] font-mono"
                       />
 
-                      {/* Live Image Preview Banner */}
                       {item.media_url ? (
                         <div className="relative h-36 w-full rounded-xl overflow-hidden border border-white/10 group mt-2">
                           <img
@@ -423,7 +600,7 @@ export default function SecureGateCmsStudioPage() {
                         </div>
                       ) : (
                         <div className="h-24 w-full rounded-xl bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center text-xs text-white/30 font-mono">
-                          No Hero Image Configured
+                          No Image Configured
                         </div>
                       )}
                     </div>
@@ -431,7 +608,7 @@ export default function SecureGateCmsStudioPage() {
                     {/* Title */}
                     <div className="space-y-1.5">
                       <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
-                        Hero Headline
+                        Headline
                       </label>
                       <input
                         type="text"
@@ -444,7 +621,7 @@ export default function SecureGateCmsStudioPage() {
                     {/* Subtitle */}
                     <div className="space-y-1.5">
                       <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
-                        Hero Subtitle / Description
+                        Subtitle / Description
                       </label>
                       <textarea
                         rows={2}
@@ -453,34 +630,6 @@ export default function SecureGateCmsStudioPage() {
                         className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] resize-none"
                       />
                     </div>
-
-                    {/* Extra fields if home page */}
-                    {page.key === 'page_home' && (
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div>
-                          <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50 mb-1">
-                            CTA Button Text
-                          </label>
-                          <input
-                            type="text"
-                            value={item.cta_text || ''}
-                            onChange={(e) => handleHeroChange(page.key, 'cta_text', e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50 mb-1">
-                            CTA Target Link
-                          </label>
-                          <input
-                            type="text"
-                            value={item.cta_link || ''}
-                            onChange={(e) => handleHeroChange(page.key, 'cta_link', e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
-                          />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -488,13 +637,408 @@ export default function SecureGateCmsStudioPage() {
           </div>
         )}
 
-        {/* TAB 2: BRAND IDENTITY & LOGO */}
+        {/* TAB 2: ROYAL HOUSES, ALLIES & DYNASTY */}
+        {activeTab === 'royal' && (
+          <div className="space-y-10">
+            {/* 1. Page Header & Overview */}
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-5 h-5 text-[#C5A880]" />
+                  <h3 className="font-serif-luxury text-xl text-white">Royal Houses Main Header</h3>
+                </div>
+                <a
+                  href="/royal-houses"
+                  target="_blank"
+                  className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-1"
+                >
+                  Preview Page <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                    Main Title
+                  </label>
+                  <input
+                    type="text"
+                    value={royalHouses.title}
+                    onChange={(e) => setRoyalHouses({ ...royalHouses, title: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2 text-sm font-serif-luxury text-white focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                    Hero Crest / Seal URL
+                  </label>
+                  <input
+                    type="text"
+                    value={royalHouses.media_url}
+                    onChange={(e) => setRoyalHouses({ ...royalHouses, media_url: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                  Subtitle Lore
+                </label>
+                <textarea
+                  rows={2}
+                  value={royalHouses.subtitle}
+                  onChange={(e) => setRoyalHouses({ ...royalHouses, subtitle: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] resize-none"
+                />
+              </div>
+            </div>
+
+            {/* 2. Cadet Houses Management */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif-luxury text-xl text-white">Cadet Branches & Princely Houses</h3>
+                  <p className="text-xs text-white/50 font-light">
+                    Manage the individual cadet houses (Reda House, Aria House, Tarek House, etc.)
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {royalHouses.cadet_houses.map((house, idx) => (
+                  <div
+                    key={house.id || idx}
+                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-[#B8976C]/30 transition space-y-4"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                      <span className="font-serif-luxury text-lg text-white font-medium">
+                        {house.name}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#C5A880] px-2 py-0.5 rounded-sm bg-white/5">
+                        {house.id}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Hero Photo URL
+                      </label>
+                      <input
+                        type="url"
+                        value={house.hero_image}
+                        onChange={(e) => handleCadetHouseChange(idx, 'hero_image', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
+                      />
+                      {house.hero_image && (
+                        <div className="relative h-28 w-full rounded-lg overflow-hidden border border-white/10">
+                          <img
+                            src={house.hero_image}
+                            alt={house.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        House Title & Founder
+                      </label>
+                      <input
+                        type="text"
+                        value={house.founder}
+                        onChange={(e) => handleCadetHouseChange(idx, 'founder', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Sanctuary Role
+                      </label>
+                      <input
+                        type="text"
+                        value={house.role}
+                        onChange={(e) => handleCadetHouseChange(idx, 'role', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Territory / Location
+                      </label>
+                      <input
+                        type="text"
+                        value={house.location}
+                        onChange={(e) => handleCadetHouseChange(idx, 'location', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Motto
+                      </label>
+                      <input
+                        type="text"
+                        value={house.motto}
+                        onChange={(e) => handleCadetHouseChange(idx, 'motto', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs italic text-[#C5A880] focus:outline-none focus:border-[#C5A880]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Overview Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={house.description}
+                        onChange={(e) => handleCadetHouseChange(idx, 'description', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] resize-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Dynastic Allies Management */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-serif-luxury text-xl text-white">Dynastic Allies (Family of Victors & Fellowships)</h3>
+                <p className="text-xs text-white/50 font-light">
+                  Manage the historic sovereign allies standing in eternal covenant with the realm.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {royalHouses.dynastic_allies.map((ally, idx) => (
+                  <div
+                    key={ally.id || idx}
+                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-[#B8976C]/30 transition space-y-4"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                      <span className="font-serif-luxury text-lg text-white font-medium">
+                        {ally.name}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#C5A880] px-2 py-0.5 rounded-sm bg-white/5">
+                        {ally.dynasty}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Citadel Image URL
+                      </label>
+                      <input
+                        type="url"
+                        value={ally.hero_image}
+                        onChange={(e) => handleAllyChange(idx, 'hero_image', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
+                      />
+                      {ally.hero_image && (
+                        <div className="relative h-28 w-full rounded-lg overflow-hidden border border-white/10">
+                          <img
+                            src={ally.hero_image}
+                            alt={ally.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                          Alliance Type
+                        </label>
+                        <input
+                          type="text"
+                          value={ally.alliance_type}
+                          onChange={(e) => handleAllyChange(idx, 'alliance_type', e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                          Ancestral Seat
+                        </label>
+                        <input
+                          type="text"
+                          value={ally.seat}
+                          onChange={(e) => handleAllyChange(idx, 'seat', e.target.value)}
+                          className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Dynastic Motto
+                      </label>
+                      <input
+                        type="text"
+                        value={ally.motto}
+                        onChange={(e) => handleAllyChange(idx, 'motto', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 text-xs italic text-[#C5A880] focus:outline-none focus:border-[#C5A880]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                        Alliance Chronicle
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={ally.description}
+                        onChange={(e) => handleAllyChange(idx, 'description', e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] resize-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: GOVERNANCE, PRIVACY & TERMS */}
+        {activeTab === 'legal' && (
+          <div className="space-y-8 max-w-4xl">
+            {/* Privacy Policy Editor */}
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-[#C5A880]" />
+                  <h3 className="font-serif-luxury text-xl text-white">Privacy Policy & Data Charter</h3>
+                </div>
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-1"
+                >
+                  Preview Privacy <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                  Page Headline
+                </label>
+                <input
+                  type="text"
+                  value={privacy.title}
+                  onChange={(e) => setPrivacy({ ...privacy, title: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 text-sm font-serif-luxury text-white focus:outline-none focus:border-[#C5A880]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                    Jurisdiction
+                  </label>
+                  <input
+                    type="text"
+                    value={privacy.jurisdiction}
+                    onChange={(e) => setPrivacy({ ...privacy, jurisdiction: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                    Regulatory Authority
+                  </label>
+                  <input
+                    type="text"
+                    value={privacy.regulator}
+                    onChange={(e) => setPrivacy({ ...privacy, regulator: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                    Effective Date
+                  </label>
+                  <input
+                    type="text"
+                    value={privacy.effective_date}
+                    onChange={(e) => setPrivacy({ ...privacy, effective_date: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                  Data Governance Statement & Pledge
+                </label>
+                <textarea
+                  rows={4}
+                  value={privacy.body}
+                  onChange={(e) => setPrivacy({ ...privacy, body: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] leading-relaxed resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Terms of Membership Editor */}
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-[#C5A880]" />
+                  <h3 className="font-serif-luxury text-xl text-white">House Rules & Membership Terms</h3>
+                </div>
+                <a
+                  href="/terms"
+                  target="_blank"
+                  className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-1"
+                >
+                  Preview Terms <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                  Page Headline
+                </label>
+                <input
+                  type="text"
+                  value={terms.title}
+                  onChange={(e) => setTerms({ ...terms, title: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 text-sm font-serif-luxury text-white focus:outline-none focus:border-[#C5A880]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
+                  Code of Fellowship Statement
+                </label>
+                <textarea
+                  rows={4}
+                  value={terms.body}
+                  onChange={(e) => setTerms({ ...terms, body: e.target.value })}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] leading-relaxed resize-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: BRAND IDENTITY & LOGO */}
         {activeTab === 'brand' && (
           <div className="max-w-3xl space-y-6">
             <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-6">
               <h3 className="font-serif-luxury text-xl text-white">Brand Typography & Logo</h3>
 
-              {/* Logo Type Switcher */}
+              {/* Logo Display Mode Switcher */}
               <div>
                 <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50 mb-3">
                   Logo Display Mode
@@ -522,13 +1066,13 @@ export default function SecureGateCmsStudioPage() {
                         : 'border-white/10 bg-white/[0.02] text-white/60 hover:text-white'
                     }`}
                   >
-                    <p className="text-sm font-medium">Custom Logo Image</p>
-                    <p className="text-[11px] text-white/40 mt-1">PNG, SVG or WebP high-resolution asset</p>
+                    <p className="text-sm font-medium">Custom Seal Asset</p>
+                    <p className="text-[11px] text-white/40 mt-1">PNG, SVG or WebP high-resolution crest</p>
                   </button>
                 </div>
               </div>
 
-              {/* Wordmark Text */}
+              {/* Wordmark */}
               <div className="space-y-2">
                 <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
                   Logo Brand Name
@@ -607,7 +1151,7 @@ export default function SecureGateCmsStudioPage() {
           </div>
         )}
 
-        {/* TAB 3: HEADER & FOOTER MENUS */}
+        {/* TAB 5: HEADER & FOOTER MENUS */}
         {activeTab === 'menus' && (
           <div className="space-y-8">
             {/* Header Navigation Section */}
@@ -621,7 +1165,12 @@ export default function SecureGateCmsStudioPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={handleAddNavItem}
+                  onClick={() =>
+                    setHeaderNav((prev) => [
+                      ...prev,
+                      { label: 'New Link', href: '/houses', order: prev.length + 1, is_active: true },
+                    ])
+                  }
                   className="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium flex items-center gap-1.5 transition"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -643,7 +1192,11 @@ export default function SecureGateCmsStudioPage() {
                         <input
                           type="text"
                           value={item.label}
-                          onChange={(e) => handleNavItemChange(idx, 'label', e.target.value)}
+                          onChange={(e) => {
+                            const list = [...headerNav];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setHeaderNav(list);
+                          }}
                           className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
                         />
                       </div>
@@ -655,7 +1208,11 @@ export default function SecureGateCmsStudioPage() {
                         <input
                           type="text"
                           value={item.href}
-                          onChange={(e) => handleNavItemChange(idx, 'href', e.target.value)}
+                          onChange={(e) => {
+                            const list = [...headerNav];
+                            list[idx] = { ...list[idx], href: e.target.value };
+                            setHeaderNav(list);
+                          }}
                           className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
                         />
                       </div>
@@ -668,7 +1225,11 @@ export default function SecureGateCmsStudioPage() {
                           <input
                             type="number"
                             value={item.order}
-                            onChange={(e) => handleNavItemChange(idx, 'order', parseInt(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const list = [...headerNav];
+                              list[idx] = { ...list[idx], order: parseInt(e.target.value) || 0 };
+                              setHeaderNav(list);
+                            }}
                             className="w-16 bg-white/[0.03] border border-white/10 rounded-lg px-2.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
                           />
                         </div>
@@ -678,7 +1239,11 @@ export default function SecureGateCmsStudioPage() {
                             <input
                               type="checkbox"
                               checked={item.is_active !== false}
-                              onChange={(e) => handleNavItemChange(idx, 'is_active', e.target.checked)}
+                              onChange={(e) => {
+                                const list = [...headerNav];
+                                list[idx] = { ...list[idx], is_active: e.target.checked };
+                                setHeaderNav(list);
+                              }}
                               className="rounded border-white/20 bg-white/5 text-[#C5A880] focus:ring-0"
                             />
                             <span>Active</span>
@@ -689,7 +1254,7 @@ export default function SecureGateCmsStudioPage() {
 
                     <button
                       type="button"
-                      onClick={() => handleRemoveNavItem(idx)}
+                      onClick={() => setHeaderNav((prev) => prev.filter((_, i) => i !== idx))}
                       className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 self-end md:self-center transition"
                       title="Remove link"
                     >
@@ -730,41 +1295,7 @@ export default function SecureGateCmsStudioPage() {
             </div>
           </div>
         )}
-
-        {/* TAB 4: MANIFESTO & TEXTS */}
-        {activeTab === 'story' && (
-          <div className="max-w-3xl space-y-6">
-            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-6">
-              <h3 className="font-serif-luxury text-xl text-white">Club Narrative & Manifesto</h3>
-
-              <div className="space-y-2">
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
-                  Homepage Manifesto Quote
-                </label>
-                <input
-                  type="text"
-                  value={heroes.page_home?.body || ''}
-                  onChange={(e) => handleHeroChange('page_home', 'body', e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C5A880]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-white/50">
-                  Membership Manifesto Statement
-                </label>
-                <textarea
-                  rows={4}
-                  value={heroes.page_membership?.body || ''}
-                  onChange={(e) => handleHeroChange('page_membership', 'body', e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-xs text-white/80 focus:outline-none focus:border-[#C5A880] leading-relaxed resize-none"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </SecureGateLayout>
   );
 }
-

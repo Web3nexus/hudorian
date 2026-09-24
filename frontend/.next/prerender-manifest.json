@@ -774,7 +774,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 27933,
+      "htmlSize": 27909,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -970,7 +970,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 10838,
+      "htmlSize": 10835,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -998,7 +998,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11380,
+      "htmlSize": 11377,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1026,7 +1026,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11501,
+      "htmlSize": 11498,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1054,7 +1054,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11526,
+      "htmlSize": 11523,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1082,7 +1082,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11355,
+      "htmlSize": 11352,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1138,7 +1138,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11490,
+      "htmlSize": 11487,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1166,7 +1166,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11363,
+      "htmlSize": 11360,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1194,7 +1194,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 11494,
+      "htmlSize": 11491,
       "experimentalBypassFor": [
         {
           "type": "header",

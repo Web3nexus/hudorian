@@ -5,8 +5,16 @@ import Link from 'next/link';
 import { ScrollText, ShieldAlert, Award, Camera, HeartHandshake } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
+import { useCms } from '@/lib/cms';
 
 export default function TermsPage() {
+  const { getPageContent } = useCms();
+  const cmsContent = getPageContent('page_terms', {
+    title: 'Membership Terms & By-Laws',
+    subtitle: 'House Rules & Code of Fellowship',
+    body: 'HUDORIAN is conceived as an oasis of creative freedom, privacy, and civil discourse. To preserve the sanctuary character of our Houses and Estates, every candidate and patron agrees to abide by this House Code.',
+  });
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <Navbar />
@@ -16,15 +24,15 @@ export default function TermsPage() {
         <section className="max-w-4xl mx-auto px-6 md:px-10 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#96754B]/10 text-[#96754B] text-[11px] uppercase tracking-[0.25em] font-semibold mb-4">
             <ScrollText className="w-3.5 h-3.5" />
-            House Rules & Code of Fellowship
+            {cmsContent.subtitle || 'House Rules & Code of Fellowship'}
           </div>
 
           <h1 className="font-serif-luxury text-4xl sm:text-6xl text-[#141414] font-light tracking-tight leading-[1.1] mb-6">
-            Membership Terms & By-Laws
+            {cmsContent.title || 'Membership Terms & By-Laws'}
           </h1>
 
           <p className="text-base sm:text-lg text-black/70 font-light leading-relaxed">
-            HUDORIAN is conceived as an oasis of creative freedom, privacy, and civil discourse. To preserve the sanctuary character of our Houses and Estates, every candidate and patron agrees to abide by this House Code.
+            {cmsContent.body || 'HUDORIAN is conceived as an oasis of creative freedom, privacy, and civil discourse. To preserve the sanctuary character of our Houses and Estates, every candidate and patron agrees to abide by this House Code.'}
           </p>
         </section>
 

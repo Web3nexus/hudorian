@@ -5,9 +5,17 @@ import Link from 'next/link';
 import { Crown, Shield, Sparkles, ArrowRight, Compass, Award, BookOpen, Users, HeartHandshake } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
+import { useCms } from '@/lib/cms';
 
 export default function RoyalFamilyPage() {
-  const royalHead = {
+  const { getPageContent } = useCms();
+  const cmsContent = getPageContent('page_royal_family', {
+    title: 'The Uzih Royal Family',
+    subtitle: 'Anchoring the sovereign heritage of HUDORIAN through centuries of noble stewardship, patronages in the arts, and the enduring grace of the House of Uzih.',
+    media_url: '/images/hudorian-seal.png',
+  });
+
+  const defaultRoyalHead = {
     title: 'His Royal Majesty',
     name: 'Sovereign Head of the Uzih Royal Dynasty',
     role: 'Patriarch & Custodian of the Imperial Lineage',
@@ -22,7 +30,7 @@ export default function RoyalFamilyPage() {
     ],
   };
 
-  const queens = [
+  const defaultQueens = [
     {
       title: 'Her Royal Majesty',
       name: 'Queen Consort Aisha of Uzih',
@@ -43,7 +51,7 @@ export default function RoyalFamilyPage() {
     },
   ];
 
-  const children = [
+  const defaultChildren = [
     {
       name: 'Prince Reda of Uzih',
       title: 'Founder & Heir to Reda House',
@@ -79,6 +87,14 @@ export default function RoyalFamilyPage() {
     },
   ];
 
+  const royalHead = cmsContent.payload?.royal_head || defaultRoyalHead;
+  const queens = (cmsContent.payload?.queens && cmsContent.payload.queens.length > 0)
+    ? cmsContent.payload.queens
+    : defaultQueens;
+  const children = (cmsContent.payload?.children && cmsContent.payload.children.length > 0)
+    ? cmsContent.payload.children
+    : defaultChildren;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <Navbar />
@@ -88,7 +104,7 @@ export default function RoyalFamilyPage() {
         <div className="text-center max-w-4xl mx-auto space-y-6">
           <div className="w-24 h-24 mx-auto mb-2 relative flex items-center justify-center">
             <img
-              src="/images/hudorian-seal.png"
+              src={cmsContent.media_url || '/images/hudorian-seal.png'}
               alt="The Royal Seal of Uzih"
               className="w-full h-full object-contain drop-shadow-xl"
             />
@@ -100,11 +116,11 @@ export default function RoyalFamilyPage() {
           </div>
 
           <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-light text-[#141414] tracking-tight">
-            The Uzih Royal Family
+            {cmsContent.title || 'The Uzih Royal Family'}
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-[#141414]/70 font-light leading-relaxed max-w-3xl mx-auto">
-            Anchoring the sovereign heritage of HUDORIAN through centuries of noble stewardship, patronages in the arts, and the enduring grace of the House of Uzih.
+            {cmsContent.subtitle || 'Anchoring the sovereign heritage of HUDORIAN through centuries of noble stewardship, patronages in the arts, and the enduring grace of the House of Uzih.'}
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
@@ -171,7 +187,7 @@ export default function RoyalFamilyPage() {
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#E8E2D8]">
-                  {royalHead.attributes.map((attr, i) => (
+                  {(royalHead.attributes || []).map((attr: any, i: number) => (
                     <div key={i} className="p-4 bg-[#F4EFEA]/60 rounded-xs space-y-1">
                       <span className="text-[11px] font-mono uppercase tracking-wider text-black/40 block">
                         {attr.label}
@@ -215,7 +231,7 @@ export default function RoyalFamilyPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {queens.map((queen, idx) => (
+            {queens.map((queen: any, idx: number) => (
               <div
                 key={idx}
                 className="bg-white rounded-xs border border-[#E8E2D8] overflow-hidden shadow-xs hover:shadow-md transition duration-500 flex flex-col justify-between"
@@ -252,7 +268,7 @@ export default function RoyalFamilyPage() {
                         Endowments & Patronages:
                       </span>
                       <div className="flex flex-wrap gap-2">
-                        {queen.patronages.map((p, i) => (
+                        {(queen.patronages || []).map((p: string, i: number) => (
                           <span
                             key={i}
                             className="text-xs px-2.5 py-1 bg-[#F4EFEA] rounded-full text-black/70 font-light"
@@ -293,7 +309,7 @@ export default function RoyalFamilyPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {children.map((child, idx) => (
+            {children.map((child: any, idx: number) => (
               <div
                 key={idx}
                 className="bg-white rounded-xs border border-[#E8E2D8] overflow-hidden shadow-xs hover:shadow-md transition duration-500 flex flex-col justify-between"

@@ -16,7 +16,7 @@ export default function EstatesPage() {
     media_url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=2000&q=85',
   });
 
-  const estates = [
+  const defaultEstates = [
     {
       name: 'The Andalusian Domain',
       location: 'Marbella, Andalusia, Spain',
@@ -39,6 +39,10 @@ export default function EstatesPage() {
     },
   ];
 
+  const estates = (heroContent.payload?.estates && heroContent.payload.estates.length > 0)
+    ? heroContent.payload.estates
+    : defaultEstates;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <Navbar />
@@ -58,7 +62,7 @@ export default function EstatesPage() {
         </div>
 
         <div className="space-y-16">
-          {estates.map((estate, idx) => (
+          {estates.map((estate: any, idx: number) => (
             <div
               key={idx}
               className="bg-white rounded-xs border border-[#E8E2D8] overflow-hidden shadow-xs hover:shadow-md transition duration-500 grid grid-cols-1 lg:grid-cols-12"
@@ -91,7 +95,7 @@ export default function EstatesPage() {
                       Estate Facilities:
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {estate.facilities.map((f, i) => (
+                      {(estate.facilities || []).map((f: string, i: number) => (
                         <span key={i} className="text-xs px-2.5 py-1 bg-[#F4EFEA] rounded-full text-black/70">
                           {f}
                         </span>

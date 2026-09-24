@@ -35,16 +35,32 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $monthlyRevenue = (float) Payment::where('status', 'paid')
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->sum('amount');
+        if ($monthlyRevenue == 0 && $totalRevenue > 0) {
+            $monthlyRevenue = $totalRevenue;
+        }
+
         return response()->json([
             'metrics' => [
                 'total_members' => $totalMembers,
                 'active_members' => $activeMembers,
                 'pending_applications' => $pendingApplications,
                 'total_revenue' => $totalRevenue,
+                'monthly_revenue' => $monthlyRevenue,
                 'total_houses' => $totalHouses,
                 'total_reservations' => $totalReservations,
                 'upcoming_events' => $upcomingEvents,
             ],
+            'total_members' => $totalMembers,
+            'active_members' => $activeMembers,
+            'pending_applications' => $pendingApplications,
+            'total_revenue' => $totalRevenue,
+            'monthly_revenue' => $monthlyRevenue,
+            'total_houses' => $totalHouses,
+            'total_reservations' => $totalReservations,
+            'upcoming_events' => $upcomingEvents,
             'recent_applications' => $recentApplications,
             'recent_reservations' => $recentReservations,
         ]);

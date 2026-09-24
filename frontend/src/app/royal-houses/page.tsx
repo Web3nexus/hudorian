@@ -5,9 +5,17 @@ import Link from 'next/link';
 import { Crown, Shield, ArrowRight, Compass, Sparkles, HeartHandshake, Award, Landmark, ExternalLink } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
+import { useCms } from '@/lib/cms';
 
 export default function RoyalHousesPage() {
-  const cadetHouses = [
+  const { getPageContent } = useCms();
+  const cmsContent = getPageContent('page_royal_houses', {
+    title: 'Royal Houses & Allies',
+    subtitle: 'The sovereign cadet houses established by the royal children of the Uzih dynasty and the historic allied families standing in eternal fellowship with the realm.',
+    media_url: '/images/hudorian-seal.png',
+  });
+
+  const defaultCadetHouses = [
     {
       id: 'reda-house',
       name: 'Reda House',
@@ -67,7 +75,7 @@ export default function RoyalHousesPage() {
     },
   ];
 
-  const dynasticAllies = [
+  const defaultDynasticAllies = [
     {
       id: 'family-of-victors',
       name: 'The Family of Victors',
@@ -122,6 +130,14 @@ export default function RoyalHousesPage() {
     },
   ];
 
+  const cadetHouses = (cmsContent.payload?.cadet_houses && cmsContent.payload.cadet_houses.length > 0)
+    ? cmsContent.payload.cadet_houses
+    : defaultCadetHouses;
+
+  const dynasticAllies = (cmsContent.payload?.dynastic_allies && cmsContent.payload.dynastic_allies.length > 0)
+    ? cmsContent.payload.dynastic_allies
+    : defaultDynasticAllies;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF8F5]">
       <Navbar />
@@ -131,7 +147,7 @@ export default function RoyalHousesPage() {
         <div className="text-center max-w-3xl mx-auto space-y-6">
           <div className="w-20 h-20 mx-auto relative flex items-center justify-center">
             <img
-              src="/images/hudorian-seal.png"
+              src={cmsContent.media_url || '/images/hudorian-seal.png'}
               alt="HUDORIAN Royal Seal"
               className="w-full h-full object-contain drop-shadow-xl"
             />
@@ -143,11 +159,11 @@ export default function RoyalHousesPage() {
           </div>
 
           <h1 className="font-serif-luxury text-4xl sm:text-6xl font-light text-[#141414] tracking-tight">
-            Royal Houses & Allies
+            {cmsContent.title || 'Royal Houses & Allies'}
           </h1>
 
           <p className="text-base sm:text-lg text-[#141414]/70 font-light leading-relaxed">
-            The sovereign cadet houses established by the royal children of the Uzih dynasty and the historic allied families standing in eternal fellowship with the realm.
+            {cmsContent.subtitle || 'The sovereign cadet houses established by the royal children of the Uzih dynasty and the historic allied families standing in eternal fellowship with the realm.'}
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
@@ -185,7 +201,7 @@ export default function RoyalHousesPage() {
           </div>
 
           <div className="space-y-16">
-            {cadetHouses.map((house) => (
+            {cadetHouses.map((house: any) => (
               <div
                 key={house.id}
                 id={house.id}
@@ -231,7 +247,7 @@ export default function RoyalHousesPage() {
                         House Facilities & Patronages:
                       </span>
                       <div className="flex flex-wrap gap-2">
-                        {house.privileges.map((p, i) => (
+                        {(house.privileges || []).map((p: string, i: number) => (
                           <span
                             key={i}
                             className="text-xs px-2.5 py-1 bg-[#F4EFEA] rounded-full text-black/70 font-light"
@@ -278,7 +294,7 @@ export default function RoyalHousesPage() {
           </div>
 
           <div className="space-y-16">
-            {dynasticAllies.map((ally) => (
+            {dynasticAllies.map((ally: any) => (
               <div
                 key={ally.id}
                 id={ally.id}
@@ -322,7 +338,7 @@ export default function RoyalHousesPage() {
                         Allied Concordat Privileges:
                       </span>
                       <div className="flex flex-wrap gap-2">
-                        {ally.allied_privileges.map((p, i) => (
+                        {(ally.allied_privileges || []).map((p: string, i: number) => (
                           <span
                             key={i}
                             className="text-xs px-2.5 py-1 bg-[#F4EFEA] rounded-full text-black/70 font-light"

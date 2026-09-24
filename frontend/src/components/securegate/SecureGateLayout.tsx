@@ -88,14 +88,14 @@ export default function SecureGateLayout({
   };
 
   const navItems = [
-    { label: 'Executive Overview', href: '/securegate', icon: LayoutDashboard },
-    { label: 'CMS & Site Studio', href: '/securegate/cms', icon: Sliders, badge: 'DYNAMIC' },
-    { label: 'Security & Auth Keys', href: '/securegate/security', icon: ShieldCheck, badge: 'PROTECTION' },
-    { label: 'Membership Queue', href: '/securegate/applications', icon: FileCheck },
-    { label: 'Member Registry', href: '/securegate/members', icon: Users },
-    { label: 'Houses & Inventory', href: '/securegate/houses', icon: Building2 },
-    { label: 'Financial Vault', href: '/securegate/payments', icon: CreditCard },
-    { label: 'Audit Trail', href: '/securegate/audit-logs', icon: History },
+    { label: 'Sanctuary Overview', href: '/securegate', icon: LayoutDashboard },
+    { label: 'CMS & Editorial Studio', href: '/securegate/cms', icon: Sliders, badge: 'DYNAMIC' },
+    { label: 'Vault & Protection', href: '/securegate/security', icon: ShieldCheck, badge: 'PROTECTED' },
+    { label: 'Admissions Dossiers', href: '/securegate/applications', icon: FileCheck },
+    { label: 'Patron Registry', href: '/securegate/members', icon: Users },
+    { label: 'Houses & Enclaves', href: '/securegate/houses', icon: Building2 },
+    { label: 'Dues & Settlements', href: '/securegate/payments', icon: CreditCard },
+    { label: 'Activity Ledger', href: '/securegate/audit-logs', icon: History },
   ];
 
   if (isVerifying || !isAuthenticated) {
@@ -110,7 +110,7 @@ export default function SecureGateLayout({
               HUDORIAN
             </span>
             <p className="text-xs text-white/40 font-mono tracking-widest uppercase">
-              Verifying SecureGate Perimeter...
+              Verifying Steward Clearance...
             </p>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function SecureGateLayout({
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <Database className="w-3 h-3 text-emerald-400/80" />
-            <span className="font-mono">Vault 3306 // Online</span>
+            <span className="font-mono">Sanctuary Vault // Protected</span>
           </div>
 
           {/* Public Portal Switcher */}
@@ -183,10 +183,10 @@ export default function SecureGateLayout({
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
             <div className="text-right hidden sm:block">
               <p className="text-xs font-medium text-white leading-tight">
-                {adminUser?.name || 'Alexander Vance'}
+                {adminUser?.name || 'Club Steward'}
               </p>
               <p className="text-[10px] font-mono text-[#C5A880] tracking-wider">
-                SUPER ADMIN
+                HOUSE DIRECTOR
               </p>
             </div>
             <button
