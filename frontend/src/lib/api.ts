@@ -415,6 +415,7 @@ class ApiClient {
   async initializePayment(data: {
     gateway: 'flutterwave' | 'paystack' | 'manual';
     membership_plan_id: number;
+    currency?: string;
     redirect_url?: string;
     email?: string;
     name?: string;
@@ -442,6 +443,35 @@ class ApiClient {
     });
   }
 
+  // --- Real-Time Currency Rates & FX Engine ---
+  async getCurrencyRates(gateway: string = 'manual', base: string = 'EUR'): Promise<{
+    status: string;
+    data: {
+      base: string;
+      provider: string;
+      rates: Record<string, number>;
+      updated_at: string;
+      is_live: boolean;
+    };
+  }> {
+    return this.request(`/currency/rates?gateway=${encodeURIComponent(gateway)}&base=${encodeURIComponent(base)}`);
+  }
+
+  async convertCurrency(amount: number, from: string, to: string, gateway: string = 'manual'): Promise<{
+    status: string;
+    data: {
+      original_amount: number;
+      original_currency: string;
+      target_amount: number;
+      target_currency: string;
+      rate: number;
+      provider: string;
+      is_live: boolean;
+    };
+  }> {
+    return this.request(`/currency/convert?amount=${amount}&from=${from}&to=${to}&gateway=${gateway}`);
+  }
+
   // --- Admin Financials & Payment Settings ---
   async getAdminPayments(params?: { status?: string; provider?: string; search?: string }): Promise<any> {
     const searchParams = new URLSearchParams();
@@ -459,7 +489,7 @@ class ApiClient {
     if (params?.search) searchParams.append('search', params.search);
     const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
     const token = typeof window !== 'undefined' ? localStorage.getItem('hudorian_admin_token') : null;
-    const res = await fetch(`${this.baseUrl}/admin/payments/export${qs}`, {
+    const res = await fetch(`${this.getBaseUrl()}/admin/payments/export${qs}`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

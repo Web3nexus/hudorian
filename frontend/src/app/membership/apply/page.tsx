@@ -24,7 +24,7 @@ const INTERESTS_OPTIONS = [
 function MembershipApplicationContent() {
   const searchParams = useSearchParams();
   const initialPlanId = searchParams.get('plan');
-  const { formatPrice } = useCurrency();
+  const { currency, formatPrice, rateProvider, refreshRates } = useCurrency();
 
   const [step, setStep] = useState(1);
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
@@ -132,6 +132,7 @@ function MembershipApplicationContent() {
         const payRes = await api.initializePayment({
           gateway: paymentSettlement,
           membership_plan_id: formData.membership_plan_id,
+          currency: currency,
           redirect_url: currentUrl,
           email: formData.email,
           name: `${formData.first_name} ${formData.last_name}`,
@@ -670,6 +671,27 @@ function MembershipApplicationContent() {
                   </label>
                 )}
               </div>
+
+              {/* Dynamic Live Currency Conversion Rate Indicator */}
+              {paymentSettlement !== 'review_first' && selectedPlan && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 bg-[#F9F7F3] border border-[#E8E2D8] rounded-xs text-xs mt-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-black/60">Settlement Amount:</span>
+                    <span className="font-serif-luxury text-sm font-semibold text-[#141414]">
+                      {formatPrice(selectedPlan.price)}
+                    </span>
+                    <span className="text-[11px] text-black/50">({currency})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-[#DDD] text-[10px] tracking-wide text-black/70">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Conversion Engine: <strong className="font-medium text-black">
+                        {paymentSettlement === 'manual' ? 'ExchangeRate-API (Live)' : paymentSettlement === 'flutterwave' ? 'Flutterwave Gateway FX' : 'Paystack Gateway FX'}
+                      </strong>
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Manual Bank Wire Details if Selected */}
               {paymentSettlement === 'manual' && (

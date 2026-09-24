@@ -31,21 +31,28 @@ class MembershipPaymentService
         string $status,
         string $transactionId,
         array $metadata = [],
-        ?string $paymentMethod = null
+        ?string $paymentMethod = null,
+        ?float $customAmount = null,
+        ?string $customCurrency = null
     ): Payment {
+        $finalAmount = $customAmount !== null ? $customAmount : (float) $plan->price;
+        $finalCurrency = ! empty($customCurrency) ? strtoupper($customCurrency) : strtoupper($plan->currency ?? 'EUR');
+
         return Payment::create([
             'transaction_id' => $transactionId,
             'user_id' => $user->id,
             'payable_type' => MembershipPlan::class,
             'payable_id' => $plan->id,
-            'amount' => (float) $plan->price,
-            'currency' => strtoupper($plan->currency ?? 'EUR'),
+            'amount' => $finalAmount,
+            'currency' => $finalCurrency,
             'provider' => $provider,
             'status' => $status,
             'payment_method' => $paymentMethod ?? ($provider === 'manual_transfer' ? 'bank_transfer' : 'card'),
             'metadata' => array_merge([
                 'plan_id' => $plan->id,
                 'plan_name' => $plan->name,
+                'base_plan_price' => (float) $plan->price,
+                'base_plan_currency' => strtoupper($plan->currency ?? 'EUR'),
                 'description' => 'HUDORIAN Annual Membership Dues - ' . $plan->name,
                 'user_email' => $user->email,
                 'user_name' => $user->name,
@@ -59,7 +66,9 @@ class MembershipPaymentService
     public function submitManualTransfer(
         User $user,
         MembershipPlan $plan,
-        array $details
+        array $details,
+        ?float $customAmount = null,
+        ?string $customCurrency = null
     ): Payment {
         $transactionId = 'wire_' . Str::lower(Str::random(14));
 
@@ -78,7 +87,9 @@ class MembershipPaymentService
                 'proof_document_url' => $details['proof_document_url'] ?? null,
                 'submitted_at' => now()->toIso8601String(),
             ],
-            'bank_transfer'
+            'bank_transfer',
+            $customAmount,
+            $customCurrency
         );
     }
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\AdminPaymentController;
 use App\Http\Controllers\Api\V1\AdminRoomController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CmsController;
+use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\EstateController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\HouseController;
@@ -73,6 +74,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/payments/config', [PaymentController::class, 'config']);
     Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
     Route::post('/payments/verify', [PaymentController::class, 'verify']);
+
+    // Currency Rates & FX Engine (ExchangeRate-API for manual, Flutterwave/Paystack for gateways)
+    Route::get('/currency/rates', [CurrencyController::class, 'rates']);
+    Route::get('/currency/convert', [CurrencyController::class, 'convert']);
     Route::post('/payments/webhook/flutterwave', [PaymentController::class, 'webhookFlutterwave']);
     Route::post('/payments/webhook/paystack', [PaymentController::class, 'webhookPaystack']);
 

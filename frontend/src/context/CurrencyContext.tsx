@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api } from '@/lib/api';
 
 export type CurrencyCode = 'NGN' | 'USD' | 'EUR' | 'GBP';
 
@@ -13,14 +14,14 @@ export interface CurrencyConfig {
   rateFromEUR: number; // Conversion rate relative to EUR base
 }
 
-export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
+export const BASE_CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   NGN: {
     code: 'NGN',
     symbol: '₦',
     name: 'Nigerian Naira',
     flag: '🇳🇬',
     region: 'Nigeria',
-    rateFromEUR: 1750,
+    rateFromEUR: 1540,
   },
   USD: {
     code: 'USD',
@@ -48,6 +49,8 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   },
 };
 
+export const CURRENCIES = BASE_CURRENCIES;
+
 interface CurrencyContextType {
   currency: CurrencyCode;
   currencyConfig: CurrencyConfig;
@@ -55,6 +58,9 @@ interface CurrencyContextType {
   convertPrice: (amountInEUR: number | string) => number;
   formatPrice: (amountInEUR: number | string, options?: { showDecimals?: boolean }) => string;
   availableCurrencies: CurrencyConfig[];
+  rateProvider: string;
+  isLiveRates: boolean;
+  refreshRates: (gateway?: 'manual' | 'flutterwave' | 'paystack') => Promise<void>;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -62,22 +68,54 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   // Default to NGN as requested
   const [currency, setCurrencyState] = useState<CurrencyCode>('NGN');
+  const [liveRates, setLiveRates] = useState<Record<CurrencyCode, number>>({
+    NGN: 1540,
+    USD: 1.08,
+    EUR: 1.0,
+    GBP: 0.85,
+  });
+  const [rateProvider, setRateProvider] = useState<string>('ExchangeRate-API');
+  const [isLiveRates, setIsLiveRates] = useState<boolean>(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('hudorian_currency') as CurrencyCode;
-    if (saved && CURRENCIES[saved]) {
-      setCurrencyState(saved);
+  const refreshRates = useCallback(async (gateway: 'manual' | 'flutterwave' | 'paystack' = 'manual') => {
+    try {
+      const res = await api.getCurrencyRates(gateway, 'EUR');
+      if (res?.data?.rates) {
+        setLiveRates((prev) => ({
+          ...prev,
+          ...(res.data.rates as unknown as Record<CurrencyCode, number>),
+        }));
+        if (res.data.provider) {
+          setRateProvider(res.data.provider);
+        }
+        setIsLiveRates(Boolean(res.data.is_live));
+      }
+    } catch {
+      // Fallback silently to baseline rates
     }
   }, []);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('hudorian_currency') as CurrencyCode;
+    if (saved && BASE_CURRENCIES[saved]) {
+      setCurrencyState(saved);
+    }
+    // Fetch live rates on mount using ExchangeRate-API for general display
+    refreshRates('manual');
+  }, [refreshRates]);
+
   const setCurrency = (code: CurrencyCode) => {
-    if (CURRENCIES[code]) {
+    if (BASE_CURRENCIES[code]) {
       setCurrencyState(code);
       localStorage.setItem('hudorian_currency', code);
     }
   };
 
-  const currentConfig = CURRENCIES[currency];
+  const currentRate = liveRates[currency] ?? BASE_CURRENCIES[currency].rateFromEUR;
+  const currentConfig: CurrencyConfig = {
+    ...BASE_CURRENCIES[currency],
+    rateFromEUR: currentRate,
+  };
 
   const parseAmount = (amountInEUR: number | string): number => {
     if (typeof amountInEUR === 'number') return isNaN(amountInEUR) ? 0 : amountInEUR;
@@ -90,15 +128,14 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const convertPrice = (amountInEUR: number | string): number => {
     const num = parseAmount(amountInEUR);
-    return Math.round(num * currentConfig.rateFromEUR);
+    return Math.round(num * currentRate);
   };
 
-  const formatPrice = (amountInEUR: number | string, options?: { showDecimals?: boolean }): string => {
+  const formatPrice = (amountInEUR: number | string): string => {
     const num = parseAmount(amountInEUR);
     const converted = convertPrice(num);
 
     if (currency === 'NGN') {
-      // Nigerian Naira formatted with standard comma delimiters, no decimals for round elegance
       return `₦${converted.toLocaleString('en-NG')}`;
     }
 
@@ -117,6 +154,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     return `${currentConfig.symbol}${converted.toLocaleString()}`;
   };
 
+  const dynamicCurrencies = Object.values(BASE_CURRENCIES).map((cfg) => ({
+    ...cfg,
+    rateFromEUR: liveRates[cfg.code] ?? cfg.rateFromEUR,
+  }));
+
   return (
     <CurrencyContext.Provider
       value={{
@@ -125,7 +167,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         setCurrency,
         convertPrice,
         formatPrice,
-        availableCurrencies: Object.values(CURRENCIES),
+        availableCurrencies: dynamicCurrencies,
+        rateProvider,
+        isLiveRates,
+        refreshRates,
       }}
     >
       {children}
@@ -136,22 +181,23 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 export function useCurrency() {
   const context = useContext(CurrencyContext);
   if (!context) {
-    // Graceful fallback if rendered outside provider during SSG or isolated tests
     return {
       currency: 'NGN' as CurrencyCode,
-      currencyConfig: CURRENCIES.NGN,
+      currencyConfig: BASE_CURRENCIES.NGN,
       setCurrency: () => {},
       convertPrice: (amt: number | string) => {
         const val = typeof amt === 'string' ? parseFloat(amt) : Number(amt);
-        return Math.round((isNaN(val) ? 0 : val) * 1750);
+        return Math.round((isNaN(val) ? 0 : val) * 1540);
       },
       formatPrice: (amt: number | string) => {
         const val = typeof amt === 'string' ? parseFloat(amt) : Number(amt);
-        return `₦${Math.round((isNaN(val) ? 0 : val) * 1750).toLocaleString('en-NG')}`;
+        return `₦${Math.round((isNaN(val) ? 0 : val) * 1540).toLocaleString('en-NG')}`;
       },
-      availableCurrencies: Object.values(CURRENCIES),
+      availableCurrencies: Object.values(BASE_CURRENCIES),
+      rateProvider: 'ExchangeRate-API',
+      isLiveRates: false,
+      refreshRates: async () => {},
     };
   }
   return context;
 }
-

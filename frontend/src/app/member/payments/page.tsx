@@ -24,7 +24,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { MembershipPlan } from '@/types';
 
 function MemberPaymentsContent() {
-  const { formatPrice } = useCurrency();
+  const { currency, formatPrice, rateProvider, refreshRates } = useCurrency();
   const searchParams = useSearchParams();
 
   const [payments, setPayments] = useState<any[]>([]);
@@ -38,6 +38,11 @@ function MemberPaymentsContent() {
   const [selectedPlanId, setSelectedPlanId] = useState<number>(0);
   const [selectedGateway, setSelectedGateway] = useState<'flutterwave' | 'paystack' | 'manual'>('flutterwave');
   const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  const handleGatewayChange = (gw: 'flutterwave' | 'paystack' | 'manual') => {
+    setSelectedGateway(gw);
+    refreshRates(gw);
+  };
 
   // Manual Transfer Form Fields
   const [transferReference, setTransferReference] = useState('');
@@ -128,6 +133,7 @@ function MemberPaymentsContent() {
       const res = await api.initializePayment({
         gateway: selectedGateway,
         membership_plan_id: selectedPlanId,
+        currency: currency,
         redirect_url: currentUrl,
         transfer_reference: transferReference || undefined,
         sender_bank: senderBank || undefined,
@@ -376,7 +382,7 @@ function MemberPaymentsContent() {
                   {paymentConfig?.flutterwave?.enabled !== false && (
                     <button
                       type="button"
-                      onClick={() => setSelectedGateway('flutterwave')}
+                      onClick={() => handleGatewayChange('flutterwave')}
                       className={`p-3 rounded-xs border text-left transition ${
                         selectedGateway === 'flutterwave'
                           ? 'border-[#141414] bg-[#141414] text-white'
@@ -391,7 +397,7 @@ function MemberPaymentsContent() {
                   {paymentConfig?.paystack?.enabled !== false && (
                     <button
                       type="button"
-                      onClick={() => setSelectedGateway('paystack')}
+                      onClick={() => handleGatewayChange('paystack')}
                       className={`p-3 rounded-xs border text-left transition ${
                         selectedGateway === 'paystack'
                           ? 'border-[#141414] bg-[#141414] text-white'
@@ -406,7 +412,7 @@ function MemberPaymentsContent() {
                   {paymentConfig?.manual?.enabled !== false && (
                     <button
                       type="button"
-                      onClick={() => setSelectedGateway('manual')}
+                      onClick={() => handleGatewayChange('manual')}
                       className={`p-3 rounded-xs border text-left transition ${
                         selectedGateway === 'manual'
                           ? 'border-[#141414] bg-[#141414] text-white'
@@ -505,6 +511,23 @@ function MemberPaymentsContent() {
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Dynamic Live Conversion Engine Notice */}
+              {selectedPlan && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-[#FAF8F5] border border-[#E8E2D8] rounded-xs text-[11px] text-black/70">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-black/50">Settlement Currency:</span>
+                    <strong className="text-black">{currency}</strong>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Rate Engine:</span>
+                    <strong className="text-black font-medium">
+                      {selectedGateway === 'manual' ? 'ExchangeRate-API (Live)' : selectedGateway === 'flutterwave' ? 'Flutterwave Gateway FX' : 'Paystack Gateway FX'}
+                    </strong>
                   </div>
                 </div>
               )}

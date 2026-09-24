@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Currency\CurrencyRateService;
 use App\Services\Payments\FlutterwaveService;
 use App\Services\Payments\MembershipPaymentService;
 use App\Services\Payments\PaymentSettingsService;
@@ -22,17 +23,20 @@ class PaymentController extends Controller
     protected FlutterwaveService $flutterwaveService;
     protected PaystackService $paystackService;
     protected MembershipPaymentService $membershipPaymentService;
+    protected CurrencyRateService $currencyRateService;
 
     public function __construct(
         PaymentSettingsService $settingsService,
         FlutterwaveService $flutterwaveService,
         PaystackService $paystackService,
-        MembershipPaymentService $membershipPaymentService
+        MembershipPaymentService $membershipPaymentService,
+        CurrencyRateService $currencyRateService
     ) {
         $this->settingsService = $settingsService;
         $this->flutterwaveService = $flutterwaveService;
         $this->paystackService = $paystackService;
         $this->membershipPaymentService = $membershipPaymentService;
+        $this->currencyRateService = $currencyRateService;
     }
 
     /**
@@ -54,6 +58,7 @@ class PaymentController extends Controller
             'gateway' => 'required|in:flutterwave,paystack,manual',
             'membership_plan_id' => 'required|exists:membership_plans,id',
             'redirect_url' => 'nullable|url',
+            'currency' => 'nullable|string|in:EUR,NGN,USD,GBP,eur,ngn,usd,gbp',
             // Guest applicant details if not authenticated
             'email' => 'nullable|email|max:255',
             'name' => 'nullable|string|max:255',
@@ -67,6 +72,22 @@ class PaymentController extends Controller
         ]);
 
         $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
+        $gateway = $validated['gateway'];
+        $baseCurrency = strtoupper($plan->currency ?? 'EUR');
+        $targetCurrency = ! empty($validated['currency']) ? strtoupper($validated['currency']) : $baseCurrency;
+
+        // Perform currency conversion using the selected gateway's conversion engine
+        $conversion = $this->currencyRateService->convert(
+            (float) $plan->price,
+            $baseCurrency,
+            $targetCurrency,
+            $gateway
+        );
+
+        $finalAmount = (float) $conversion['target_amount'];
+        $finalCurrency = (string) $conversion['target_currency'];
+        $exchangeRate = (float) $conversion['rate'];
+        $rateProvider = (string) $conversion['provider'];
 
         // Resolve or create user
         $user = $request->user();
@@ -89,10 +110,9 @@ class PaymentController extends Controller
             );
         }
 
-        $gateway = $validated['gateway'];
         $redirectUrl = $validated['redirect_url'] ?? url('/member/payments');
 
-        // 1. Manual Bank Wire Transfer
+        // 1. Manual Bank Wire Transfer (ExchangeRate-API)
         if ($gateway === 'manual') {
             $payment = $this->membershipPaymentService->submitManualTransfer($user, $plan, [
                 'transfer_reference' => $validated['transfer_reference'] ?? ('WIRE-' . strtoupper(Str::random(8))),
@@ -100,7 +120,9 @@ class PaymentController extends Controller
                 'sender_account_name' => $validated['sender_account_name'] ?? $user->name,
                 'transfer_date' => $validated['transfer_date'] ?? now()->toDateString(),
                 'proof_notes' => $validated['proof_notes'] ?? null,
-            ]);
+                'exchange_rate' => $exchangeRate,
+                'rate_provider' => $rateProvider,
+            ], $finalAmount, $finalCurrency);
 
             return response()->json([
                 'success' => true,
@@ -113,6 +135,8 @@ class PaymentController extends Controller
                     'amount' => $payment->amount,
                     'currency' => $payment->currency,
                     'status' => $payment->status,
+                    'exchange_rate' => $exchangeRate,
+                    'rate_provider' => $rateProvider,
                     'transfer_reference' => $payment->metadata['transfer_reference'] ?? null,
                 ],
             ], 201);
@@ -124,13 +148,15 @@ class PaymentController extends Controller
 
             $initResult = $this->flutterwaveService->initializePayment(
                 $user,
-                (float) $plan->price,
-                $plan->currency ?? 'EUR',
+                $finalAmount,
+                $finalCurrency,
                 $txRef,
                 [
                     'plan_id' => $plan->id,
                     'plan_name' => $plan->name,
                     'user_id' => $user->id,
+                    'exchange_rate' => $exchangeRate,
+                    'rate_provider' => $rateProvider,
                 ],
                 $redirectUrl
             );
@@ -149,7 +175,14 @@ class PaymentController extends Controller
                 'flutterwave',
                 'pending',
                 $txRef,
-                ['checkout_url' => $initResult['checkout_url'] ?? null]
+                [
+                    'checkout_url' => $initResult['checkout_url'] ?? null,
+                    'exchange_rate' => $exchangeRate,
+                    'rate_provider' => $rateProvider,
+                ],
+                'card',
+                $finalAmount,
+                $finalCurrency
             );
 
             return response()->json([
@@ -158,6 +191,10 @@ class PaymentController extends Controller
                 'checkout_url' => $initResult['checkout_url'] ?? null,
                 'tx_ref' => $txRef,
                 'payment_id' => $payment->id,
+                'amount' => $finalAmount,
+                'currency' => $finalCurrency,
+                'exchange_rate' => $exchangeRate,
+                'rate_provider' => $rateProvider,
             ]);
         }
 
@@ -167,13 +204,15 @@ class PaymentController extends Controller
 
             $initResult = $this->paystackService->initializePayment(
                 $user,
-                (float) $plan->price,
-                $plan->currency ?? 'EUR',
+                $finalAmount,
+                $finalCurrency,
                 $reference,
                 [
                     'plan_id' => $plan->id,
                     'plan_name' => $plan->name,
                     'user_id' => $user->id,
+                    'exchange_rate' => $exchangeRate,
+                    'rate_provider' => $rateProvider,
                 ],
                 $redirectUrl
             );
@@ -195,7 +234,12 @@ class PaymentController extends Controller
                 [
                     'authorization_url' => $initResult['authorization_url'] ?? null,
                     'access_code' => $initResult['access_code'] ?? null,
-                ]
+                    'exchange_rate' => $exchangeRate,
+                    'rate_provider' => $rateProvider,
+                ],
+                'card',
+                $finalAmount,
+                $finalCurrency
             );
 
             return response()->json([
@@ -205,6 +249,10 @@ class PaymentController extends Controller
                 'access_code' => $initResult['access_code'] ?? null,
                 'reference' => $reference,
                 'payment_id' => $payment->id,
+                'amount' => $finalAmount,
+                'currency' => $finalCurrency,
+                'exchange_rate' => $exchangeRate,
+                'rate_provider' => $rateProvider,
             ]);
         }
 
