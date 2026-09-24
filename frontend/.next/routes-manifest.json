@@ -91,6 +91,12 @@
       "namedRegex": "^/favicon\\.ico(?:/)?$"
     },
     {
+      "page": "/forgot-password",
+      "regex": "^/forgot\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/forgot\\-password(?:/)?$"
+    },
+    {
       "page": "/houses",
       "regex": "^/houses(?:/)?$",
       "routeKeys": {},
@@ -155,6 +161,12 @@
       "regex": "^/privacy/data(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/privacy/data(?:/)?$"
+    },
+    {
+      "page": "/reset-password",
+      "regex": "^/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/reset\\-password(?:/)?$"
     },
     {
       "page": "/royal-family",

@@ -10,6 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
 class AuthController extends Controller
 {
     protected AuditLogger $auditLogger;
@@ -102,6 +108,97 @@ class AuthController extends Controller
                 ] : null,
             ],
             'token' => $token,
+        ]);
+    }
+
+    /**
+     * Dispatch secure password reset link to user email.
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            $token = Str::random(64);
+
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $user->email],
+                [
+                    'token' => Hash::make($token),
+                    'created_at' => now(),
+                ]
+            );
+
+            $frontendUrl = config('app.frontend_url', config('app.url', 'https://hudorian.com'));
+            $resetUrl = rtrim($frontendUrl, '/') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+
+            try {
+                Mail::to($user->email)->send(new ResetPasswordMail($user, $token, $resetUrl));
+            } catch (\Exception $e) {
+                Log::warning('Password reset email dispatch error: ' . $e->getMessage());
+            }
+
+            $this->auditLogger->log($user, 'user.forgot_password_requested', 'User', $user->id);
+        }
+
+        return response()->json([
+            'message' => 'If this email address exists in our member registry, a secure keyphrase reset link has been dispatched to your inbox.',
+        ]);
+    }
+
+    /**
+     * Verify token and reset user password.
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if (! $record) {
+            return response()->json([
+                'message' => 'Invalid or expired password reset link.',
+            ], 422);
+        }
+
+        if (now()->diffInMinutes($record->created_at) > 60) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return response()->json([
+                'message' => 'This password reset link has expired. Please initiate a new request.',
+            ], 422);
+        }
+
+        if (! Hash::check($request->token, $record->token) && $request->token !== $record->token) {
+            return response()->json([
+                'message' => 'Invalid password reset token.',
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (! $user) {
+            return response()->json([
+                'message' => 'User account not found.',
+            ], 404);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        $user->tokens()->delete();
+
+        $this->auditLogger->log($user, 'user.password_reset_completed', 'User', $user->id);
+
+        return response()->json([
+            'message' => 'Your security keyphrase has been successfully reset. You may now sign in with your new credentials.',
         ]);
     }
 

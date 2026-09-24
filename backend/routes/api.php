@@ -62,6 +62,8 @@ Route::prefix('v1')->group(function () {
     // Public Authentication
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
     // Public Security Configuration (for Cloudflare / reCAPTCHA widget on login)
     Route::get('/security/config', [AdminAuthController::class, 'getPublicConfig']);

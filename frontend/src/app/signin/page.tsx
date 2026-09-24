@@ -77,9 +77,9 @@ function SignInContent() {
                 <label className="text-xs uppercase tracking-wider text-black/60 font-medium">
                   Password
                 </label>
-                <span className="text-[10px] text-black/50 hover:underline cursor-pointer">
-                  Forgot?
-                </span>
+                <Link href="/forgot-password" className="text-[10px] text-[#96754B] hover:underline">
+                  Forgot Keyphrase?
+                </Link>
               </div>
               <input
                 type="password"
