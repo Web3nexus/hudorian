@@ -91,11 +91,11 @@ export default function SecureGateLayout({
     { label: 'Sanctuary Overview', href: '/securegate', icon: LayoutDashboard },
     { label: 'CMS & Editorial Studio', href: '/securegate/cms', icon: Sliders, badge: 'DYNAMIC' },
     { label: 'Vault & Protection', href: '/securegate/security', icon: ShieldCheck, badge: 'PROTECTED' },
-    { label: 'Admissions Dossiers', href: '/securegate/applications', icon: FileCheck },
-    { label: 'Patron Registry', href: '/securegate/members', icon: Users },
-    { label: 'Houses & Enclaves', href: '/securegate/houses', icon: Building2 },
-    { label: 'Dues & Settlements', href: '/securegate/payments', icon: CreditCard },
-    { label: 'Activity Ledger', href: '/securegate/audit-logs', icon: History },
+    { label: 'Membership Applications', href: '/securegate/applications', icon: FileCheck },
+    { label: 'Members Directory', href: '/securegate/members', icon: Users },
+    { label: 'Sanctuaries & Houses', href: '/securegate/houses', icon: Building2 },
+    { label: 'Transactions & Treasury', href: '/securegate/payments', icon: CreditCard },
+    { label: 'Audit & Activity Ledger', href: '/securegate/audit-logs', icon: History },
   ];
 
   if (isVerifying || !isAuthenticated) {

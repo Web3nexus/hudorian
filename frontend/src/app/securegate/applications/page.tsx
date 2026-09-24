@@ -46,8 +46,8 @@ export default function SecureGateApplicationsPage() {
 
   return (
     <SecureGateLayout
-      title="Membership Candidate Queue"
-      subtitle="Examine applicant dossiers, assess cultural alignment, and issue council admission clearances."
+      title="Membership Applications"
+      subtitle="Review prospective candidate dossiers, assess committee alignment, and issue membership admissions clearances."
     >
       <div className="space-y-6">
         {actionMsg && (

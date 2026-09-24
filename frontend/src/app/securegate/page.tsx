@@ -131,10 +131,10 @@ export default function SecureGateDashboardPage() {
       <div className="space-y-8">
         {/* Top Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {/* Card 1: Active Patrons */}
+          {/* Card 1: Active Members */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-[#B8976C]/30 transition duration-300">
             <div className="flex items-center justify-between text-white/50 mb-3">
-              <span className="text-xs font-mono uppercase tracking-wider">Active Patrons</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Active Members</span>
               <div className="p-2 rounded-lg bg-white/5 text-[#C5A880]">
                 <Users className="w-4 h-4" />
               </div>
@@ -143,16 +143,19 @@ export default function SecureGateDashboardPage() {
               <span className="font-serif-luxury text-3xl font-medium text-white">
                 {loading ? '...' : (stats?.active_members ?? 0)}
               </span>
-              <span className="text-[11px] font-mono text-emerald-400">
-                In good standing
-              </span>
+              <Link
+                href="/securegate/members"
+                className="text-[11px] font-mono text-emerald-400 hover:underline flex items-center gap-0.5"
+              >
+                Members Directory <ArrowUpRight className="w-3 h-3" />
+              </Link>
             </div>
           </div>
 
-          {/* Card 2: Pending Applications */}
+          {/* Card 2: Pending Membership Applications */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-[#B8976C]/30 transition duration-300">
             <div className="flex items-center justify-between text-white/50 mb-3">
-              <span className="text-xs font-mono uppercase tracking-wider">Admissions Dossiers</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Membership Applications</span>
               <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
                 <FileCheck className="w-4 h-4" />
               </div>
@@ -165,7 +168,7 @@ export default function SecureGateDashboardPage() {
                 href="/securegate/applications"
                 className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-0.5"
               >
-                Review Queue <ArrowUpRight className="w-3 h-3" />
+                Review Candidates <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -173,7 +176,7 @@ export default function SecureGateDashboardPage() {
           {/* Card 3: Global Sanctuaries */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-[#B8976C]/30 transition duration-300">
             <div className="flex items-center justify-between text-white/50 mb-3">
-              <span className="text-xs font-mono uppercase tracking-wider">Sanctuaries</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Sanctuaries & Houses</span>
               <div className="p-2 rounded-lg bg-white/5 text-[#C5A880]">
                 <Building2 className="w-4 h-4" />
               </div>
@@ -186,10 +189,10 @@ export default function SecureGateDashboardPage() {
             </div>
           </div>
 
-          {/* Card 4: Dues & Patronage Volume (Currency Aware) */}
+          {/* Card 4: Dues & Transaction Volume (Currency Aware) */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-[#B8976C]/30 transition duration-300">
             <div className="flex items-center justify-between text-white/50 mb-3">
-              <span className="text-xs font-mono uppercase tracking-wider">Patronage Settlements</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Transaction Volume</span>
               <div className="p-2 rounded-lg bg-white/5 text-[#C5A880]">
                 <CreditCard className="w-4 h-4" />
               </div>
@@ -198,9 +201,12 @@ export default function SecureGateDashboardPage() {
               <span className="font-serif-luxury text-3xl font-medium text-white">
                 {loading ? '...' : formatPrice(stats?.monthly_revenue || stats?.total_revenue || 0)}
               </span>
-              <span className="text-[11px] font-mono text-white/40">
-                {currencyConfig.code}
-              </span>
+              <Link
+                href="/securegate/payments"
+                className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-0.5"
+              >
+                Treasury Ledger <ArrowUpRight className="w-3 h-3" />
+              </Link>
             </div>
           </div>
         </div>

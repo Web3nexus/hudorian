@@ -54,6 +54,73 @@ class AdminPaymentController extends Controller
         return response()->json($payments);
     }
 
+    public function export(Request $request)
+    {
+        $query = Payment::with(['user', 'payable']);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('provider') && $request->provider !== 'all') {
+            $query->where('provider', $request->provider);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('transaction_id', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $payments = $query->orderByDesc('created_at')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="hudorian-transactions-' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function () use ($payments) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, [
+                'ID',
+                'Transaction Ref',
+                'Patron Name',
+                'Patron Email',
+                'Amount',
+                'Currency',
+                'Provider',
+                'Status',
+                'Payable Type',
+                'Payment Method',
+                'Date',
+            ]);
+
+            foreach ($payments as $payment) {
+                fputcsv($file, [
+                    $payment->id,
+                    $payment->transaction_id ?? $payment->reference ?? '—',
+                    $payment->user->name ?? 'Guest / Candidate',
+                    $payment->user->email ?? '—',
+                    $payment->amount,
+                    $payment->currency ?? 'EUR',
+                    $payment->provider ?? 'manual',
+                    $payment->status,
+                    class_basename($payment->payable_type ?? 'Membership'),
+                    $payment->payment_method ?? 'Bank Wire / Card',
+                    $payment->created_at ? $payment->created_at->format('Y-m-d H:i:s') : '—',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function show(int $id): JsonResponse
     {
         $payment = Payment::with(['user', 'invoices', 'refunds', 'payable'])->findOrFail($id);

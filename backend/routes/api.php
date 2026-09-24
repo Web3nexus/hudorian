@@ -127,6 +127,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/payments/settings', [AdminPaymentController::class, 'getSettings']);
         Route::put('/payments/settings', [AdminPaymentController::class, 'updateSettings']);
         Route::get('/payments', [AdminPaymentController::class, 'index']);
+        Route::get('/payments/export', [AdminPaymentController::class, 'export']);
         Route::get('/payments/{id}', [AdminPaymentController::class, 'show']);
         Route::post('/payments/{id}/approve', [AdminPaymentController::class, 'approve']);
         Route::post('/payments/{id}/reject', [AdminPaymentController::class, 'reject']);

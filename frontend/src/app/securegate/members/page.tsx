@@ -51,8 +51,8 @@ export default function SecureGateMembersPage() {
 
   return (
     <SecureGateLayout
-      title="Member Registry & Clearances"
-      subtitle="Surveillance of active patrons, membership credentials, and gate access privileges."
+      title="Members Directory"
+      subtitle="Directory of active club members, issued membership credentials, tier privileges, and sanctuary clearances."
     >
       <div className="space-y-6">
         {actionMsg && (

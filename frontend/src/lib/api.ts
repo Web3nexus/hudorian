@@ -452,6 +452,21 @@ class ApiClient {
     return this.request(`/admin/payments${qs}`, {}, true);
   }
 
+  async exportAdminPayments(params?: { status?: string; provider?: string; search?: string }): Promise<Blob> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.provider) searchParams.append('provider', params.provider);
+    if (params?.search) searchParams.append('search', params.search);
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('hudorian_admin_token') : null;
+    const res = await fetch(`${this.baseUrl}/admin/payments/export${qs}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    return res.blob();
+  }
+
   async getAdminPaymentSettings(): Promise<{ settings: any }> {
     return this.request<{ settings: any }>('/admin/payments/settings', {}, true);
   }
