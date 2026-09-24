@@ -104,12 +104,8 @@ function SignInContent() {
           <div className="pt-4 border-t border-[#E8E2D8] text-center space-y-2 text-xs">
             <p className="text-black/60 font-light">
               Not yet a member?{' '}
-              <Link href="/register" className="font-semibold text-black hover:underline">
-                Create an account
-              </Link>
-              {' '}or{' '}
-              <Link href="/membership/apply" className="font-semibold text-[#96754B] hover:underline">
-                Apply for candidacy
+              <Link href="/membership/apply" className="font-semibold text-[#141414] hover:text-[#96754B] underline transition">
+                Apply for membership →
               </Link>
             </p>
           </div>

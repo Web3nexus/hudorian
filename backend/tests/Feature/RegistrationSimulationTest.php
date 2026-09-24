@@ -208,3 +208,4 @@ class RegistrationSimulationTest extends TestCase
         });
     }
 }
+
