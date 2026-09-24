@@ -26,8 +26,8 @@ class MembershipPlan extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'stay_discount_percent' => 'decimal:2',
+        'price' => 'float',
+        'stay_discount_percent' => 'float',
         'guest_allowance' => 'integer',
         'perks' => 'array',
         'is_active' => 'boolean',

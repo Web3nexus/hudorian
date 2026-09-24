@@ -35,7 +35,7 @@ class Event extends Model
         'ends_at' => 'datetime',
         'capacity' => 'integer',
         'booked_count' => 'integer',
-        'price' => 'decimal:2',
+        'price' => 'float',
         'is_member_only' => 'boolean',
     ];
 

@@ -44,7 +44,8 @@ export default function RoomDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   const nights = calculateNights();
-  const baseTotal = room ? room.base_price_per_night * (nights || 1) : 0;
+  const basePrice = room ? Number(room.base_price_per_night) || 0 : 0;
+  const baseTotal = basePrice * (nights || 1);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,7 +266,7 @@ export default function RoomDetailPage({ params }: { params: Promise<{ slug: str
                 {nights > 0 && (
                   <div className="pt-4 border-t border-[#E8E2D8] space-y-2 text-xs">
                     <div className="flex justify-between text-black/70">
-                      <span>{formatPrice(room.base_price_per_night)} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
+                      <span>{formatPrice(basePrice)} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
                       <span>{formatPrice(baseTotal)}</span>
                     </div>
                     <div className="flex justify-between text-black/70">

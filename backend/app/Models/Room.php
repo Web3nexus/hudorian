@@ -29,7 +29,7 @@ class Room extends Model
     ];
 
     protected $casts = [
-        'base_price_per_night' => 'decimal:2',
+        'base_price_per_night' => 'float',
         'capacity' => 'integer',
         'max_adults' => 'integer',
         'max_children' => 'integer',

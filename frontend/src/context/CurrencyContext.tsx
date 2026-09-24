@@ -52,8 +52,8 @@ interface CurrencyContextType {
   currency: CurrencyCode;
   currencyConfig: CurrencyConfig;
   setCurrency: (code: CurrencyCode) => void;
-  convertPrice: (amountInEUR: number) => number;
-  formatPrice: (amountInEUR: number, options?: { showDecimals?: boolean }) => string;
+  convertPrice: (amountInEUR: number | string) => number;
+  formatPrice: (amountInEUR: number | string, options?: { showDecimals?: boolean }) => string;
   availableCurrencies: CurrencyConfig[];
 }
 
@@ -79,14 +79,23 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const currentConfig = CURRENCIES[currency];
 
-  const convertPrice = (amountInEUR: number): number => {
-    if (typeof amountInEUR !== 'number' || isNaN(amountInEUR)) return 0;
-    return Math.round(amountInEUR * currentConfig.rateFromEUR);
+  const parseAmount = (amountInEUR: number | string): number => {
+    if (typeof amountInEUR === 'number') return isNaN(amountInEUR) ? 0 : amountInEUR;
+    if (typeof amountInEUR === 'string') {
+      const parsed = parseFloat(amountInEUR);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
   };
 
-  const formatPrice = (amountInEUR: number, options?: { showDecimals?: boolean }): string => {
-    if (typeof amountInEUR !== 'number' || isNaN(amountInEUR)) return `${currentConfig.symbol}0`;
-    const converted = convertPrice(amountInEUR);
+  const convertPrice = (amountInEUR: number | string): number => {
+    const num = parseAmount(amountInEUR);
+    return Math.round(num * currentConfig.rateFromEUR);
+  };
+
+  const formatPrice = (amountInEUR: number | string, options?: { showDecimals?: boolean }): string => {
+    const num = parseAmount(amountInEUR);
+    const converted = convertPrice(num);
 
     if (currency === 'NGN') {
       // Nigerian Naira formatted with standard comma delimiters, no decimals for round elegance
@@ -132,8 +141,14 @@ export function useCurrency() {
       currency: 'NGN' as CurrencyCode,
       currencyConfig: CURRENCIES.NGN,
       setCurrency: () => {},
-      convertPrice: (amt: number) => Math.round(amt * 1750),
-      formatPrice: (amt: number) => `₦${Math.round(amt * 1750).toLocaleString('en-NG')}`,
+      convertPrice: (amt: number | string) => {
+        const val = typeof amt === 'string' ? parseFloat(amt) : Number(amt);
+        return Math.round((isNaN(val) ? 0 : val) * 1750);
+      },
+      formatPrice: (amt: number | string) => {
+        const val = typeof amt === 'string' ? parseFloat(amt) : Number(amt);
+        return `₦${Math.round((isNaN(val) ? 0 : val) * 1750).toLocaleString('en-NG')}`;
+      },
       availableCurrencies: Object.values(CURRENCIES),
     };
   }
