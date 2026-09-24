@@ -38,7 +38,7 @@ class PaymentSettingsService
             'manual_instructions' => 'Please quote your Full Name or Membership Dossier Reference as the wire transfer reference. Dues are verified and cleared by Treasury within 24 hours of receipt.',
 
             // General
-            'default_currency' => 'EUR',
+            'default_currency' => 'NGN',
         ];
     }
 
@@ -81,7 +81,7 @@ class PaymentSettingsService
                 'sort_code' => $settings['manual_sort_code'] ?? '20-00-00',
                 'instructions' => $settings['manual_instructions'] ?? 'Please quote your Full Name or Membership Dossier Reference as the wire transfer reference.',
             ],
-            'default_currency' => $settings['default_currency'] ?? 'EUR',
+            'default_currency' => $settings['default_currency'] ?? 'NGN',
         ];
     }
 

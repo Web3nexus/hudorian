@@ -109,4 +109,31 @@ class SecureGateTest extends TestCase
         $response->assertStatus(403)
             ->assertJsonPath('error', 'Forbidden');
     }
+
+    public function test_admin_can_view_and_update_profile_name(): void
+    {
+        $admin = User::where('email', 'admin@hudorian.com')->first();
+
+        // 1. Get profile
+        $getRes = $this->actingAs($admin)
+            ->getJson('/api/v1/admin/profile');
+
+        $getRes->assertStatus(200)
+            ->assertJsonPath('admin.name', $admin->name);
+
+        // 2. Update profile name
+        $updateRes = $this->actingAs($admin)
+            ->putJson('/api/v1/admin/profile', [
+                'name' => 'Vincent Sovereign Steward',
+                'email' => 'admin@hudorian.com',
+            ]);
+
+        $updateRes->assertStatus(200)
+            ->assertJsonPath('admin.name', 'Vincent Sovereign Steward');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $admin->id,
+            'name' => 'Vincent Sovereign Steward',
+        ]);
+    }
 }

@@ -19,7 +19,14 @@ import {
   X,
   Clock,
   Database,
+  User,
+  Edit2,
+  CheckCircle2,
+  AlertCircle,
+  KeyRound,
+  RefreshCw,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface SecureGateLayoutProps {
   children: React.ReactNode;
@@ -42,6 +49,17 @@ export default function SecureGateLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>('');
 
+  // Profile Edit Modal State
+  const [profileModalOpen, setProfileModalOpen] = useState<boolean>(false);
+  const [profileName, setProfileName] = useState<string>('');
+  const [profileEmail, setProfileEmail] = useState<string>('');
+  const [currentPassword, setCurrentPassword] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [showPasswordChange, setShowPasswordChange] = useState<boolean>(false);
+  const [profileLoading, setProfileLoading] = useState<boolean>(false);
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   useEffect(() => {
     // 1. Verify admin token
     const token = localStorage.getItem('hudorian_admin_token');
@@ -54,11 +72,28 @@ export default function SecureGateLayout({
 
     if (storedUser) {
       try {
-        setAdminUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setAdminUser(parsed);
+        setProfileName(parsed.name || '');
+        setProfileEmail(parsed.email || '');
       } catch {
         // ignore
       }
     }
+
+    // Try fetching fresh profile from backend
+    api.getAdminProfile()
+      .then((res) => {
+        if (res && res.admin) {
+          setAdminUser(res.admin);
+          setProfileName(res.admin.name || '');
+          setProfileEmail(res.admin.email || '');
+          localStorage.setItem('hudorian_admin', JSON.stringify(res.admin));
+        }
+      })
+      .catch(() => {
+        // continue with stored user
+      });
 
     setIsAuthenticated(true);
     setIsVerifying(false);
@@ -85,6 +120,69 @@ export default function SecureGateLayout({
     localStorage.removeItem('hudorian_admin_token');
     localStorage.removeItem('hudorian_admin');
     router.push('/securegate/login');
+  };
+
+  const handleOpenProfileModal = () => {
+    setProfileName(adminUser?.name || '');
+    setProfileEmail(adminUser?.email || '');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowPasswordChange(false);
+    setProfileMessage(null);
+    setProfileModalOpen(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileLoading(true);
+    setProfileMessage(null);
+
+    if (showPasswordChange && newPassword && newPassword !== confirmPassword) {
+      setProfileMessage({ type: 'error', text: 'New passwords do not match.' });
+      setProfileLoading(false);
+      return;
+    }
+
+    try {
+      const payload: {
+        name: string;
+        email: string;
+        current_password?: string;
+        new_password?: string;
+        new_password_confirmation?: string;
+      } = {
+        name: profileName.trim(),
+        email: profileEmail.trim(),
+      };
+
+      if (showPasswordChange && newPassword) {
+        payload.current_password = currentPassword;
+        payload.new_password = newPassword;
+        payload.new_password_confirmation = confirmPassword;
+      }
+
+      const res = await api.updateAdminProfile(payload);
+
+      // Update state and local storage
+      const updatedAdmin = {
+        ...adminUser,
+        name: res.admin.name,
+        email: res.admin.email,
+      };
+      setAdminUser(updatedAdmin);
+      localStorage.setItem('hudorian_admin', JSON.stringify(updatedAdmin));
+
+      setProfileMessage({ type: 'success', text: 'Administrator profile updated successfully.' });
+      setTimeout(() => {
+        setProfileModalOpen(false);
+      }, 1200);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update administrator profile.';
+      setProfileMessage({ type: 'error', text: msg });
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   const navItems = [
@@ -179,20 +277,31 @@ export default function SecureGateLayout({
             <span>Live Sanctuary</span>
           </Link>
 
-          {/* Admin User Badge & Logout */}
+          {/* Admin User Profile Trigger & Logout */}
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-medium text-white leading-tight">
-                {adminUser?.name || 'Club Steward'}
-              </p>
-              <p className="text-[10px] font-mono text-[#C5A880] tracking-wider">
-                HOUSE DIRECTOR
-              </p>
-            </div>
+            <button
+              onClick={handleOpenProfileModal}
+              title="Edit Steward Profile & Name"
+              className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-white/5 transition cursor-pointer text-left group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#C5A880]/15 border border-[#C5A880]/30 flex items-center justify-center text-[#C5A880] group-hover:scale-105 transition">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-medium text-white leading-tight flex items-center gap-1">
+                  <span>{adminUser?.name || 'Club Steward'}</span>
+                  <Edit2 className="w-2.5 h-2.5 text-[#C5A880] opacity-0 group-hover:opacity-100 transition" />
+                </p>
+                <p className="text-[10px] font-mono text-[#C5A880] tracking-wider">
+                  HOUSE DIRECTOR
+                </p>
+              </div>
+            </button>
+
             <button
               onClick={handleLogout}
               title="Secure Logout"
-              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 transition"
+              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 transition cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -248,10 +357,10 @@ export default function SecureGateLayout({
             })}
           </div>
 
-          {/* Quick System Badge */}
+          {/* Quick System Badge & Edit Profile Trigger */}
           <div className="mt-auto p-4 rounded-xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/5 space-y-2">
             <div className="flex items-center justify-between text-[11px] text-white/50">
-              <span className="font-mono">Security Tier</span>
+              <span className="font-mono">Security Clearance</span>
               <span className="text-[#C5A880] font-semibold">Tier 4 Clearance</span>
             </div>
             <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
@@ -260,6 +369,13 @@ export default function SecureGateLayout({
             <p className="text-[10px] text-white/40 leading-relaxed font-light">
               MFA Hardware Enforced • Dual cryptographic session active.
             </p>
+            <button
+              onClick={handleOpenProfileModal}
+              className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-mono transition flex items-center justify-center gap-1.5 cursor-pointer mt-2 border border-white/5"
+            >
+              <Edit2 className="w-3 h-3 text-[#C5A880]" />
+              <span>Edit Steward Profile</span>
+            </button>
           </div>
         </aside>
 
@@ -308,6 +424,19 @@ export default function SecureGateLayout({
                   </Link>
                 );
               })}
+
+              <div className="pt-4 border-t border-white/10">
+                <button
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    handleOpenProfileModal();
+                  }}
+                  className="w-full p-3 rounded-lg bg-white/5 text-white text-xs font-mono flex items-center justify-center gap-2"
+                >
+                  <Edit2 className="w-4 h-4 text-[#C5A880]" />
+                  <span>Edit Steward Profile Name</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -335,7 +464,175 @@ export default function SecureGateLayout({
           {children}
         </main>
       </div>
+
+      {/* ======================================================== */}
+      {/* MODAL: STEWARD PROFILE & CREDENTIALS EDIT MODAL         */}
+      {/* ======================================================== */}
+      {profileModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#121215] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#C5A880]/15 flex items-center justify-center text-[#C5A880]">
+                  <User className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif-luxury text-lg text-white">Steward Profile & Clearance</h3>
+                  <p className="text-[10px] font-mono text-white/40">
+                    Update administrative name, email, and security credentials
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setProfileModalOpen(false)}
+                className="text-white/50 hover:text-white transition p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="p-6 space-y-4">
+              {profileMessage && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs flex items-center gap-2 border ${
+                    profileMessage.type === 'success'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                  }`}
+                >
+                  {profileMessage.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  )}
+                  <span>{profileMessage.text}</span>
+                </div>
+              )}
+
+              {/* Steward Name Input */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                  Steward Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="e.g. Vincent"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                />
+              </div>
+
+              {/* Steward Email Input */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                  Administrative Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  placeholder="admin@hudorian.com"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                />
+              </div>
+
+              {/* Clearance Role Badge */}
+              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono text-white/40 uppercase block">Administrative Rank</span>
+                  <span className="font-serif-luxury text-sm text-[#C5A880]">House Director & Sovereign Super Admin</span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  ACTIVE
+                </span>
+              </div>
+
+              {/* Toggle Password Change */}
+              <div className="pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordChange(!showPasswordChange)}
+                  className="text-xs text-[#C5A880] hover:underline flex items-center gap-1.5 font-mono cursor-pointer"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>{showPasswordChange ? 'Cancel Password Change' : 'Change Vault Password (Optional)'}</span>
+                </button>
+              </div>
+
+              {showPasswordChange && (
+                <div className="space-y-3 pt-2 bg-white/[0.01] p-3.5 rounded-xl border border-white/5 animate-fade-in">
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                      Current Password *
+                    </label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                      New Password (Min. 8 characters) *
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
+                      Confirm New Password *
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A880]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Buttons */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setProfileModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-white/60 hover:text-white transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={profileLoading}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition cursor-pointer shadow-lg shadow-[#B8976C]/10 flex items-center gap-1.5"
+                >
+                  {profileLoading ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <span>Save Profile</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

@@ -502,6 +502,24 @@ class ApiClient {
   async getAdminHouses(): Promise<unknown> {
     return this.request('/admin/houses', {}, true);
   }
+
+  // --- Admin Profile Management ---
+  async getAdminProfile(): Promise<{ admin: { id: number; name: string; email: string; role: string; google2fa_enabled: boolean } }> {
+    return this.request('/admin/profile', {}, true);
+  }
+
+  async updateAdminProfile(data: {
+    name: string;
+    email: string;
+    current_password?: string;
+    new_password?: string;
+    new_password_confirmation?: string;
+  }): Promise<{ message: string; admin: { id: number; name: string; email: string; role: string; google2fa_enabled: boolean } }> {
+    return this.request('/admin/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, true);
+  }
 }
 
 export const api = new ApiClient();

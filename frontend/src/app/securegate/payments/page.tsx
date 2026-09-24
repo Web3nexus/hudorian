@@ -73,7 +73,7 @@ export default function SecureGatePaymentsPage() {
     manual_sort_code: '20-00-00',
     manual_instructions: 'Please quote your Full Name or Membership Dossier Reference as the wire transfer reference.',
 
-    default_currency: 'EUR',
+    default_currency: 'NGN',
   });
 
   const fetchPayments = () => {
@@ -1010,6 +1010,30 @@ export default function SecureGatePaymentsPage() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Treasury Base Currency Section */}
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-[#C5A880]" />
+                  <span className="font-semibold text-white">Treasury Default Operating Currency</span>
+                </div>
+                <p className="text-white/50 text-[11px] leading-relaxed">
+                  The primary ledger denomination for membership fee calculations, local payment gateways, and banking reconciliations.
+                </p>
+                <div>
+                  <label className="block text-white/40 mb-1 font-mono text-[10px]">Default Ledger Currency</label>
+                  <select
+                    value={settings.default_currency || 'NGN'}
+                    onChange={(e) => setSettings({ ...settings, default_currency: e.target.value })}
+                    className="w-full bg-[#121215] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#C5A880]"
+                  >
+                    <option value="NGN">NGN (₦ - Nigerian Naira) - Domestic & Pan-African Standard</option>
+                    <option value="USD">USD ($ - US Dollar) - Global Trade Standard</option>
+                    <option value="EUR">EUR (€ - Euro) - European Sanctuaries Standard</option>
+                    <option value="GBP">GBP (£ - British Pound) - UK Enclaves Standard</option>
+                  </select>
+                </div>
               </div>
 
               <div className="pt-2 flex items-center justify-between border-t border-white/10">

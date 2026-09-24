@@ -146,5 +146,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/security/2fa/setup', [AdminAuthController::class, 'setup2fa']);
         Route::post('/security/2fa/confirm', [AdminAuthController::class, 'confirm2fa']);
         Route::post('/security/2fa/disable', [AdminAuthController::class, 'disable2fa']);
+
+        // Admin Profile Management
+        Route::get('/profile', [AdminAuthController::class, 'getProfile']);
+        Route::put('/profile', [AdminAuthController::class, 'updateProfile']);
     });
 });

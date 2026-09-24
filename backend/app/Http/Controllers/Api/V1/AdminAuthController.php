@@ -292,4 +292,63 @@ class AdminAuthController extends Controller
             'message' => 'SecureGate session terminated.',
         ]);
     }
+
+    /**
+     * Get authenticated admin user profile.
+     */
+    public function getProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'admin' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'google2fa_enabled' => (bool) $user->google2fa_enabled,
+                'created_at' => $user->created_at,
+            ],
+        ]);
+    }
+
+    /**
+     * Update admin profile name, email, or password.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'current_password' => 'nullable|required_with:new_password|string',
+            'new_password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        if (! empty($validated['new_password'])) {
+            if (! Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'message' => 'The current password provided does not match our records.',
+                    'errors' => ['current_password' => ['The current password is incorrect.']],
+                ], 422);
+            }
+            $user->password = Hash::make($validated['new_password']);
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->save();
+
+        return response()->json([
+            'message' => 'Administrator profile updated successfully.',
+            'admin' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'google2fa_enabled' => (bool) $user->google2fa_enabled,
+            ],
+        ]);
+    }
 }
