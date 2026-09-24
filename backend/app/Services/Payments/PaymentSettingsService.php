@@ -110,3 +110,4 @@ class PaymentSettingsService
         return $updated;
     }
 }
+

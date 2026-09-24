@@ -18,6 +18,7 @@
   "/page": "app/page.js",
   "/privacy/data/page": "app/privacy/data/page.js",
   "/privacy/page": "app/privacy/page.js",
+  "/register/page": "app/register/page.js",
   "/reset-password/page": "app/reset-password/page.js",
   "/royal-family/houses/page": "app/royal-family/houses/page.js",
   "/royal-family/page": "app/royal-family/page.js",
@@ -35,7 +36,7 @@
   "/signin/page": "app/signin/page.js",
   "/stays/page": "app/stays/page.js",
   "/terms/page": "app/terms/page.js",
-  "/journal/[slug]/page": "app/journal/[slug]/page.js",
   "/houses/[slug]/page": "app/houses/[slug]/page.js",
+  "/journal/[slug]/page": "app/journal/[slug]/page.js",
   "/stays/[slug]/page": "app/stays/[slug]/page.js"
 }

@@ -163,6 +163,12 @@
       "namedRegex": "^/privacy/data(?:/)?$"
     },
     {
+      "page": "/register",
+      "regex": "^/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register(?:/)?$"
+    },
+    {
       "page": "/reset-password",
       "regex": "^/reset\\-password(?:/)?$",
       "routeKeys": {},

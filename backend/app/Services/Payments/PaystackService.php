@@ -189,3 +189,4 @@ class PaystackService
         return hash_equals($computed, $signature);
     }
 }
+

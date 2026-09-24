@@ -161,6 +161,25 @@ class ApiClient {
   }
 
   // --- Member Auth & Portal ---
+  async register(data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    country?: string;
+    city?: string;
+  }): Promise<{ user: User; token: string }> {
+    const res = await this.request<{ user: User; token: string }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (typeof window !== 'undefined' && res.token) {
+      localStorage.setItem('hudorian_token', res.token);
+      localStorage.setItem('hudorian_user', JSON.stringify(res.user));
+    }
+    return res;
+  }
+
   async login(email: string, password: string): Promise<{ user: User; token: string }> {
     const res = await this.request<{ user: User; token: string }>('/auth/login', {
       method: 'POST',

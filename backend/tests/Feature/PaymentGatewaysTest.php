@@ -276,3 +276,4 @@ class PaymentGatewaysTest extends TestCase
         $this->assertTrue($verifyResponse->json('success'));
     }
 }
+

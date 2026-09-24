@@ -18,6 +18,7 @@
   "/page": "/",
   "/privacy/data/page": "/privacy/data",
   "/privacy/page": "/privacy",
+  "/register/page": "/register",
   "/reset-password/page": "/reset-password",
   "/royal-family/houses/page": "/royal-family/houses",
   "/royal-family/page": "/royal-family",
@@ -35,7 +36,7 @@
   "/signin/page": "/signin",
   "/stays/page": "/stays",
   "/terms/page": "/terms",
-  "/journal/[slug]/page": "/journal/[slug]",
   "/houses/[slug]/page": "/houses/[slug]",
+  "/journal/[slug]/page": "/journal/[slug]",
   "/stays/[slug]/page": "/stays/[slug]"
 }

@@ -281,6 +281,20 @@
       }
     }
   },
+  "/register": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 160,
+            "slots": null
+          }
+        }
+      }
+    }
+  },
   "/reset-password": {
     "hints": 64,
     "slots": {

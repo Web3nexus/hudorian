@@ -101,10 +101,14 @@ function SignInContent() {
             </div>
           </form>
 
-          <div className="pt-4 border-t border-[#E8E2D8] text-center space-y-3 text-xs">
+          <div className="pt-4 border-t border-[#E8E2D8] text-center space-y-2 text-xs">
             <p className="text-black/60 font-light">
               Not yet a member?{' '}
-              <Link href="/membership/apply" className="font-semibold text-black hover:underline">
+              <Link href="/register" className="font-semibold text-black hover:underline">
+                Create an account
+              </Link>
+              {' '}or{' '}
+              <Link href="/membership/apply" className="font-semibold text-[#96754B] hover:underline">
                 Apply for candidacy
               </Link>
             </p>

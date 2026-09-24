@@ -50,6 +50,18 @@ class AuthController extends Controller
 
         $this->auditLogger->log($user, 'user.registered', 'User', $user->id);
 
+        try {
+            Mail::to($user->email)->send(
+                new \App\Mail\WelcomeMemberMail(
+                    $user,
+                    'HUD-' . date('Y') . '-' . strtoupper(Str::random(5)),
+                    'Member Patron'
+                )
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Failed to dispatch welcome member email on direct registration', ['error' => $e->getMessage()]);
+        }
+
         return response()->json([
             'user' => [
                 'id' => $user->id,

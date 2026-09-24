@@ -178,3 +178,4 @@ class FlutterwaveService
         return hash_equals($secretHash, (string) $request->header('verif-hash', ''));
     }
 }
+

@@ -2,6 +2,8 @@
 
 namespace App\Services\Membership;
 
+use App\Mail\ApplicationReceivedMail;
+use App\Mail\WelcomeMemberMail;
 use App\Models\Member;
 use App\Models\MembershipApplication;
 use App\Models\MembershipPlan;
@@ -11,6 +13,8 @@ use App\Services\Payments\PaymentGatewayInterface;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class MembershipService
@@ -72,6 +76,18 @@ class MembershipService
             $application->id,
             ['plan' => $plan->name, 'applicant' => $application->first_name . ' ' . $application->last_name]
         );
+
+        // Send candidacy dossier confirmation email
+        try {
+            Mail::to($application->email)->send(
+                new ApplicationReceivedMail(
+                    $application->first_name . ' ' . $application->last_name,
+                    $plan->name
+                )
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Failed to dispatch application received email', ['error' => $e->getMessage()]);
+        }
 
         return $application;
     }
@@ -140,6 +156,19 @@ class MembershipService
                         ],
                         'idemp_mbr_' . $member->id . '_' . now()->year
                     );
+                }
+
+                // Send welcome member email with portal access
+                try {
+                    Mail::to($user->email)->send(
+                        new WelcomeMemberMail(
+                            $user,
+                            $member->membership_number,
+                            $plan->name
+                        )
+                    );
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to dispatch welcome member email on approval', ['error' => $e->getMessage()]);
                 }
             }
 
