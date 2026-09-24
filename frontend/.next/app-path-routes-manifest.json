@@ -4,6 +4,8 @@
   "/apple-icon.png/route": "/apple-icon.png",
   "/favicon.ico/route": "/favicon.ico",
   "/icon.png/route": "/icon.png",
+  "/403/page": "/403",
+  "/500/page": "/500",
   "/estates/page": "/estates",
   "/experiences/page": "/experiences",
   "/forgot-password/page": "/forgot-password",

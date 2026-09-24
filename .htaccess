@@ -56,3 +56,8 @@
 
 DirectoryIndex index.html index.php
 Options -Indexes
+
+# Custom Luxury Error Documents
+ErrorDocument 404 /404.html
+ErrorDocument 403 /403.html
+ErrorDocument 500 /500.html

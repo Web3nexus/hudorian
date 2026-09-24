@@ -67,6 +67,18 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/403",
+      "regex": "^/403(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/403(?:/)?$"
+    },
+    {
+      "page": "/500",
+      "regex": "^/500(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/500(?:/)?$"
+    },
+    {
       "page": "/apple-icon.png",
       "regex": "^/apple\\-icon\\.png(?:/)?$",
       "routeKeys": {},
