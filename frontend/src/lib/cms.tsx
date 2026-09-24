@@ -40,13 +40,14 @@ const defaultBrand: BrandSettings = {
 const defaultHeaderNav: HeaderNavItem[] = [
   { label: 'The Royal Family', href: '/royal-family', order: 1, is_active: true },
   { label: 'Royal Houses', href: '/royal-houses', order: 2, is_active: true },
-  { label: 'Houses', href: '/houses', order: 3, is_active: true },
-  { label: 'Estates', href: '/estates', order: 4, is_active: true },
-  { label: 'Stays', href: '/stays', order: 5, is_active: true },
-  { label: 'Experiences', href: '/experiences', order: 6, is_active: true },
-  { label: 'Membership', href: '/membership', order: 7, is_active: true },
-  { label: 'Journal', href: '/journal', order: 8, is_active: true },
-  { label: 'Boutique', href: '/shop', order: 9, is_active: true },
+  { label: 'Royal Allies', href: '/royal-houses#allies', order: 3, is_active: true },
+  { label: 'Houses', href: '/houses', order: 4, is_active: true },
+  { label: 'Estates', href: '/estates', order: 5, is_active: true },
+  { label: 'Membership', href: '/membership', order: 6, is_active: true },
+  { label: 'Stays', href: '/stays', order: 7, is_active: true },
+  { label: 'Experiences', href: '/experiences', order: 8, is_active: true },
+  { label: 'Journal', href: '/journal', order: 9, is_active: true },
+  { label: 'Boutique', href: '/shop', order: 10, is_active: true },
 ];
 
 const defaultFooterNav = {
@@ -136,11 +137,25 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? rawHeaderItems
       : defaultHeaderNav;
 
-  // Guarantee 'The Royal Family' is never lost after API load
+  // Guarantee 'The Royal Family', 'Royal Houses', and 'Royal Allies' are never lost after API load
   if (!resolvedHeaderNav.some((item) => item.href === '/royal-family')) {
     resolvedHeaderNav = [
       { label: 'The Royal Family', href: '/royal-family', order: 1, is_active: true },
       ...resolvedHeaderNav,
+    ];
+  }
+  if (!resolvedHeaderNav.some((item) => item.href === '/royal-houses')) {
+    resolvedHeaderNav = [
+      ...resolvedHeaderNav.slice(0, 1),
+      { label: 'Royal Houses', href: '/royal-houses', order: 2, is_active: true },
+      ...resolvedHeaderNav.slice(1),
+    ];
+  }
+  if (!resolvedHeaderNav.some((item) => item.href.includes('allies'))) {
+    resolvedHeaderNav = [
+      ...resolvedHeaderNav.slice(0, 2),
+      { label: 'Royal Allies', href: '/royal-houses#allies', order: 3, is_active: true },
+      ...resolvedHeaderNav.slice(2),
     ];
   }
 

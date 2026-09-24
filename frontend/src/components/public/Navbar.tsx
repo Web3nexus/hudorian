@@ -40,12 +40,12 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          {/* Left Column: Menu Button & Essential Top Links */}
-          <div className="flex-1 flex items-center justify-start gap-4 xl:gap-8">
+          {/* Left Column: Menu Button & 3 Royal Top Links */}
+          <div className="flex-1 flex items-center justify-start gap-3 xl:gap-6">
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open directory menu"
-              className="p-2 -ml-2 rounded-full hover:bg-black/5 transition text-[#141414] flex items-center gap-2 group cursor-pointer"
+              className="p-2 -ml-2 rounded-full hover:bg-black/5 transition text-[#141414] flex items-center gap-1.5 group cursor-pointer shrink-0"
             >
               <Menu className="w-5 h-5 stroke-[1.5] group-hover:scale-110 transition duration-300" />
               <span className="text-[11px] uppercase tracking-[0.2em] font-mono text-black/70 hidden sm:inline">
@@ -53,7 +53,7 @@ export default function Navbar() {
               </span>
             </button>
 
-            <nav className="hidden md:flex items-center space-x-6 xl:space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/85">
+            <nav className="hidden lg:flex items-center space-x-3.5 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.18em] font-medium text-[#141414]/85">
               <Link
                 href="/royal-family"
                 className="hover:text-[#96754B] transition whitespace-nowrap"
@@ -61,16 +61,22 @@ export default function Navbar() {
                 The Royal Family
               </Link>
               <Link
-                href="/houses"
+                href="/royal-houses"
                 className="hover:text-[#96754B] transition whitespace-nowrap"
               >
-                Houses
+                Royal Houses
+              </Link>
+              <Link
+                href="/royal-houses#allies"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                Royal Allies
               </Link>
             </nav>
           </div>
 
           {/* Center Column: Dedicated Brand Logo (Never Overlapped) */}
-          <div className="shrink-0 px-4 md:px-8 text-center flex items-center justify-center">
+          <div className="shrink-0 px-3 md:px-6 xl:px-8 text-center flex items-center justify-center">
             <Link
               href="/"
               className="inline-flex items-center justify-center hover:opacity-85 transition group py-1"
@@ -89,9 +95,15 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right Column: Essential Top Links & Membership Actions */}
-          <div className="flex-1 flex items-center justify-end gap-4 xl:gap-8">
-            <nav className="hidden md:flex items-center space-x-6 xl:space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/85">
+          {/* Right Column: 3 Property & Membership Links + Actions */}
+          <div className="flex-1 flex items-center justify-end gap-3 xl:gap-6">
+            <nav className="hidden lg:flex items-center space-x-3.5 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.18em] font-medium text-[#141414]/85">
+              <Link
+                href="/houses"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                Houses
+              </Link>
               <Link
                 href="/estates"
                 className="hover:text-[#96754B] transition whitespace-nowrap"

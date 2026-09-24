@@ -1,3 +1,3 @@
-:HL["/_next/static/css/7a4a3bb4a5eb05af.css","style"]
+:HL["/_next/static/css/818f6be230eee0bc.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"stays","param":null,"prefetchHints":4192,"slots":{"children":{"name":"slug","param":{"type":"d","key":"hudorian-kyoto-private-villa-pavilion","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"8Bh0hqxSfv6FRhRXCPwNV"}
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"stays","param":null,"prefetchHints":4192,"slots":{"children":{"name":"slug","param":{"type":"d","key":"hudorian-kyoto-private-villa-pavilion","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"mRwNAfa05uRVyaOxqWAOl"}
