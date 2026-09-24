@@ -2,15 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Menu, X, User as UserIcon } from 'lucide-react';
+import { Menu, X, User as UserIcon, Crown, Compass, Shield, ArrowRight } from 'lucide-react';
 import { useCms } from '@/lib/cms';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [member, setMember] = useState<{ name: string } | null>(null);
-  const { brand, headerNav } = useCms();
+  const { brand } = useCms();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,49 +30,47 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const activeNavItems = (headerNav || [])
-    .filter((item) => item.is_active !== false)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  // Split into left and right menus around center logo if desired
-  const midPoint = Math.ceil(activeNavItems.length / 2);
-  const leftNavItems = activeNavItems.slice(0, midPoint);
-  const rightNavItems = activeNavItems.slice(midPoint);
-
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
             ? 'glass-nav py-4 border-b border-[#E8E2D8]/60 shadow-xs'
-            : 'bg-transparent py-7'
+            : 'bg-transparent py-6 md:py-7'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between">
-          {/* Left: Menu Trigger & Left Links */}
-          <div className="flex items-center gap-6">
+          {/* Left Column: Menu Button & Essential Top Links */}
+          <div className="flex-1 flex items-center justify-start gap-4 xl:gap-8">
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open directory menu"
-              className="p-2 -ml-2 rounded-full hover:bg-black/5 transition text-[#141414]"
+              className="p-2 -ml-2 rounded-full hover:bg-black/5 transition text-[#141414] flex items-center gap-2 group cursor-pointer"
             >
-              <Menu className="w-5 h-5 stroke-[1.5]" />
+              <Menu className="w-5 h-5 stroke-[1.5] group-hover:scale-110 transition duration-300" />
+              <span className="text-[11px] uppercase tracking-[0.2em] font-mono text-black/70 hidden sm:inline">
+                Menu
+              </span>
             </button>
-            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.15em] xl:tracking-[0.2em] font-medium text-[#141414]/80">
-              {leftNavItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="hover:text-black transition whitespace-nowrap"
-                >
-                  {item.label}
-                </Link>
-              ))}
+
+            <nav className="hidden md:flex items-center space-x-6 xl:space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/85">
+              <Link
+                href="/royal-family"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                The Royal Family
+              </Link>
+              <Link
+                href="/houses"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                Houses
+              </Link>
             </nav>
           </div>
 
-          {/* Center: Brand Logo / Wordmark */}
-          <div className="text-center absolute left-1/2 -translate-x-1/2">
+          {/* Center Column: Dedicated Brand Logo (Never Overlapped) */}
+          <div className="shrink-0 px-4 md:px-8 text-center flex items-center justify-center">
             <Link
               href="/"
               className="inline-flex items-center justify-center hover:opacity-85 transition group py-1"
@@ -92,39 +89,42 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right: Right Links, Sign In / Member Dashboard */}
-          <div className="flex items-center space-x-4 xl:space-x-6">
-            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.15em] xl:tracking-[0.2em] font-medium text-[#141414]/80">
-              {rightNavItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="hover:text-black transition whitespace-nowrap"
-                >
-                  {item.label}
-                </Link>
-              ))}
+          {/* Right Column: Essential Top Links & Membership Actions */}
+          <div className="flex-1 flex items-center justify-end gap-4 xl:gap-8">
+            <nav className="hidden md:flex items-center space-x-6 xl:space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-[#141414]/85">
+              <Link
+                href="/estates"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                Estates
+              </Link>
+              <Link
+                href="/membership"
+                className="hover:text-[#96754B] transition whitespace-nowrap"
+              >
+                Membership
+              </Link>
             </nav>
 
             {member ? (
               <Link
                 href="/member"
-                className="flex items-center space-x-2 text-xs uppercase tracking-[0.15em] font-medium px-4 py-2 rounded-full border border-black/15 bg-black/5 hover:bg-black hover:text-white transition duration-300"
+                className="flex items-center space-x-2 text-xs uppercase tracking-[0.15em] font-medium px-4 py-2 rounded-full border border-black/15 bg-black/5 hover:bg-black hover:text-white transition duration-300 whitespace-nowrap shrink-0"
               >
                 <UserIcon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Member Portal</span>
               </Link>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 shrink-0">
                 <Link
                   href="/signin"
-                  className="text-xs uppercase tracking-[0.15em] font-medium hover:text-black text-[#141414]/80 transition px-2 py-1"
+                  className="text-xs uppercase tracking-[0.15em] font-medium hover:text-black text-[#141414]/80 transition px-2 py-1 whitespace-nowrap"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/membership/apply"
-                  className="hidden sm:inline-block text-xs uppercase tracking-[0.15em] font-medium px-4 py-2 rounded-full bg-[#141414] text-[#FAF8F5] hover:bg-[#2b2b2b] transition duration-300 shadow-xs"
+                  className="hidden sm:inline-block text-xs uppercase tracking-[0.15em] font-medium px-4 py-2 rounded-full bg-[#141414] text-[#FAF8F5] hover:bg-[#2b2b2b] transition duration-300 shadow-xs whitespace-nowrap"
                 >
                   Apply
                 </Link>
@@ -134,10 +134,11 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Fullscreen Mobile / Expandable Navigation Overlay */}
+      {/* Fullscreen Directory Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-60 bg-[#121212] text-[#FAF8F5] flex flex-col justify-between p-8 md:p-14 animate-fade-in">
-          <div className="flex items-center justify-between border-b border-white/10 pb-6">
+        <div className="fixed inset-0 z-60 bg-[#101014] text-[#FAF8F5] flex flex-col justify-between p-8 md:p-14 animate-fade-in overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-6 shrink-0">
             <div className="flex items-center">
               {brand.logo_image_url ? (
                 <img
@@ -154,59 +155,158 @@ export default function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(false)}
               aria-label="Close menu"
-              className="p-2 rounded-full hover:bg-white/10 transition"
+              className="p-2.5 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer"
             >
               <X className="w-6 h-6 stroke-[1.5]" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 my-auto">
-            <div className="space-y-4">
-              <span className="text-xs uppercase tracking-[0.25em] text-[#B8976C] font-semibold block mb-4">
-                Directory
+          {/* Directory Content Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 py-10 my-auto">
+            {/* Column 1: The Uzih Dynasty */}
+            <div className="space-y-5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A880] font-semibold flex items-center gap-2">
+                <Crown className="w-3.5 h-3.5 text-[#C5A880]" />
+                <span>The Uzih Dynasty</span>
               </span>
-              <ul className="space-y-4 text-2xl md:text-3xl font-serif-luxury font-light">
-                {activeNavItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="hover:text-[#B8976C] transition"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+              <ul className="space-y-4 text-xl sm:text-2xl font-serif-luxury font-light">
+                <li>
+                  <Link
+                    href="/royal-family"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    The Royal Family
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/royal-houses"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Royal Houses & Allies
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/royal-houses#reda-house"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base text-white/70 hover:text-white transition flex items-center gap-2"
+                  >
+                    <ArrowRight className="w-3 h-3 text-[#C5A880]" />
+                    <span>Reda House</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/royal-houses#family-of-victors"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base text-white/70 hover:text-white transition flex items-center gap-2"
+                  >
+                    <ArrowRight className="w-3 h-3 text-[#C5A880]" />
+                    <span>The Family of Victors</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 
-            <div className="space-y-6 flex flex-col justify-end border-t md:border-t-0 md:border-l border-white/10 pt-8 md:pt-0 md:pl-12">
-              <span className="text-xs uppercase tracking-[0.25em] text-[#B8976C] font-semibold block">
-                Sanctuary Concierge
+            {/* Column 2: Houses & Sanctuaries */}
+            <div className="space-y-5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A880] font-semibold flex items-center gap-2">
+                <Compass className="w-3.5 h-3.5 text-[#C5A880]" />
+                <span>Sanctuaries & Stays</span>
               </span>
-              <p className="text-sm text-white/70 font-light leading-relaxed">
-                {brand.tagline || 'Private Members Club & Global Constellation of Houses.'}
-              </p>
-              <div className="text-xs space-y-2 text-white/60">
-                <p>Private Line: {brand.concierge_phone || '+44 (0) 20 7946 0912'}</p>
-                <p>Enquiries: {brand.concierge_email || 'concierge@hudorian.com'}</p>
-                {brand.office_address && <p>{brand.office_address}</p>}
-              </div>
+              <ul className="space-y-4 text-xl sm:text-2xl font-serif-luxury font-light">
+                <li>
+                  <Link
+                    href="/houses"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Global Houses
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/estates"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Private Estates
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/stays"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Suites & Stays
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/experiences"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Curated Gatherings
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-              <div className="pt-4 flex gap-4">
-                <Link
-                  href="/membership/apply"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-6 py-3 rounded-full bg-[#B8976C] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[#c9a77c] transition"
-                >
-                  Apply for Membership
-                </Link>
-              </div>
+            {/* Column 3: Membership & Culture */}
+            <div className="space-y-5">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#C5A880] font-semibold flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-[#C5A880]" />
+                <span>Membership & Culture</span>
+              </span>
+              <ul className="space-y-4 text-xl sm:text-2xl font-serif-luxury font-light">
+                <li>
+                  <Link
+                    href="/membership"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Tiers & Privileges
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/membership/apply"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Apply for Candidacy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/journal"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Editorial Journal
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Boutique Collection
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-6 text-xs text-white/40 flex justify-between">
-            <p>{brand.logo_text || 'HUDORIAN'} Private Members Club</p>
+          {/* Footer Info in Drawer */}
+          <div className="border-t border-white/10 pt-6 text-xs text-white/40 flex flex-col sm:flex-row justify-between gap-2 shrink-0">
+            <p>{brand.logo_text || 'HUDORIAN'} Private Members Club & Dynasty</p>
             <p>London • Ibiza • Marbella • Kyoto • Cape Town</p>
           </div>
         </div>

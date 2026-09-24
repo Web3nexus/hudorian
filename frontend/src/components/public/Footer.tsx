@@ -25,7 +25,7 @@ export default function Footer() {
 
   // Filter out any accidental administrative / SecureGate links from CMS payload
   const rawSections = footerNav.sections && footerNav.sections.length > 0 ? footerNav.sections : null;
-  const sanitizedSections = rawSections
+  const sanitized = rawSections
     ? rawSections
         .filter((s) => !s.title.toLowerCase().includes('securegate'))
         .map((s) => ({
@@ -40,7 +40,24 @@ export default function Footer() {
           ),
         }))
         .filter((s) => s.links.length > 0)
-    : null;
+    : [];
+
+  // Guarantee The Uzih Dynasty section is always present in footer
+  let finalSections = sanitized;
+  if (!finalSections.some((s) => s.title.toLowerCase().includes('uzih') || s.title.toLowerCase().includes('royal'))) {
+    finalSections = [
+      {
+        title: 'The Uzih Dynasty',
+        links: [
+          { label: 'The Royal Family', href: '/royal-family' },
+          { label: 'Royal Houses & Heirs', href: '/royal-houses' },
+          { label: 'Reda House', href: '/royal-houses#reda-house' },
+          { label: 'The Family of Victors', href: '/royal-houses#family-of-victors' },
+        ],
+      },
+      ...finalSections,
+    ];
+  }
 
   return (
     <footer className="bg-[#121212] text-[#FAF8F5] pt-20 pb-12 border-t border-white/10">
@@ -102,8 +119,8 @@ export default function Footer() {
 
         {/* Middle Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-16 text-sm">
-          {sanitizedSections && sanitizedSections.length > 0 ? (
-            sanitizedSections.map((section, idx) => (
+          {finalSections && finalSections.length > 0 ? (
+            finalSections.map((section, idx) => (
               <div key={section.title || idx}>
                 <h4 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#B8976C] mb-5">
                   {section.title}

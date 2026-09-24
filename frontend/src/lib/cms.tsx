@@ -130,17 +130,40 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     tagline: blocks['brand_settings']?.subtitle || blocks['brand_settings']?.payload?.tagline || defaultBrand.tagline,
   };
 
-  const headerNav: HeaderNavItem[] =
-    blocks['navigation_header']?.payload?.items && Array.isArray(blocks['navigation_header'].payload.items)
-      ? blocks['navigation_header'].payload.items
+  const rawHeaderItems = blocks['navigation_header']?.payload?.items;
+  let resolvedHeaderNav: HeaderNavItem[] =
+    Array.isArray(rawHeaderItems) && rawHeaderItems.length > 0
+      ? rawHeaderItems
       : defaultHeaderNav;
+
+  // Guarantee 'The Royal Family' is never lost after API load
+  if (!resolvedHeaderNav.some((item) => item.href === '/royal-family')) {
+    resolvedHeaderNav = [
+      { label: 'The Royal Family', href: '/royal-family', order: 1, is_active: true },
+      ...resolvedHeaderNav,
+    ];
+  }
+
+  const rawFooterSections = blocks['navigation_footer']?.payload?.sections;
+  let resolvedFooterSections: FooterSection[] =
+    Array.isArray(rawFooterSections) && rawFooterSections.length > 0
+      ? rawFooterSections
+      : defaultFooterNav.sections;
+
+  // Guarantee 'The Uzih Dynasty' section is never lost after API load
+  if (!resolvedFooterSections.some((s) => s.title.toLowerCase().includes('uzih') || s.title.toLowerCase().includes('royal'))) {
+    resolvedFooterSections = [
+      defaultFooterNav.sections[0],
+      ...resolvedFooterSections,
+    ];
+  }
+
+  const headerNav: HeaderNavItem[] = resolvedHeaderNav;
 
   const footerNav = {
     copyright: blocks['navigation_footer']?.payload?.copyright || defaultFooterNav.copyright,
     tagline: blocks['navigation_footer']?.payload?.tagline || defaultFooterNav.tagline,
-    sections: blocks['navigation_footer']?.payload?.sections && Array.isArray(blocks['navigation_footer'].payload.sections)
-      ? blocks['navigation_footer'].payload.sections
-      : defaultFooterNav.sections,
+    sections: resolvedFooterSections,
   };
 
   const getPageContent = (key: string, fallback?: PageContent): PageContent => {
