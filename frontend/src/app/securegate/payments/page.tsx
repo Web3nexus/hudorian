@@ -21,6 +21,7 @@ import {
   Clock,
   ShieldCheck,
   Filter,
+  AlertTriangle,
 } from 'lucide-react';
 import SecureGateLayout from '@/components/securegate/SecureGateLayout';
 import { api } from '@/lib/api';
@@ -50,6 +51,34 @@ export default function SecureGatePaymentsPage() {
 
   // Inspect Transaction Modal
   const [inspectPayment, setInspectPayment] = useState<any | null>(null);
+
+  // Custom Reject Wire Modal
+  const [rejectModal, setRejectModal] = useState<{
+    isOpen: boolean;
+    payment: any | null;
+    reason: string;
+  }>({
+    isOpen: false,
+    payment: null,
+    reason: '',
+  });
+
+  // Custom Refund Modal
+  const [refundModal, setRefundModal] = useState<{
+    isOpen: boolean;
+    paymentId: number | null;
+    transactionRef: string | null;
+    amount: number | null;
+    currency: string | null;
+    reason: string;
+  }>({
+    isOpen: false,
+    paymentId: null,
+    transactionRef: null,
+    amount: null,
+    currency: null,
+    reason: 'Refund authorized via SecureGate Admin',
+  });
 
   // Settings State
   const [settings, setSettings] = useState({
@@ -153,14 +182,26 @@ export default function SecureGatePaymentsPage() {
     }
   };
 
-  const handleReject = async (paymentId: number) => {
-    const reason = prompt('Please enter the reason for rejecting this payment (e.g. Reference not found on bank statement):');
-    if (!reason) return;
+  const openRejectModal = (payment: any) => {
+    setRejectModal({
+      isOpen: true,
+      payment,
+      reason: '',
+    });
+  };
+
+  const submitReject = async () => {
+    if (!rejectModal.payment) return;
+    if (!rejectModal.reason.trim()) {
+      setActionMsg({ type: 'error', text: 'Please enter a justification for rejecting this payment.' });
+      return;
+    }
     setProcessingAction(true);
     setActionMsg(null);
     try {
-      await api.rejectManualPayment(paymentId, reason);
-      setActionMsg({ type: 'success', text: `Payment #${paymentId} has been rejected.` });
+      await api.rejectManualPayment(rejectModal.payment.id, rejectModal.reason.trim());
+      setActionMsg({ type: 'success', text: `Payment #${rejectModal.payment.id} has been marked as rejected.` });
+      setRejectModal({ isOpen: false, payment: null, reason: '' });
       setReviewPayment(null);
       setInspectPayment(null);
       fetchPayments();
@@ -172,16 +213,32 @@ export default function SecureGatePaymentsPage() {
     }
   };
 
-  const handleRefund = async (paymentId: number) => {
-    if (!confirm('Are you sure you wish to process a refund for this transaction?')) return;
+  const openRefundModal = (payment: any) => {
+    setRefundModal({
+      isOpen: true,
+      paymentId: payment.id,
+      transactionRef: payment.transaction_id,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      reason: 'Refund authorized via SecureGate Admin',
+    });
+  };
+
+  const submitRefund = async () => {
+    if (!refundModal.paymentId) return;
+    setProcessingAction(true);
     setActionMsg(null);
     try {
-      await api.refundPayment(paymentId, 'Refund authorized via SecureGate Admin');
-      setActionMsg({ type: 'success', text: `Refund transaction initiated for payment #${paymentId}.` });
+      await api.refundPayment(refundModal.paymentId, refundModal.reason.trim());
+      setActionMsg({ type: 'success', text: `Refund successfully processed for payment #${refundModal.paymentId}.` });
+      setRefundModal({ isOpen: false, paymentId: null, transactionRef: null, amount: null, currency: null, reason: '' });
       setInspectPayment(null);
       fetchPayments();
-    } catch {
-      setActionMsg({ type: 'error', text: 'Failed to process refund.' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to process refund.';
+      setActionMsg({ type: 'error', text: msg });
+    } finally {
+      setProcessingAction(false);
     }
   };
 
@@ -229,7 +286,7 @@ export default function SecureGatePaymentsPage() {
   // Export to CSV Function
   const handleExportCsv = () => {
     if (filteredPayments.length === 0) {
-      alert('No transactions available to export.');
+      setActionMsg({ type: 'error', text: 'No transactions available to export.' });
       return;
     }
 
@@ -619,7 +676,7 @@ export default function SecureGatePaymentsPage() {
                           {/* Quick Refund */}
                           {p.status === 'paid' && (
                             <button
-                              onClick={() => handleRefund(p.id)}
+                              onClick={() => openRefundModal(p)}
                               className="px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium transition cursor-pointer"
                             >
                               Refund
@@ -754,7 +811,7 @@ export default function SecureGatePaymentsPage() {
                   {inspectPayment.status === 'pending' && (inspectPayment.provider === 'manual_transfer' || inspectPayment.provider === 'manual') && (
                     <>
                       <button
-                        onClick={() => handleReject(inspectPayment.id)}
+                        onClick={() => openRejectModal(inspectPayment)}
                         disabled={processingAction}
                         className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-medium transition cursor-pointer"
                       >
@@ -768,6 +825,16 @@ export default function SecureGatePaymentsPage() {
                         Clear & Activate
                       </button>
                     </>
+                  )}
+
+                  {inspectPayment.status === 'paid' && (
+                    <button
+                      onClick={() => openRefundModal(inspectPayment)}
+                      disabled={processingAction}
+                      className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition cursor-pointer"
+                    >
+                      Issue Refund
+                    </button>
                   )}
 
                   <button
@@ -829,7 +896,7 @@ export default function SecureGatePaymentsPage() {
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
-                onClick={() => handleReject(reviewPayment.id)}
+                onClick={() => openRejectModal(reviewPayment)}
                 disabled={processingAction}
                 className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition cursor-pointer"
               >
@@ -1063,6 +1130,181 @@ export default function SecureGatePaymentsPage() {
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 4: CUSTOM REJECT WIRE PAYMENT MODAL               */}
+      {/* ======================================================== */}
+      {rejectModal.isOpen && rejectModal.payment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#121212] border border-rose-500/30 rounded-2xl max-w-lg w-full p-6 text-white shadow-2xl space-y-5 animate-scale-up">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif-luxury text-lg text-white">Reject Treasury Wire Payment</h3>
+                  <p className="text-xs text-white/50">Transaction #{rejectModal.payment.id} • {rejectModal.payment.transaction_id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRejectModal({ isOpen: false, payment: null, reason: '' })}
+                className="text-white/40 hover:text-white transition p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Payment Summary */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Patron Candidate:</span>
+                <span className="text-white font-medium">{rejectModal.payment.user?.name || rejectModal.payment.metadata?.user_name || 'Anonymous Patron'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Amount Submitted:</span>
+                <span className="text-[#C5A880] font-semibold">{formatPrice(Number(rejectModal.payment.amount))}</span>
+              </div>
+              {rejectModal.payment.metadata?.transfer_reference && (
+                <div className="flex justify-between items-center">
+                  <span className="text-white/50">Provided Wire Ref:</span>
+                  <span className="font-mono text-white/80">{rejectModal.payment.metadata.transfer_reference}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Reason Presets */}
+            <div className="space-y-2">
+              <label className="text-[11px] uppercase tracking-wider text-white/60 font-medium block">
+                Quick Reason Presets
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'Reference not found on bank statement',
+                  'Incorrect transfer amount received',
+                  'Sender account name mismatch',
+                  'Duplicate wire transfer notice',
+                  'Payment recalled by sending bank',
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setRejectModal((prev) => ({ ...prev, reason: preset }))}
+                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-[11px] transition text-left cursor-pointer"
+                  >
+                    + {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Reason Textarea */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wider text-white/60 font-medium block">
+                Rejection Justification *
+              </label>
+              <textarea
+                value={rejectModal.reason}
+                onChange={(e) => setRejectModal((prev) => ({ ...prev, reason: e.target.value }))}
+                placeholder="Enter specific audit details explaining why this wire transaction was rejected..."
+                rows={3}
+                className="w-full bg-white/[0.04] border border-white/10 focus:border-rose-500/50 rounded-xl p-3 text-xs text-white placeholder:text-white/30 focus:outline-none transition resize-none"
+              />
+              <p className="text-[10px] text-white/40">
+                This reason will be recorded in the treasury audit logs and visible on the patron's payment status ledger.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setRejectModal({ isOpen: false, payment: null, reason: '' })}
+                className="px-4 py-2 rounded-xl text-xs text-white/60 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={processingAction || !rejectModal.reason.trim()}
+                onClick={submitReject}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white font-medium text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-1.5 cursor-pointer"
+              >
+                {processingAction ? 'Processing...' : 'Confirm Rejection'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 5: CUSTOM REFUND TRANSACTION MODAL               */}
+      {/* ======================================================== */}
+      {refundModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#121212] border border-[#2A2620] rounded-2xl max-w-md w-full p-6 text-white shadow-2xl space-y-5 animate-scale-up">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <RefreshCw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif-luxury text-lg text-white">Authorize Treasury Refund</h3>
+                  <p className="text-xs text-white/50">Transaction #{refundModal.paymentId}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRefundModal({ isOpen: false, paymentId: null, transactionRef: null, amount: null, currency: null, reason: '' })}
+                className="text-white/40 hover:text-white transition p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Transaction Reference:</span>
+                <span className="font-mono text-white/80">{refundModal.transactionRef}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Refund Amount:</span>
+                <span className="text-[#C5A880] font-semibold">{formatPrice(Number(refundModal.amount))}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wider text-white/60 font-medium block">
+                Refund Reason / Audit Note
+              </label>
+              <input
+                type="text"
+                value={refundModal.reason}
+                onChange={(e) => setRefundModal((prev) => ({ ...prev, reason: e.target.value }))}
+                placeholder="Reason for refunding transaction..."
+                className="w-full bg-white/[0.04] border border-white/10 focus:border-[#C5A880] rounded-xl p-3 text-xs text-white placeholder:text-white/30 focus:outline-none transition"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setRefundModal({ isOpen: false, paymentId: null, transactionRef: null, amount: null, currency: null, reason: '' })}
+                className="px-4 py-2 rounded-xl text-xs text-white/60 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={processingAction}
+                onClick={submitRefund}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:opacity-90 disabled:opacity-40 text-black font-semibold text-xs uppercase tracking-wider transition shadow-lg cursor-pointer"
+              >
+                {processingAction ? 'Processing...' : 'Authorize Refund'}
+              </button>
+            </div>
           </div>
         </div>
       )}

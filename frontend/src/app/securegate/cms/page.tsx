@@ -444,6 +444,15 @@ export default function SecureGateCmsStudioPage() {
     data: { title: '', subtitle: '', media_url: '', body: '', cta_text: '', cta_link: '' },
   });
 
+  // Custom Luxury Confirmation Modal (replaces browser confirm)
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+  } | null>(null);
+
   const [editCharterModal, setEditCharterModal] = useState<{
     isOpen: boolean;
     type: 'privacy' | 'terms';
@@ -701,12 +710,19 @@ export default function SecureGateCmsStudioPage() {
 
   const handleDeleteCadetHouse = (index: number) => {
     const item = royalHouses.cadet_houses[index];
-    if (confirm(`Are you sure you want to remove '${item.name}' from the Princely Cadet Houses?`)) {
-      setRoyalHouses((prev) => ({
-        ...prev,
-        cadet_houses: prev.cadet_houses.filter((_, i) => i !== index),
-      }));
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Princely Cadet House',
+      message: `Are you sure you wish to remove '${item.name}' from the Princely Cadet Houses register?`,
+      confirmLabel: 'Remove House',
+      onConfirm: () => {
+        setRoyalHouses((prev) => ({
+          ...prev,
+          cadet_houses: prev.cadet_houses.filter((_, i) => i !== index),
+        }));
+        setConfirmModal(null);
+      },
+    });
   };
 
   // --- DYNASTIC ALLIES CRUD HANDLERS ---
@@ -733,12 +749,19 @@ export default function SecureGateCmsStudioPage() {
 
   const handleDeleteAlly = (index: number) => {
     const item = royalHouses.dynastic_allies[index];
-    if (confirm(`Are you sure you want to remove '${item.name}' from Dynastic Allies?`)) {
-      setRoyalHouses((prev) => ({
-        ...prev,
-        dynastic_allies: prev.dynastic_allies.filter((_, i) => i !== index),
-      }));
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Dynastic Ally',
+      message: `Are you sure you wish to remove '${item.name}' from the Dynastic Allies ledger?`,
+      confirmLabel: 'Remove Ally',
+      onConfirm: () => {
+        setRoyalHouses((prev) => ({
+          ...prev,
+          dynastic_allies: prev.dynastic_allies.filter((_, i) => i !== index),
+        }));
+        setConfirmModal(null);
+      },
+    });
   };
 
   // --- SOVEREIGN HEAD HANDLER ---
@@ -775,12 +798,19 @@ export default function SecureGateCmsStudioPage() {
 
   const handleDeleteQueen = (index: number) => {
     const item = royalFamily.queens[index];
-    if (confirm(`Are you sure you want to remove '${item.name}' from the Queens & Consorts register?`)) {
-      setRoyalFamily((prev) => ({
-        ...prev,
-        queens: prev.queens.filter((_, i) => i !== index),
-      }));
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Consort Record',
+      message: `Are you sure you wish to remove '${item.name}' from the Queens & Consorts register?`,
+      confirmLabel: 'Remove Record',
+      onConfirm: () => {
+        setRoyalFamily((prev) => ({
+          ...prev,
+          queens: prev.queens.filter((_, i) => i !== index),
+        }));
+        setConfirmModal(null);
+      },
+    });
   };
 
   // --- ROYAL HEIRS CRUD HANDLERS ---
@@ -807,12 +837,19 @@ export default function SecureGateCmsStudioPage() {
 
   const handleDeleteChild = (index: number) => {
     const item = royalFamily.children[index];
-    if (confirm(`Are you sure you want to remove '${item.name}' from the Royal Lineage?`)) {
-      setRoyalFamily((prev) => ({
-        ...prev,
-        children: prev.children.filter((_, i) => i !== index),
-      }));
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Royal Lineage Entry',
+      message: `Are you sure you wish to remove '${item.name}' from the Royal Lineage?`,
+      confirmLabel: 'Remove Entry',
+      onConfirm: () => {
+        setRoyalFamily((prev) => ({
+          ...prev,
+          children: prev.children.filter((_, i) => i !== index),
+        }));
+        setConfirmModal(null);
+      },
+    });
   };
 
   // --- PAGE HERO SAVE HANDLER ---
@@ -1881,9 +1918,16 @@ export default function SecureGateCmsStudioPage() {
                             <button
                               type="button"
                               onClick={() => {
-                                if (confirm(`Remove '${item.label}' from header navigation?`)) {
-                                  setHeaderNav((prev) => prev.filter((_, i) => i !== idx));
-                                }
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: 'Remove Navigation Item',
+                                  message: `Are you sure you want to remove '${item.label}' from the header navigation menu?`,
+                                  confirmLabel: 'Remove Link',
+                                  onConfirm: () => {
+                                    setHeaderNav((prev) => prev.filter((_, i) => i !== idx));
+                                    setConfirmModal(null);
+                                  },
+                                });
                               }}
                               className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition cursor-pointer"
                               title="Delete Link"
@@ -3122,6 +3166,51 @@ export default function SecureGateCmsStudioPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Luxury Custom Confirmation Modal */}
+      {confirmModal && confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#121212] border border-[#2A2620] rounded-2xl max-w-md w-full p-6 text-white shadow-2xl space-y-4 animate-scale-up">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif-luxury text-lg text-white">{confirmModal.title}</h3>
+                  <p className="text-xs text-white/50">Irreversible steward action</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="text-white/40 hover:text-white transition p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-white/70 leading-relaxed">
+              {confirmModal.message}
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 rounded-xl text-xs text-white/60 hover:text-white transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs uppercase tracking-wider transition shadow-lg cursor-pointer"
+              >
+                {confirmModal.confirmLabel || 'Confirm Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

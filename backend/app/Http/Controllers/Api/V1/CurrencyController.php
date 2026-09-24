@@ -62,3 +62,4 @@ class CurrencyController extends Controller
         ]);
     }
 }
+

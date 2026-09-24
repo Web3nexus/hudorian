@@ -299,8 +299,14 @@ function MemberPaymentsContent() {
                       <td className="p-4 text-right">
                         {p.status === 'paid' ? (
                           <button
-                            onClick={() => alert(`Official VAT Invoice downloaded for transaction ${p.transaction_id}`)}
-                            className="inline-flex items-center gap-1 text-[11px] text-[#96754B] font-semibold hover:underline"
+                            onClick={() => {
+                              setFeedbackMsg({
+                                type: 'success',
+                                text: `Official VAT Invoice generated and verified for transaction ${p.transaction_id}.`,
+                              });
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="inline-flex items-center gap-1 text-[11px] text-[#96754B] font-semibold hover:underline cursor-pointer"
                           >
                             <Download className="w-3 h-3" /> PDF Receipt
                           </button>

@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Lock } from 'lucide-react';
+import { ShoppingBag, Lock, CheckCircle2, X } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 
@@ -51,6 +51,8 @@ import { useCurrency } from '@/context/CurrencyContext';
 export default function ShopPage() {
   const { formatPrice } = useCurrency();
   const { getPageContent } = useCms();
+  const [orderedProduct, setOrderedProduct] = useState<string | null>(null);
+
   const heroContent = getPageContent('page_shop', {
     title: 'The Club Collection',
     subtitle: 'Every object in our shop is sourced directly from the artisans, weavers, and studios that furnish our Houses worldwide.',
@@ -111,8 +113,9 @@ export default function ShopPage() {
               <div className="p-6 pt-0 flex items-center justify-between border-t border-[#E8E2D8] mt-4">
                 <span className="font-serif-luxury text-lg text-[#141414]">{formatPrice(prod.price)}</span>
                 <button
-                  onClick={() => alert(`Pre-order placed for ${prod.name}. The Club concierge will contact your registered member profile.`)}
-                  className="px-4 py-2 rounded-full bg-[#141414] text-white text-xs uppercase tracking-wider font-semibold hover:bg-[#B8976C] transition"
+                  type="button"
+                  onClick={() => setOrderedProduct(prod.name)}
+                  className="px-4 py-2 rounded-full bg-[#141414] text-white text-xs uppercase tracking-wider font-semibold hover:bg-[#B8976C] transition cursor-pointer"
                 >
                   Acquire
                 </button>
@@ -121,6 +124,35 @@ export default function ShopPage() {
           ))}
         </div>
       </main>
+
+      {/* Pre-order Acquisition Modal */}
+      {orderedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#141414] text-white p-8 rounded-2xl max-w-md w-full border border-[#332D24] shadow-2xl space-y-5 text-center">
+            <div className="w-12 h-12 rounded-full bg-[#C5A880]/15 text-[#C5A880] mx-auto flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#C5A880] font-semibold block mb-1">
+                ACQUISITION REGISTERED
+              </span>
+              <h3 className="font-serif-luxury text-xl text-white">
+                {orderedProduct}
+              </h3>
+            </div>
+            <p className="text-xs text-white/70 font-light leading-relaxed">
+              Your acquisition request has been dispatched to the HUDORIAN Concierge. Your dedicated House steward will contact your registered profile regarding delivery and bespoke packaging.
+            </p>
+            <button
+              type="button"
+              onClick={() => setOrderedProduct(null)}
+              className="w-full py-3 rounded-full bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-widest hover:opacity-90 transition cursor-pointer"
+            >
+              Acknowledge & Close
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
