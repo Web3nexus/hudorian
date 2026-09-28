@@ -1,4 +1,58 @@
-import { House, Room, Event, MembershipPlan, User, Reservation, EventBooking, JournalPost, CmsBlock } from '../types';
+import {
+  House,
+  Room,
+  Event,
+  MembershipPlan,
+  User,
+  Reservation,
+  EventBooking,
+  JournalPost,
+  CmsBlock,
+  Location,
+  Estate,
+  Amenity,
+  Book,
+  BookFormat,
+  BookStatus,
+  LoanType,
+  LoanStatus,
+  AcquisitionMode,
+  LibraryConfig,
+  MyArchive,
+  BookCheckoutResult,
+  AdminArchiveReference,
+  ArchiveLoan,
+} from '../types';
+
+export interface HousePayload {
+  name: string;
+  slug?: string | null;
+  location_id: number | '';
+  estate_id?: number | null;
+  tagline?: string | null;
+  house_type: string;
+  short_description?: string | null;
+  description: string;
+  address: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  hero_image?: string | null;
+  hero_video?: string | null;
+  status: string;
+  is_featured: boolean;
+  sort_order?: number | null;
+  amenities?: number[];
+}
+
+export interface AdminHouseReference {
+  data: {
+    locations: Location[];
+    estates: Estate[];
+    amenities: Amenity[];
+    house_types: string[];
+    statuses: string[];
+  };
+}
 
 const getBaseUrl = (): string => {
   if (process.env.NEXT_PUBLIC_API_URL) {
@@ -529,8 +583,211 @@ class ApiClient {
     }, true);
   }
 
-  async getAdminHouses(): Promise<unknown> {
-    return this.request('/admin/houses', {}, true);
+  async getAdminHouses(): Promise<{ data: House[] }> {
+    return this.request<{ data: House[] }>('/admin/houses', {}, true);
+  }
+
+  async getAdminHouseReference(): Promise<AdminHouseReference> {
+    return this.request<AdminHouseReference>('/admin/houses/reference', {}, true);
+  }
+
+  async createHouse(payload: HousePayload): Promise<{ message: string; data: House }> {
+    return this.request<{ message: string; data: House }>('/admin/houses', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, true);
+  }
+
+  async updateHouse(id: number, payload: HousePayload): Promise<{ message: string; data: House }> {
+    return this.request<{ message: string; data: House }>(`/admin/houses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }, true);
+  }
+
+  async deleteHouse(id: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/admin/houses/${id}`, {
+      method: 'DELETE',
+    }, true);
+  }
+
+  // --- Royal Archive: public catalogue ---
+  async getLibraryConfig(): Promise<{ data: LibraryConfig }> {
+    return this.request<{ data: LibraryConfig }>('/library/config');
+  }
+
+  async getBooks(params?: {
+    search?: string;
+    collection?: string;
+    format?: BookFormat;
+    availability?: 'purchase' | 'rental' | 'both';
+    featured?: boolean;
+    sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'title';
+    per_page?: number;
+  }): Promise<{ data: Book[]; meta: Record<string, number>; collections: { slug: string; name: string; books_count: number }[] }> {
+    const query = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.append(key, String(value));
+      }
+    });
+
+    const qs = query.toString();
+    return this.request(`/library/books${qs ? `?${qs}` : ''}`);
+  }
+
+  async getBook(slug: string): Promise<{ data: Book; config: LibraryConfig }> {
+    return this.request<{ data: Book; config: LibraryConfig }>(`/library/books/${slug}`);
+  }
+
+  /**
+   * Begin a purchase or rental. A guest is issued a token in the response
+   * which must be persisted to reach the resulting archive.
+   */
+  async initializeBookCheckout(payload: {
+    book_id: number;
+    mode: AcquisitionMode;
+    gateway: 'flutterwave' | 'paystack' | 'manual';
+    currency?: string;
+    redirect_url?: string;
+    email?: string;
+    name?: string;
+    phone?: string;
+    transfer_reference?: string;
+    sender_bank?: string;
+    sender_account_name?: string;
+    transfer_date?: string;
+    proof_notes?: string;
+  }): Promise<BookCheckoutResult> {
+    return this.request<BookCheckoutResult>('/library/checkout', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async verifyBookPayment(gateway: 'flutterwave' | 'paystack', reference: string): Promise<{
+    success: boolean;
+    message: string;
+    access?: { loan_id: number; loan_type: LoanType; expires_at?: string | null } | null;
+  }> {
+    return this.request('/library/verify', {
+      method: 'POST',
+      body: JSON.stringify({ gateway, reference }),
+    });
+  }
+
+  // --- Royal Archive: the reader's shelf ---
+  // These are reader routes, not SecureGate routes: they must carry the reader
+  // token. Passing the admin flag would send no credential at all for a reader.
+  async getMyArchive(): Promise<{ data: MyArchive; config: LibraryConfig }> {
+    return this.request<{ data: MyArchive; config: LibraryConfig }>('/library/my-archive');
+  }
+
+  /** Request a short-lived signed link, then redeem it. */
+  async getBookDownload(loanId: number): Promise<{
+    success: boolean;
+    data: { download_url: string; filename: string; format: BookFormat; expires_in_minutes: number };
+  }> {
+    return this.request(`/library/loans/${loanId}/download`, { method: 'POST' });
+  }
+
+  async renewBookRental(loanId: number): Promise<{
+    success: boolean;
+    message: string;
+    data: { book_id: number; mode: 'rental'; rental_days: number };
+  }> {
+    return this.request(`/library/loans/${loanId}/renew`, { method: 'POST' });
+  }
+
+  // --- Royal Archive: admin ---
+  async getAdminArchiveReference(): Promise<AdminArchiveReference> {
+    return this.request<AdminArchiveReference>('/admin/archive/reference', {}, true);
+  }
+
+  async getAdminBooks(params?: {
+    search?: string;
+    status?: BookStatus;
+    collection?: number;
+    availability?: 'purchase' | 'rental' | 'both';
+    sort?: 'newest' | 'oldest' | 'title' | 'price_asc' | 'price_desc';
+    per_page?: number;
+  }): Promise<{ data: Book[]; meta: Record<string, number> }> {
+    const query = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.append(key, String(value));
+      }
+    });
+
+    const qs = query.toString();
+    return this.request(`/admin/archive/books${qs ? `?${qs}` : ''}`, {}, true);
+  }
+
+  async createBook(payload: Partial<Book>): Promise<{ message: string; data: Book }> {
+    return this.request<{ message: string; data: Book }>('/admin/archive/books', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, true);
+  }
+
+  async updateBook(id: number, payload: Partial<Book>): Promise<{ message: string; data: Book }> {
+    return this.request<{ message: string; data: Book }>(`/admin/archive/books/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }, true);
+  }
+
+  async deleteBook(id: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/admin/archive/books/${id}`, { method: 'DELETE' }, true);
+  }
+
+  async getArchiveLoans(params?: {
+    status?: LoanStatus;
+    book_id?: number;
+    loan_type?: LoanType;
+    search?: string;
+    per_page?: number;
+  }): Promise<{ data: ArchiveLoan[]; meta: Record<string, number> }> {
+    const query = new URLSearchParams();
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.append(key, String(value));
+      }
+    });
+
+    const qs = query.toString();
+    return this.request(`/admin/archive/loans${qs ? `?${qs}` : ''}`, {}, true);
+  }
+
+  async grantArchiveAccess(payload: {
+    book_id: number;
+    user_id: number;
+    loan_type: LoanType;
+    rental_days?: number;
+    note?: string;
+  }): Promise<{ message: string; data: { id: number; loan_type: LoanType; expires_at?: string | null } }> {
+    return this.request('/admin/archive/loans/grant', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, true);
+  }
+
+  async revokeArchiveAccess(loanId: number, reason?: string): Promise<{ message: string }> {
+    return this.request(`/admin/archive/loans/${loanId}/revoke`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }, true);
+  }
+
+  async getLibrarySettings(): Promise<{ data: LibraryConfig }> {
+    return this.request<{ data: LibraryConfig }>('/admin/archive/settings', {}, true);
+  }
+
+  async updateLibrarySettings(settings: LibraryConfig): Promise<{ message: string; data: LibraryConfig }> {
+    return this.request<{ message: string; data: LibraryConfig }>('/admin/archive/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    }, true);
   }
 
   // --- Admin Profile Management ---

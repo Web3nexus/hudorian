@@ -43,11 +43,12 @@ const defaultHeaderNav: HeaderNavItem[] = [
   { label: 'Royal Allies', href: '/royal-houses#allies', order: 3, is_active: true },
   { label: 'Houses', href: '/houses', order: 4, is_active: true },
   { label: 'Estates', href: '/estates', order: 5, is_active: true },
-  { label: 'Membership', href: '/membership', order: 6, is_active: true },
-  { label: 'Stays', href: '/stays', order: 7, is_active: true },
-  { label: 'Experiences', href: '/experiences', order: 8, is_active: true },
-  { label: 'Journal', href: '/journal', order: 9, is_active: true },
-  { label: 'Boutique', href: '/shop', order: 10, is_active: true },
+  { label: 'Royal Archive', href: '/royal-archive', order: 6, is_active: true },
+  { label: 'Membership', href: '/membership', order: 7, is_active: true },
+  { label: 'Stays', href: '/stays', order: 8, is_active: true },
+  { label: 'Experiences', href: '/experiences', order: 9, is_active: true },
+  { label: 'Journal', href: '/journal', order: 10, is_active: true },
+  { label: 'Boutique', href: '/shop', order: 11, is_active: true },
 ];
 
 const defaultFooterNav = {
@@ -81,11 +82,12 @@ const defaultFooterNav = {
       ],
     },
     {
-      title: 'The Gazette',
+      title: 'The Archive',
       links: [
+        { label: 'Royal Archive', href: '/royal-archive' },
+        { label: 'My Archive', href: '/royal-archive/my-archive' },
         { label: 'Editorial Journal', href: '/journal' },
         { label: 'Boutique Collection', href: '/shop' },
-        { label: 'Concierge & Privacy', href: '/membership' },
       ],
     },
   ],

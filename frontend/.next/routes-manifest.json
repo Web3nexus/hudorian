@@ -53,6 +53,14 @@
       "namedRegex": "^/journal/(?<nxtPslug>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/royal-archive/[slug]",
+      "regex": "^/royal\\-archive/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/royal\\-archive/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/stays/[slug]",
       "regex": "^/stays/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -201,6 +209,18 @@
       "namedRegex": "^/reset\\-password(?:/)?$"
     },
     {
+      "page": "/royal-archive",
+      "regex": "^/royal\\-archive(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/royal\\-archive(?:/)?$"
+    },
+    {
+      "page": "/royal-archive/my-archive",
+      "regex": "^/royal\\-archive/my\\-archive(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/royal\\-archive/my\\-archive(?:/)?$"
+    },
+    {
       "page": "/royal-family",
       "regex": "^/royal\\-family(?:/)?$",
       "routeKeys": {},
@@ -229,6 +249,12 @@
       "regex": "^/securegate/applications(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/securegate/applications(?:/)?$"
+    },
+    {
+      "page": "/securegate/archive",
+      "regex": "^/securegate/archive(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/securegate/archive(?:/)?$"
     },
     {
       "page": "/securegate/audit-logs",

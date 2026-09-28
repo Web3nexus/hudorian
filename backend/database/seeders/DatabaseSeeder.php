@@ -17,7 +17,6 @@ use App\Models\MembershipPlan;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\Room;
-use App\Models\RoomMedia;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -340,8 +339,8 @@ class DatabaseSeeder extends Seeder
             // Create 2 curated rooms per house
             $room1 = Room::create([
                 'house_id' => $house->id,
-                'name' => $house->name . ' — Horizon Suite',
-                'slug' => Str::slug($house->name . ' Horizon Suite'),
+                'name' => $house->name.' — Horizon Suite',
+                'slug' => Str::slug($house->name.' Horizon Suite'),
                 'room_type' => 'suite',
                 'description' => 'A spacious bedroom suite featuring custom walnut furnishings, king-size Belgian linen bed, and a private stone terrace with panoramic views.',
                 'capacity' => 2,
@@ -360,8 +359,8 @@ class DatabaseSeeder extends Seeder
 
             $room2 = Room::create([
                 'house_id' => $house->id,
-                'name' => $house->name . ' — Private Villa Pavilion',
-                'slug' => Str::slug($house->name . ' Private Villa Pavilion'),
+                'name' => $house->name.' — Private Villa Pavilion',
+                'slug' => Str::slug($house->name.' Private Villa Pavilion'),
                 'room_type' => 'villa',
                 'description' => 'A secluded private residence with independent plunge pool, master fireplace, outdoor marble shower, and dedicated butler service.',
                 'capacity' => 4,
@@ -383,7 +382,7 @@ class DatabaseSeeder extends Seeder
             Event::create([
                 'house_id' => $house->id,
                 'title' => 'Solstice Gastronomic Dinner & Wine Pairing',
-                'slug' => Str::slug('solstice-gastronomic-dinner-' . $house->slug),
+                'slug' => Str::slug('solstice-gastronomic-dinner-'.$house->slug),
                 'event_type' => 'dinner',
                 'short_description' => 'An eight-course sensory journey prepared over open wood embers, accompanied by rare biodynamic vintages.',
                 'description' => 'Join our Executive Chef and invited guest vintners for an unforgettable evening under the stars. Starting with sunset aperitifs on the terrace, followed by eight intimate tasting courses honoring local land and sea produce.',
@@ -402,7 +401,7 @@ class DatabaseSeeder extends Seeder
             Event::create([
                 'house_id' => $house->id,
                 'title' => 'Sound Sanctuary & Somatic Breathwork',
-                'slug' => Str::slug('sound-sanctuary-breathwork-' . $house->slug),
+                'slug' => Str::slug('sound-sanctuary-breathwork-'.$house->slug),
                 'event_type' => 'wellness',
                 'short_description' => 'A deeply restorative morning of guided acoustic sound resonance and breathwork led by master practitioners.',
                 'description' => 'Immerse your senses in Tibetan singing bowls, gongs, and restorative somatic breath patterns designed to reset the nervous system.',
@@ -451,6 +450,9 @@ class DatabaseSeeder extends Seeder
             'published_at' => now()->subDays(12),
         ]);
 
+        // 8b. Royal Archive — collections and titles
+        $this->call(BookSeeder::class);
+
         // 9. CMS Blocks (Brand Settings, Menus, Page Heroes & Story)
         CmsBlock::create([
             'key' => 'brand_settings',
@@ -481,11 +483,12 @@ class DatabaseSeeder extends Seeder
                     ['label' => 'Royal Allies', 'href' => '/royal-houses#allies', 'order' => 3, 'is_active' => true],
                     ['label' => 'Houses', 'href' => '/houses', 'order' => 4, 'is_active' => true],
                     ['label' => 'Estates', 'href' => '/estates', 'order' => 5, 'is_active' => true],
-                    ['label' => 'Membership', 'href' => '/membership', 'order' => 6, 'is_active' => true],
-                    ['label' => 'Stays', 'href' => '/stays', 'order' => 7, 'is_active' => true],
-                    ['label' => 'Experiences', 'href' => '/experiences', 'order' => 8, 'is_active' => true],
-                    ['label' => 'Journal', 'href' => '/journal', 'order' => 9, 'is_active' => true],
-                    ['label' => 'Boutique', 'href' => '/shop', 'order' => 10, 'is_active' => true],
+                    ['label' => 'Royal Archive', 'href' => '/royal-archive', 'order' => 6, 'is_active' => true],
+                    ['label' => 'Membership', 'href' => '/membership', 'order' => 7, 'is_active' => true],
+                    ['label' => 'Stays', 'href' => '/stays', 'order' => 8, 'is_active' => true],
+                    ['label' => 'Experiences', 'href' => '/experiences', 'order' => 9, 'is_active' => true],
+                    ['label' => 'Journal', 'href' => '/journal', 'order' => 10, 'is_active' => true],
+                    ['label' => 'Boutique', 'href' => '/shop', 'order' => 11, 'is_active' => true],
                 ],
             ],
         ]);
@@ -595,6 +598,14 @@ class DatabaseSeeder extends Seeder
             'subtitle' => 'Dispatches on design, architecture, gastronomy, and contemporary culture from across our houses.',
             'body' => 'Essays and reflections from our resident curators, architects, and international contributors.',
             'media_url' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=2000&q=85',
+        ]);
+
+        CmsBlock::create([
+            'key' => 'page_royal_archive',
+            'title' => 'The Royal Archive',
+            'subtitle' => 'A private press of first editions, working papers and rare volumes, delivered as protected digital editions.',
+            'body' => 'Assembled over four generations from the Ravensworth library and the households of our founding patrons, the Archive holds working manuscripts that were never intended for the reading public. Acquire a title outright, or borrow it for a fixed term at the steward\'s discretion.',
+            'media_url' => 'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=2000&q=85',
         ]);
 
         CmsBlock::create([

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AdminApplicationController;
 use App\Http\Controllers\Api\V1\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\AdminAuthController;
+use App\Http\Controllers\Api\V1\AdminBookController;
 use App\Http\Controllers\Api\V1\AdminDashboardController;
 use App\Http\Controllers\Api\V1\AdminEventController;
 use App\Http\Controllers\Api\V1\AdminHouseController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\Api\V1\AdminMemberController;
 use App\Http\Controllers\Api\V1\AdminPaymentController;
 use App\Http\Controllers\Api\V1\AdminRoomController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BookCheckoutController;
+use App\Http\Controllers\Api\V1\BookController;
 use App\Http\Controllers\Api\V1\CmsController;
 use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\EstateController;
@@ -18,6 +21,7 @@ use App\Http\Controllers\Api\V1\HouseController;
 use App\Http\Controllers\Api\V1\JournalController;
 use App\Http\Controllers\Api\V1\MemberPortalController;
 use App\Http\Controllers\Api\V1\MembershipController;
+use App\Http\Controllers\Api\V1\MyArchiveController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\StayController;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +85,15 @@ Route::prefix('v1')->group(function () {
     Route::post('/payments/webhook/flutterwave', [PaymentController::class, 'webhookFlutterwave']);
     Route::post('/payments/webhook/paystack', [PaymentController::class, 'webhookPaystack']);
 
+    // ==========================================
+    // ROYAL ARCHIVE — Public Catalogue & Checkout
+    // ==========================================
+    Route::get('/library/config', [BookController::class, 'config']);
+    Route::get('/library/books', [BookController::class, 'index']);
+    Route::get('/library/books/{slug}', [BookController::class, 'show']);
+    Route::post('/library/checkout', [BookCheckoutController::class, 'initialize']);
+    Route::post('/library/verify', [BookCheckoutController::class, 'verify']);
+
     // Admin SecureGate Authentication Checkpoints
     Route::post('/admin/auth/login', [AdminAuthController::class, 'login']);
     Route::post('/admin/auth/verify-mfa', [AdminAuthController::class, 'verifyMfa']);
@@ -102,6 +115,14 @@ Route::prefix('v1')->group(function () {
         // Bookings
         Route::post('/stays/book', [StayController::class, 'book']);
         Route::post('/events/{id}/book', [EventController::class, 'book']);
+
+        // Royal Archive — the reader's own shelf
+        Route::get('/library/my-archive', [MyArchiveController::class, 'index']);
+        Route::post('/library/loans/{loan}/download', [MyArchiveController::class, 'download']);
+        Route::post('/library/loans/{loan}/renew', [MyArchiveController::class, 'renew']);
+        Route::get('/library/download/{loan}', [MyArchiveController::class, 'serve'])
+            ->middleware('signed')
+            ->name('api.v1.library.download.serve');
     });
 
     // ==========================================
@@ -124,6 +145,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/applications/{id}/review', [AdminApplicationController::class, 'review']);
 
         // Properties & Inventory CRUD
+        Route::get('/houses/reference', [AdminHouseController::class, 'reference']);
         Route::apiResource('/houses', AdminHouseController::class);
         Route::apiResource('/rooms', AdminRoomController::class);
         Route::apiResource('/events', AdminEventController::class);
@@ -137,6 +159,16 @@ Route::prefix('v1')->group(function () {
         Route::post('/payments/{id}/approve', [AdminPaymentController::class, 'approve']);
         Route::post('/payments/{id}/reject', [AdminPaymentController::class, 'reject']);
         Route::post('/payments/{id}/refund', [AdminPaymentController::class, 'refund']);
+
+        // Royal Archive — titles, policy and the reader loan ledger
+        Route::get('/archive/settings', [AdminBookController::class, 'getSettings']);
+        Route::put('/archive/settings', [AdminBookController::class, 'updateSettings']);
+        Route::get('/archive/reference', [AdminBookController::class, 'reference']);
+        // Named to avoid colliding with other apiResource name groups.
+        Route::apiResource('/archive/books', AdminBookController::class)->names('archive.books');
+        Route::get('/archive/loans', [AdminBookController::class, 'loans']);
+        Route::post('/archive/loans/grant', [AdminBookController::class, 'grant']);
+        Route::post('/archive/loans/{id}/revoke', [AdminBookController::class, 'revoke']);
 
         // Immutable Audit Trail
         Route::get('/audit-logs', [AdminAuditLogController::class, 'index']);

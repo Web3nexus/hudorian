@@ -2,13 +2,14 @@
 
 namespace App\Services\Payments;
 
+use App\Models\Book;
 use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
-use Exception;
+use App\Services\Library\BookCheckoutService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -53,7 +54,7 @@ class MembershipPaymentService
                 'plan_name' => $plan->name,
                 'base_plan_price' => (float) $plan->price,
                 'base_plan_currency' => strtoupper($plan->currency ?? 'EUR'),
-                'description' => 'HUDORIAN Annual Membership Dues - ' . $plan->name,
+                'description' => 'HUDORIAN Annual Membership Dues - '.$plan->name,
                 'user_email' => $user->email,
                 'user_name' => $user->name,
             ], $metadata),
@@ -70,7 +71,7 @@ class MembershipPaymentService
         ?float $customAmount = null,
         ?string $customCurrency = null
     ): Payment {
-        $transactionId = 'wire_' . Str::lower(Str::random(14));
+        $transactionId = 'wire_'.Str::lower(Str::random(14));
 
         return $this->recordPayment(
             $user,
@@ -79,7 +80,7 @@ class MembershipPaymentService
             'pending',
             $transactionId,
             [
-                'transfer_reference' => $details['transfer_reference'] ?? $details['reference'] ?? 'WIRE-' . strtoupper(Str::random(8)),
+                'transfer_reference' => $details['transfer_reference'] ?? $details['reference'] ?? 'WIRE-'.strtoupper(Str::random(8)),
                 'sender_bank' => $details['sender_bank'] ?? null,
                 'sender_account_name' => $details['sender_account_name'] ?? $user->name,
                 'transfer_date' => $details['transfer_date'] ?? now()->toDateString(),
@@ -108,7 +109,7 @@ class MembershipPaymentService
             ]);
 
             // Issue invoice and activate or extend membership
-            $this->activateOrRenewMember($payment);
+            $this->fulfil($payment, $verificationData);
 
             $this->auditLogger->log(
                 $payment->user,
@@ -154,7 +155,7 @@ class MembershipPaymentService
             ]);
 
             // Issue invoice and activate or extend membership
-            $this->activateOrRenewMember($payment);
+            $this->fulfil($payment);
 
             $this->auditLogger->log(
                 $adminUser,
@@ -209,6 +210,23 @@ class MembershipPaymentService
     }
 
     /**
+     * Route a settled payment to the right fulfilment path.
+     *
+     * A Royal Archive payment issues an archive loan rather than membership
+     * privileges, so it must never reach activateOrRenewMember().
+     */
+    public function fulfil(Payment $payment, array $verificationData = []): void
+    {
+        if ($payment->payable_type === Book::class) {
+            app(BookCheckoutService::class)->fulfilFromPayment($payment, $verificationData);
+
+            return;
+        }
+
+        $this->activateOrRenewMember($payment);
+    }
+
+    /**
      * Activate or extend member record and issue invoice.
      */
     public function activateOrRenewMember(Payment $payment): void
@@ -240,7 +258,7 @@ class MembershipPaymentService
             ]);
         } else {
             // New membership activation
-            $membershipNumber = 'HUD-' . date('Y') . '-' . strtoupper(Str::random(5));
+            $membershipNumber = 'HUD-'.date('Y').'-'.strtoupper(Str::random(5));
             Member::create([
                 'user_id' => $user->id,
                 'membership_plan_id' => $plan->id,
@@ -248,13 +266,13 @@ class MembershipPaymentService
                 'status' => 'active',
                 'started_at' => now(),
                 'expires_at' => now()->addYear(),
-                'internal_notes' => 'Activated via ' . strtoupper($payment->provider) . ' payment ' . $payment->transaction_id,
+                'internal_notes' => 'Activated via '.strtoupper($payment->provider).' payment '.$payment->transaction_id,
             ]);
         }
 
         // Ensure Invoice exists
         if (! Invoice::where('payment_id', $payment->id)->exists()) {
-            $invoiceNumber = 'INV-' . date('Y') . '-' . strtoupper(Str::random(8));
+            $invoiceNumber = 'INV-'.date('Y').'-'.strtoupper(Str::random(8));
             Invoice::create([
                 'invoice_number' => $invoiceNumber,
                 'payment_id' => $payment->id,
@@ -262,10 +280,9 @@ class MembershipPaymentService
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
                 'status' => 'paid',
-                'pdf_url' => '/api/v1/invoices/' . $invoiceNumber . '/pdf',
+                'pdf_url' => '/api/v1/invoices/'.$invoiceNumber.'/pdf',
                 'issued_at' => now(),
             ]);
         }
     }
 }
-

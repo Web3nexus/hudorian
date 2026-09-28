@@ -216,6 +216,33 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../src/app/royal-archive/[slug]/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-archive/[slug]">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-archive/[slug]/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/royal-archive/my-archive/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-archive/my-archive">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-archive/my-archive/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/royal-archive/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/royal-archive">> = Specific
+  const handler = {} as typeof import("../../src/app/royal-archive/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/royal-family/houses/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/royal-family/houses">> = Specific
@@ -247,6 +274,15 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
 {
   type __IsExpected<Specific extends AppPageConfig<"/securegate/applications">> = Specific
   const handler = {} as typeof import("../../src/app/securegate/applications/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/securegate/archive/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/securegate/archive">> = Specific
+  const handler = {} as typeof import("../../src/app/securegate/archive/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -22,10 +22,12 @@
   "/privacy/page": "app/privacy/page.js",
   "/register/page": "app/register/page.js",
   "/reset-password/page": "app/reset-password/page.js",
+  "/royal-archive/page": "app/royal-archive/page.js",
   "/royal-family/houses/page": "app/royal-family/houses/page.js",
   "/royal-family/page": "app/royal-family/page.js",
   "/royal-houses/page": "app/royal-houses/page.js",
   "/securegate/applications/page": "app/securegate/applications/page.js",
+  "/securegate/archive/page": "app/securegate/archive/page.js",
   "/securegate/audit-logs/page": "app/securegate/audit-logs/page.js",
   "/securegate/cms/page": "app/securegate/cms/page.js",
   "/securegate/houses/page": "app/securegate/houses/page.js",
@@ -38,7 +40,9 @@
   "/signin/page": "app/signin/page.js",
   "/stays/page": "app/stays/page.js",
   "/terms/page": "app/terms/page.js",
-  "/houses/[slug]/page": "app/houses/[slug]/page.js",
   "/journal/[slug]/page": "app/journal/[slug]/page.js",
+  "/houses/[slug]/page": "app/houses/[slug]/page.js",
+  "/royal-archive/[slug]/page": "app/royal-archive/[slug]/page.js",
+  "/royal-archive/my-archive/page": "app/royal-archive/my-archive/page.js",
   "/stays/[slug]/page": "app/stays/[slug]/page.js"
 }

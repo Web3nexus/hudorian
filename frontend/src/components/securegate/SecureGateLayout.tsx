@@ -8,6 +8,7 @@ import {
   Users,
   FileCheck,
   Building2,
+  BookOpen,
   CreditCard,
   History,
   ShieldCheck,
@@ -192,6 +193,7 @@ export default function SecureGateLayout({
     { label: 'Membership Applications', href: '/securegate/applications', icon: FileCheck },
     { label: 'Members Directory', href: '/securegate/members', icon: Users },
     { label: 'Sanctuaries & Houses', href: '/securegate/houses', icon: Building2 },
+    { label: 'Royal Archive', href: '/securegate/archive', icon: BookOpen },
     { label: 'Transactions & Treasury', href: '/securegate/payments', icon: CreditCard },
     { label: 'Audit & Activity Ledger', href: '/securegate/audit-logs', icon: History },
   ];

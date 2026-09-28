@@ -22,10 +22,12 @@
   "/privacy/page": "/privacy",
   "/register/page": "/register",
   "/reset-password/page": "/reset-password",
+  "/royal-archive/page": "/royal-archive",
   "/royal-family/houses/page": "/royal-family/houses",
   "/royal-family/page": "/royal-family",
   "/royal-houses/page": "/royal-houses",
   "/securegate/applications/page": "/securegate/applications",
+  "/securegate/archive/page": "/securegate/archive",
   "/securegate/audit-logs/page": "/securegate/audit-logs",
   "/securegate/cms/page": "/securegate/cms",
   "/securegate/houses/page": "/securegate/houses",
@@ -38,7 +40,9 @@
   "/signin/page": "/signin",
   "/stays/page": "/stays",
   "/terms/page": "/terms",
-  "/houses/[slug]/page": "/houses/[slug]",
   "/journal/[slug]/page": "/journal/[slug]",
+  "/houses/[slug]/page": "/houses/[slug]",
+  "/royal-archive/[slug]/page": "/royal-archive/[slug]",
+  "/royal-archive/my-archive/page": "/royal-archive/my-archive",
   "/stays/[slug]/page": "/stays/[slug]"
 }
