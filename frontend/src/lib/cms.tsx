@@ -30,9 +30,9 @@ const defaultBrand: BrandSettings = {
   logo_image_url: '/images/hudorian-seal.png',
   tagline: 'Private Members Club & Global Network of Houses',
   concierge_email: 'concierge@hudorian.com',
-  concierge_phone: '+44 (0) 20 7946 0912',
-  office_address: '7 Berkeley Square, Mayfair, London W1J 6ES',
-  currency_symbol: '€',
+  concierge_phone: '+234 (0) 1 800 4836',
+  office_address: '14 Ozumba Mbadiwe Avenue, Victoria Island, Lagos, Nigeria',
+  currency_symbol: '₦',
 };
 
 const defaultHeaderNav: HeaderNavItem[] = [
@@ -63,29 +63,29 @@ const defaultFooterNav = {
       ],
     },
     {
-      title: 'Houses & Estates',
+      title: 'Houses & Sanctuaries',
       links: [
         { label: 'Global Houses', href: '/houses' },
         { label: 'Private Estates', href: '/estates' },
         { label: 'Suites & Stays', href: '/stays' },
-        { label: 'Events & Experiences', href: '/experiences' },
+        { label: 'Curated Gatherings', href: '/experiences' },
       ],
     },
     {
       title: 'Membership',
       links: [
-        { label: 'Levels & Benefits', href: '/membership' },
+        { label: 'Tiers & Privileges', href: '/membership' },
         { label: 'Apply for Membership', href: '/membership/apply' },
         { label: 'Member Portal', href: '/member' },
       ],
     },
     {
-      title: 'The Archive',
+      title: 'The Gazette & Governance',
       links: [
-        { label: 'Royal Archive', href: '/royal-archive' },
-        { label: 'My Archive', href: '/royal-archive/my-archive' },
         { label: 'Editorial Journal', href: '/journal' },
         { label: 'Boutique Collection', href: '/shop' },
+        { label: 'Privacy Policy', href: '/privacy' },
+        { label: 'Data Protection', href: '/privacy/data' },
       ],
     },
   ],

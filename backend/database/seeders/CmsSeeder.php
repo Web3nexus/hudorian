@@ -50,6 +50,15 @@ class CmsSeeder extends Seeder
                     'tagline' => 'An invitation-only assembly of extraordinary spaces and discerning patrons.',
                     'sections' => [
                         [
+                            'title' => 'The Uzih Dynasty',
+                            'links' => [
+                                ['label' => 'The Royal Family', 'href' => '/royal-family'],
+                                ['label' => 'Royal Houses & Heirs', 'href' => '/royal-houses'],
+                                ['label' => 'Reda House', 'href' => '/royal-houses#reda-house'],
+                                ['label' => 'The Family of Victors', 'href' => '/royal-houses#family-of-victors'],
+                            ],
+                        ],
+                        [
                             'title' => 'Houses & Sanctuaries',
                             'links' => [
                                 ['label' => 'Global Houses', 'href' => '/houses'],
@@ -64,23 +73,15 @@ class CmsSeeder extends Seeder
                                 ['label' => 'Tiers & Privileges', 'href' => '/membership'],
                                 ['label' => 'Apply for Membership', 'href' => '/membership/apply'],
                                 ['label' => 'Member Portal', 'href' => '/member'],
-                                ['label' => 'Private Concierge', 'href' => '/membership#concierge'],
                             ],
                         ],
                         [
-                            'title' => 'The Gazette',
+                            'title' => 'The Gazette & Governance',
                             'links' => [
                                 ['label' => 'Editorial Journal', 'href' => '/journal'],
                                 ['label' => 'Boutique Collection', 'href' => '/shop'],
-                                ['label' => 'Salon Calendar', 'href' => '/experiences'],
-                            ],
-                        ],
-                        [
-                            'title' => 'Legal & Privacy',
-                            'links' => [
                                 ['label' => 'Privacy Policy', 'href' => '/privacy'],
-                                ['label' => 'Data Privacy & Protection', 'href' => '/privacy/data'],
-                                ['label' => 'House Code & Terms', 'href' => '/terms'],
+                                ['label' => 'Data Protection', 'href' => '/privacy/data'],
                             ],
                         ],
                     ],

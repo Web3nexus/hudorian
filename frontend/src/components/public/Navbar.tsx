@@ -7,7 +7,35 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [member, setMember] = useState<{ name: string } | null>(null);
-  const { brand } = useCms();
+  const { brand, headerNav } = useCms();
+
+  // Split headerNav into left (Royal Dynasty) and right (Houses & Membership) with safe fallbacks
+  const activeNav = (headerNav || []).filter((item) => item.is_active !== false);
+  const leftNavItems = activeNav.filter(
+    (item) =>
+      item.href.includes('royal') ||
+      item.label.toLowerCase().includes('royal') ||
+      item.label.toLowerCase().includes('uzih')
+  );
+  const rightNavItems = activeNav.filter(
+    (item) =>
+      !item.href.includes('royal') &&
+      !item.label.toLowerCase().includes('royal') &&
+      !item.label.toLowerCase().includes('uzih') &&
+      !['signin', 'apply', 'register', 'member'].some((k) => item.href.includes(k))
+  ).slice(0, 3);
+
+  const finalLeftNav = leftNavItems.length > 0 ? leftNavItems : [
+    { label: 'The Royal Family', href: '/royal-family' },
+    { label: 'Royal Houses', href: '/royal-houses' },
+    { label: 'Royal Allies', href: '/royal-houses#allies' },
+  ];
+
+  const finalRightNav = rightNavItems.length > 0 ? rightNavItems : [
+    { label: 'Houses', href: '/houses' },
+    { label: 'Estates', href: '/estates' },
+    { label: 'Membership', href: '/membership' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,24 +80,15 @@ export default function Navbar() {
             </button>
 
             <nav className="hidden lg:flex items-center space-x-3.5 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.18em] font-medium text-[#141414]/85">
-              <Link
-                href="/royal-family"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                The Royal Family
-              </Link>
-              <Link
-                href="/royal-houses"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                Royal Houses
-              </Link>
-              <Link
-                href="/royal-houses#allies"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                Royal Allies
-              </Link>
+              {finalLeftNav.map((item) => (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className="hover:text-[#96754B] transition whitespace-nowrap"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
@@ -96,24 +115,15 @@ export default function Navbar() {
           {/* Right Column: 3 Property & Membership Links + Actions */}
           <div className="flex-1 flex items-center justify-end gap-3 xl:gap-6">
             <nav className="hidden lg:flex items-center space-x-3.5 xl:space-x-6 text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.18em] font-medium text-[#141414]/85">
-              <Link
-                href="/houses"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                Houses
-              </Link>
-              <Link
-                href="/estates"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                Estates
-              </Link>
-              <Link
-                href="/membership"
-                className="hover:text-[#96754B] transition whitespace-nowrap"
-              >
-                Membership
-              </Link>
+              {finalRightNav.map((item) => (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className="hover:text-[#96754B] transition whitespace-nowrap"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </nav>
 
             {member ? (
@@ -290,6 +300,15 @@ export default function Navbar() {
                     className="hover:text-[#C5A880] transition block"
                   >
                     Apply for Membership
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/royal-archive"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C5A880] transition block"
+                  >
+                    Royal Archive
                   </Link>
                 </li>
                 <li>

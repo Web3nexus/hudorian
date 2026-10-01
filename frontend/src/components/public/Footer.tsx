@@ -40,9 +40,47 @@ export default function Footer() {
         .filter((s) => s.links.length > 0)
     : [];
 
-  // Guarantee The Uzih Dynasty section is always present in footer
-  let finalSections = sanitized;
-  if (!finalSections.some((s) => s.title.toLowerCase().includes('uzih') || s.title.toLowerCase().includes('royal'))) {
+  // Guarantee complete sections and that The Uzih Dynasty is always present
+  let finalSections = sanitized.length > 0 ? sanitized : (footerNav.sections && footerNav.sections.length > 0 ? footerNav.sections : []);
+  if (finalSections.length === 0) {
+    finalSections = [
+      {
+        title: 'The Uzih Dynasty',
+        links: [
+          { label: 'The Royal Family', href: '/royal-family' },
+          { label: 'Royal Houses & Heirs', href: '/royal-houses' },
+          { label: 'Reda House', href: '/royal-houses#reda-house' },
+          { label: 'The Family of Victors', href: '/royal-houses#family-of-victors' },
+        ],
+      },
+      {
+        title: 'Houses & Sanctuaries',
+        links: [
+          { label: 'Global Houses', href: '/houses' },
+          { label: 'Private Estates', href: '/estates' },
+          { label: 'Suites & Stays', href: '/stays' },
+          { label: 'Curated Gatherings', href: '/experiences' },
+        ],
+      },
+      {
+        title: 'Membership',
+        links: [
+          { label: 'Tiers & Privileges', href: '/membership' },
+          { label: 'Apply for Membership', href: '/membership/apply' },
+          { label: 'Member Portal', href: '/member' },
+        ],
+      },
+      {
+        title: 'The Gazette & Governance',
+        links: [
+          { label: 'Editorial Journal', href: '/journal' },
+          { label: 'Boutique Collection', href: '/shop' },
+          { label: 'Privacy Policy', href: '/privacy' },
+          { label: 'Data Protection', href: '/privacy/data' },
+        ],
+      },
+    ];
+  } else if (!finalSections.some((s) => s.title.toLowerCase().includes('uzih') || s.title.toLowerCase().includes('royal'))) {
     finalSections = [
       {
         title: 'The Uzih Dynasty',

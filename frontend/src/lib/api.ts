@@ -55,18 +55,17 @@ export interface AdminHouseReference {
 }
 
 const getBaseUrl = (): string => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return '/api/v1';
-    }
-  }
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
+  if (
+    typeof import.meta !== 'undefined' &&
+    import.meta.env?.VITE_API_URL &&
+    !import.meta.env.VITE_API_URL.includes('localhost') &&
+    !import.meta.env.VITE_API_URL.includes('127.0.0.1')
+  ) {
     return import.meta.env.VITE_API_URL;
   }
-  return 'http://localhost:8000/api/v1';
+  // In browser on any host (desktop, mobile, live, dev via Vite proxy), /api/v1 is optimal
+  return '/api/v1';
 };
-
-const API_BASE_URL = getBaseUrl();
 
 class ApiClient {
   private getAuthToken(): string | null {
@@ -80,15 +79,7 @@ class ApiClient {
   }
 
   private getBaseUrl(): string {
-    if (typeof window !== 'undefined') {
-      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        return '/api/v1';
-      }
-    }
-    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
-      return import.meta.env.VITE_API_URL;
-    }
-    return 'http://localhost:8000/api/v1';
+    return getBaseUrl();
   }
 
   private async request<T>(
