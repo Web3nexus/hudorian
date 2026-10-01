@@ -223,9 +223,16 @@ php artisan migrate:fresh --seed
 php artisan serve --port=8000
 ```
 *Demo Accounts seeded:*
-- **Super Admin**: `admin@hudorian.com` / `password123` (2FA OFF by default; can be activated in `/securegate/security`)
-- **Member**: `member@hudorian.com` / `password123`
-- **Applicant**: `applicant@hudorian.com` / `password123`
+
+> **These credentials are for local development only.** The seeder reads
+> `SEED_ADMIN_PASSWORD` (and the member/applicant equivalents) and falls back to
+> `password123` when that variable is unset. Never run the seeder against a
+> reachable environment: the fallback is public knowledge, and every seeded
+> account is a valid login.
+
+- **Super Admin**: `admin@hudorian.com` / `SEED_ADMIN_PASSWORD` (2FA OFF by default; can be activated in `/securegate/security`)
+- **Member**: `member@hudorian.com` / `SEED_MEMBER_PASSWORD`
+- **Applicant**: `applicant@hudorian.com` / `SEED_APPLICANT_PASSWORD`
 
 ### Running Frontend (Next.js)
 ```bash

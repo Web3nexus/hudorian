@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
       await api.forgotPassword(email);
       setSubmitted(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unable to dispatch reset instructions. Please verify your email.';
+      const msg = err instanceof Error ? err.message : 'We could not send reset instructions. Please check your email address.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -45,13 +45,13 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <span className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#96754B] block">
-              Security Protocol
+              Account Security
             </span>
             <h1 className="font-serif-luxury text-3xl font-light text-[#141414]">
-              Reset Keyphrase
+              Reset password
             </h1>
             <p className="text-xs text-[#141414]/60 font-light leading-relaxed">
-              Enter the email address registered with your HUDORIAN member dossier to receive a secure single-use recovery link.
+              Enter the email address registered with your HUDORIAN membership to receive a secure single-use reset link.
             </p>
           </div>
 
@@ -67,10 +67,10 @@ export default function ForgotPasswordPage() {
               <div className="p-6 rounded-xs bg-emerald-50/70 border border-emerald-200/60 text-emerald-950 space-y-3">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
                 <h3 className="font-serif-luxury text-lg font-medium text-emerald-900">
-                  Recovery Dispatch Initiated
+                  Check your email
                 </h3>
                 <p className="text-xs text-emerald-800/80 font-light leading-relaxed">
-                  If <strong>{email}</strong> is recorded in our registry, a secure clearance link has been dispatched. Please review your inbox and spam folder.
+                  If <strong>{email}</strong> is registered with us, a password reset link has been sent. Please check your inbox and spam folder.
                 </p>
                 <p className="text-[11px] font-mono text-emerald-700/70 pt-1">
                   Valid for 60 minutes from issuance.
@@ -111,10 +111,10 @@ export default function ForgotPasswordPage() {
                 className="w-full py-4 rounded-full bg-[#141414] text-[#FAF8F5] text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#96754B] transition duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
-                  <span>Dispatching Protocol...</span>
+                  <span>Sending...</span>
                 ) : (
                   <>
-                    <span>Dispatch Recovery Link</span>
+                    <span>Send reset link</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
                   className="inline-flex items-center gap-1.5 text-xs text-black/60 hover:text-black font-light transition"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Remembered your keyphrase? Sign In</span>
+                  <span>Remembered your password? Sign in</span>
                 </Link>
               </div>
             </form>

@@ -47,7 +47,7 @@ export default function SecureGateApplicationsPage() {
   return (
     <SecureGateLayout
       title="Membership Applications"
-      subtitle="Review prospective candidate dossiers, assess committee alignment, and issue membership admissions clearances."
+      subtitle="Review membership requests and approve or decline them."
     >
       <div className="space-y-6">
         {actionMsg && (
@@ -61,11 +61,11 @@ export default function SecureGateApplicationsPage() {
         <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
           {loading ? (
             <div className="p-16 text-center text-xs text-white/40 font-mono">
-              Synchronizing applicant records from SecureGate vault...
+              Loading membership requests…
             </div>
           ) : applications.length === 0 ? (
             <div className="p-16 text-center text-white/50 text-xs font-light">
-              No applicant dossiers pending review.
+              No membership applications pending review.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -111,7 +111,7 @@ export default function SecureGateApplicationsPage() {
                           onClick={() => setSelectedApp(app)}
                           className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-[#B8976C] hover:text-black text-white/80 transition text-xs font-medium border border-white/10"
                         >
-                          Examine Dossier
+                          View application
                         </button>
                       </td>
                     </tr>

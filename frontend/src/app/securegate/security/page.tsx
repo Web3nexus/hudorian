@@ -176,8 +176,8 @@ export default function SecureGateSecurityPage() {
 
   return (
     <SecureGateLayout
-      title="Security & Key Management"
-      subtitle="Configure real Cloudflare Turnstile, Google reCAPTCHA, and RFC 6238 Google Authenticator 2FA."
+      title="Security Settings"
+      subtitle="Configure Cloudflare Turnstile, Google reCAPTCHA, and Google Authenticator two-factor authentication."
     >
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Status Alert */}
@@ -228,10 +228,10 @@ export default function SecureGateSecurityPage() {
                 </div>
                 <p className="text-xs text-white/50 mt-1">
                   {twoFactorEnabled
-                    ? `Cryptographic 2FA is active on your administrator account. Confirmed on ${
+                    ? `Two-factor authentication is active on your administrator account. Confirmed on ${
                         twoFactorConfirmedAt ? new Date(twoFactorConfirmedAt).toLocaleDateString() : 'Active'
                       }.`
-                    : '2FA is currently disabled. Admin can log in directly with identifier and clearance keyphrase.'}
+                    : 'Two-step verification is off. Administrators can sign in with just their email and password.'}
                 </p>
               </div>
             </div>
@@ -588,7 +588,7 @@ export default function SecureGateSecurityPage() {
                   Disable 2-Factor Authentication
                 </h3>
                 <p className="text-xs text-white/50">
-                  Confirm your clearance password to disable Google Authenticator.
+                  Enter your password to turn off Google Authenticator.
                 </p>
               </div>
 

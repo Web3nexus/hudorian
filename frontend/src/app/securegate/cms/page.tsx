@@ -677,7 +677,7 @@ export default function SecureGateCmsStudioPage() {
 
       await api.batchUpdateCmsBlocks(batchPayload);
       await refreshCms();
-      setSuccessMessage('Executive Sanctuary changes published successfully! Changes reflect across all public pages immediately.');
+      setSuccessMessage('Your changes have been published. They are now live on the website.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to publish CMS updates.';
       setErrorMessage(msg);
@@ -752,7 +752,7 @@ export default function SecureGateCmsStudioPage() {
     setConfirmModal({
       isOpen: true,
       title: 'Remove Dynastic Ally',
-      message: `Are you sure you wish to remove '${item.name}' from the Dynastic Allies ledger?`,
+      message: `Are you sure you wish to remove '${item.name}' from the list of partners?`,
       confirmLabel: 'Remove Ally',
       onConfirm: () => {
         setRoyalHouses((prev) => ({
@@ -908,7 +908,7 @@ export default function SecureGateCmsStudioPage() {
     { key: 'page_home', label: 'Home Page Hero & Copy', previewHref: '/' },
     { key: 'page_houses', label: 'Houses Constellation', previewHref: '/houses' },
     { key: 'page_estates', label: 'Private Estates', previewHref: '/estates' },
-    { key: 'page_stays', label: 'Sanctuary Stays & Suites', previewHref: '/stays' },
+    { key: 'page_stays', label: 'Stays & Suites', previewHref: '/stays' },
     { key: 'page_experiences', label: 'Cultural Gatherings', previewHref: '/experiences' },
     { key: 'page_membership', label: 'Membership & Application', previewHref: '/membership' },
     { key: 'page_journal', label: 'Editorial Journal', previewHref: '/journal' },
@@ -917,8 +917,8 @@ export default function SecureGateCmsStudioPage() {
 
   return (
     <SecureGateLayout
-      title="Executive Sanctuary CMS & Heritage Studio"
-      subtitle="Structured table governance for cadet houses, sovereign lineage, dynastic covenants, and sanctuary editorial."
+      title="Website content"
+      subtitle="Edit the text, images and details that appear across your public website."
       actions={
         <button
           onClick={handleSaveAll}
@@ -928,7 +928,7 @@ export default function SecureGateCmsStudioPage() {
           {saving ? (
             <>
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Publishing Vault...</span>
+              <span>Publishing…</span>
             </>
           ) : (
             <>
@@ -952,7 +952,7 @@ export default function SecureGateCmsStudioPage() {
               target="_blank"
               className="font-mono underline text-emerald-200 hover:text-white flex items-center gap-1"
             >
-              Inspect Live Sanctuary <ExternalLink className="w-3 h-3" />
+              View Live Page <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         )}
@@ -987,7 +987,7 @@ export default function SecureGateCmsStudioPage() {
             }`}
           >
             <Layers className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>Sanctuary Pages & Heroes</span>
+            <span>Pages & Banners</span>
           </button>
 
           <button
@@ -1369,7 +1369,7 @@ export default function SecureGateCmsStudioPage() {
                       <th className="p-4 pl-6">Portrait</th>
                       <th className="p-4">Title & Name</th>
                       <th className="p-4">Role & Pavilion Seat</th>
-                      <th className="p-4">Biography Lore</th>
+                      <th className="p-4">Biography</th>
                       <th className="p-4 pr-6 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -1550,9 +1550,9 @@ export default function SecureGateCmsStudioPage() {
           <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
             <div className="p-5 border-b border-white/5 flex items-center justify-between">
               <div>
-                <h3 className="font-serif-luxury text-lg text-white">Sanctuary Pages & Editorial Registry</h3>
+                <h3 className="font-serif-luxury text-lg text-white">Pages & Content</h3>
                 <p className="text-xs text-white/50 font-light">
-                  Edit headlines, subtitles, media, and calls-to-action for all public sanctuary routes.
+                  Edit headlines, subtitles, media, and buttons for all public pages.
                 </p>
               </div>
             </div>
@@ -1562,9 +1562,9 @@ export default function SecureGateCmsStudioPage() {
                 <thead className="bg-white/[0.03] text-white/40 font-mono uppercase tracking-wider border-b border-white/5">
                   <tr>
                     <th className="p-4 pl-6">Hero Preview</th>
-                    <th className="p-4">Sanctuary Page</th>
+                    <th className="p-4">Page</th>
                     <th className="p-4">Headline / Hero Title</th>
-                    <th className="p-4">Subtitle Lore</th>
+                    <th className="p-4">Subtitle</th>
                     <th className="p-4">Live Route</th>
                     <th className="p-4 pr-6 text-right">Actions</th>
                   </tr>
@@ -1635,7 +1635,7 @@ export default function SecureGateCmsStudioPage() {
               <div>
                 <h3 className="font-serif-luxury text-lg text-white">Governance, Privacy & House Code Charters</h3>
                 <p className="text-xs text-white/50 font-light">
-                  Statutory charters, NDPA compliance, and sanctuary membership codes of fellowship.
+                  Statutory charters, data-protection compliance, and membership terms and conditions.
                 </p>
               </div>
             </div>
@@ -1736,7 +1736,7 @@ export default function SecureGateCmsStudioPage() {
               <div>
                 <h3 className="font-serif-luxury text-lg text-white">Brand Typography & Seal Assets</h3>
                 <p className="text-xs text-white/50 font-light">
-                  Configure brand wordmark typography, crest seal imagery, and concierge coordinates.
+                  Configure your logo, brand colours, crest seal image, and contact details.
                 </p>
               </div>
             </div>
@@ -1812,7 +1812,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <div className="md:col-span-4 text-white/50 font-mono uppercase tracking-wider">Concierge Coordinates</div>
+                <div className="md:col-span-4 text-white/50 font-mono uppercase tracking-wider">Contact Details</div>
                 <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
                   <div>
                     <label className="block text-[10px] font-mono text-white/40 mb-1">Email</label>
@@ -1986,7 +1986,7 @@ export default function SecureGateCmsStudioPage() {
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Crown className="w-4 h-4 text-[#C5A880]" />
-                <h3 className="font-serif-luxury text-lg text-white">Edit Sovereign Royal Head</h3>
+                <h3 className="font-serif-luxury text-lg text-white">Edit Royal Profile</h3>
               </div>
               <button
                 onClick={() => setEditRoyalHeadModal({ ...editRoyalHeadModal, isOpen: false })}
@@ -2014,7 +2014,7 @@ export default function SecureGateCmsStudioPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-mono uppercase text-white/40">Sovereign Name</label>
+                  <label className="block text-[10px] font-mono uppercase text-white/40">Name</label>
                   <input
                     type="text"
                     value={editRoyalHeadModal.data.name}
@@ -2030,7 +2030,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Sovereign Role</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Role</label>
                 <input
                   type="text"
                   value={editRoyalHeadModal.data.role}
@@ -2045,7 +2045,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Heraldry / Crest Lore</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Heraldry / crest</label>
                 <input
                   type="text"
                   value={editRoyalHeadModal.data.heraldry}
@@ -2080,7 +2080,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Sovereign Biography</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Biography</label>
                 <textarea
                   rows={4}
                   value={editRoyalHeadModal.data.bio}
@@ -2106,7 +2106,7 @@ export default function SecureGateCmsStudioPage() {
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition"
                 >
-                  Update Sovereign Head
+                  Save changes
                 </button>
               </div>
             </form>
@@ -2189,7 +2189,7 @@ export default function SecureGateCmsStudioPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-mono uppercase text-white/40">Sanctuary Role</label>
+                  <label className="block text-[10px] font-mono uppercase text-white/40">Role</label>
                   <input
                     type="text"
                     placeholder="e.g. Princely Cadet House & Maritime Domain"
@@ -2572,7 +2572,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Biography Lore</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Biography</label>
                 <textarea
                   rows={3}
                   value={editQueenModal.data.bio}
@@ -2769,7 +2769,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Biography Lore</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Biography</label>
                 <textarea
                   rows={3}
                   value={editChildModal.data.bio}
@@ -2876,7 +2876,7 @@ export default function SecureGateCmsStudioPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase text-white/40">Sanctuary Body Text / Manifesto</label>
+                <label className="block text-[10px] font-mono uppercase text-white/40">Body Text</label>
                 <textarea
                   rows={3}
                   value={editPageModal.data.body || ''}

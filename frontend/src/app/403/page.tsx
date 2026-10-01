@@ -30,17 +30,17 @@ export default function AccessDeniedPage() {
           {/* Status Badge */}
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-600/20 text-[#96754B] text-[11px] uppercase tracking-[0.25em] font-medium shadow-xs">
             <ShieldAlert className="w-3.5 h-3.5 text-[#96754B]" />
-            <span>403 • Restricted Sanctuary Enclave</span>
+            <span>403 • Access denied</span>
           </div>
 
           {/* Headline */}
           <div className="space-y-4">
             <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-[#141414] leading-[1.08]">
-              Clearance Required <br />
+              Sign in required <br />
               <span className="italic font-serif text-[#96754B]">Access Denied</span>
             </h1>
             <p className="text-base sm:text-lg text-black/70 font-light max-w-xl mx-auto leading-relaxed">
-              This private chamber, member dossier, or administrative enclave is restricted to verified Member Patrons and authorized SecureGate officers.
+              This page is restricted to signed-in members and administrators.
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export default function AccessDeniedPage() {
                   Member Portal
                 </h2>
                 <p className="text-xs text-black/60 font-light leading-relaxed">
-                  Authenticate with your registered email and keyphrase to access digital passes, private bookings, and house accounts.
+                  Sign in with your registered email and password to access your membership card, bookings, and account.
                 </p>
               </div>
               <Link
@@ -78,29 +78,29 @@ export default function AccessDeniedPage() {
                   Apply for Candidacy
                 </h2>
                 <p className="text-xs text-black/60 font-light leading-relaxed">
-                  Not yet a member? Submit your candidate dossier to the Admissions Committee for consideration and vetting.
+                  Not yet a member? Apply for membership and our admissions team will review your application.
                 </p>
               </div>
               <Link
                 href="/membership/apply"
                 className="inline-flex items-center justify-between w-full pt-4 border-t border-[#E8E2D8] text-xs uppercase tracking-[0.15em] font-semibold text-[#141414] hover:text-[#96754B] transition"
               >
-                <span>Submit Dossier</span>
+                <span>Apply for membership</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            {/* 3. SecureGate Admin */}
+            {/* 3. Admin Console */}
             <div className="p-6 bg-[#141414] text-[#FAF8F5] border border-[#222] transition duration-300 rounded-xs shadow-md flex flex-col justify-between space-y-4">
               <div className="space-y-3">
                 <div className="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
                   <Lock className="w-4 h-4 text-[#B8976C]" />
                 </div>
                 <h2 className="font-serif-luxury text-xl text-white font-medium">
-                  SecureGate
+                  Admin
                 </h2>
                 <p className="text-xs text-white/60 font-light leading-relaxed">
-                  Dedicated operations and security console for House Directors, Concierge Marshals, and Club Staff.
+                  Management console for house managers and club staff.
                 </p>
               </div>
               <Link

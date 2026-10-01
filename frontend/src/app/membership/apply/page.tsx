@@ -174,7 +174,7 @@ function MembershipApplicationContent() {
             MEMBERSHIP APPLICATION
           </span>
           <h1 className="font-serif-luxury text-3xl sm:text-5xl font-light text-[#141414] tracking-tight">
-            Candidate Dossier
+            Membership Application
           </h1>
           <p className="text-xs text-black/60 font-light mt-2">
             Step {step} of 6 • Confidential Membership Council Submission
@@ -268,7 +268,7 @@ function MembershipApplicationContent() {
           <form onSubmit={handleNext} className="bg-white p-8 md:p-12 rounded-xs border border-[#E8E2D8] shadow-xs space-y-6">
             <h2 className="font-serif-luxury text-2xl text-[#141414]">Step 2 — Personal Profile</h2>
             <p className="text-xs text-black/60">
-              Basic identification for House concierge and communications.
+              Basic contact details so our team can reach you.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -429,7 +429,7 @@ function MembershipApplicationContent() {
           <form onSubmit={handleNext} className="bg-white p-8 md:p-12 rounded-xs border border-[#E8E2D8] shadow-xs space-y-6">
             <h2 className="font-serif-luxury text-2xl text-[#141414]">Step 4 — Passions & Fellowships</h2>
             <p className="text-xs text-black/60">
-              Select the cultural realms that matter most to you to assist our event curations.
+              Select the interests that matter most to you so we can suggest relevant events.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -524,7 +524,7 @@ function MembershipApplicationContent() {
                 type="submit"
                 className="px-8 py-3.5 rounded-full bg-[#141414] text-white text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#B8976C] transition"
               >
-                Review & Submit Dossier →
+                Review & submit application →
               </button>
             </div>
           </form>
@@ -533,7 +533,7 @@ function MembershipApplicationContent() {
         {/* Step 6: Final Review & Submission */}
         {step === 6 && (
           <div className="bg-white p-8 md:p-12 rounded-xs border border-[#E8E2D8] shadow-xs space-y-6">
-            <h2 className="font-serif-luxury text-2xl text-[#141414]">Step 6 — Dossier Review</h2>
+            <h2 className="font-serif-luxury text-2xl text-[#141414]">Step 6 — Review your application</h2>
             <p className="text-xs text-black/60">
               Please review your candidate submission before submitting it to the Membership Council.
             </p>
@@ -570,7 +570,7 @@ function MembershipApplicationContent() {
             {/* Payment Settlement Preference */}
             <div className="space-y-3 pt-2">
               <span className="text-xs uppercase tracking-wider text-black/60 font-medium block">
-                Treasury Settlement Preference
+                Payment preference
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <label
@@ -666,7 +666,7 @@ function MembershipApplicationContent() {
                       <span className="font-semibold text-black">Manual Bank Wire</span>
                     </div>
                     <p className="text-[11px] text-black/60 mt-1 pl-5">
-                      Direct wire to HUDORIAN Treasury with verification code.
+                      Bank transfer with a verification code.
                     </p>
                   </label>
                 )}
@@ -738,7 +738,7 @@ function MembershipApplicationContent() {
               <span>
                 {paymentSettlement === 'review_first'
                   ? 'By submitting, you agree to the HUDORIAN House Code and confirm that membership privileges will only be billed following committee approval.'
-                  : 'By submitting, you authorize your membership dues settlement. Official digital pass and welcome dossier are issued upon Treasury confirmation.'}
+                  : 'By submitting, you authorize your membership payment. Your membership card and welcome pack are issued once payment is confirmed.'}
               </span>
             </div>
 
@@ -756,7 +756,7 @@ function MembershipApplicationContent() {
                 onClick={handleSubmit}
                 className="px-10 py-4 rounded-full bg-[#141414] text-white text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#B8976C] transition disabled:opacity-50"
               >
-                {submitting ? 'Transmitting Dossier...' : 'Submit Candidate Dossier'}
+                {submitting ? 'Submitting...' : 'Submit application'}
               </button>
             </div>
           </div>
@@ -770,7 +770,7 @@ function MembershipApplicationContent() {
             </div>
 
             <h2 className="font-serif-luxury text-3xl sm:text-4xl text-[#141414]">
-              Dossier Transmitted Successfully
+              Application received
             </h2>
 
             <p className="text-sm text-black/75 max-w-lg mx-auto font-light leading-relaxed">

@@ -42,7 +42,7 @@ function SignInContent() {
         <div className="bg-white p-8 md:p-12 rounded-xs border border-[#E8E2D8] shadow-md max-w-md w-full space-y-6">
           <div className="text-center space-y-2">
             <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#96754B]">
-              PRIVATE RESIDENCE ACCESS
+              MEMBER SIGN IN
             </span>
             <h1 className="font-serif-luxury text-3xl md:text-4xl text-[#141414]">
               Member Portal
@@ -78,7 +78,7 @@ function SignInContent() {
                   Password
                 </label>
                 <Link href="/forgot-password" className="text-[10px] text-[#96754B] hover:underline">
-                  Forgot Keyphrase?
+                  Forgot password?
                 </Link>
               </div>
               <input

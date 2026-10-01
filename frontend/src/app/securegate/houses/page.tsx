@@ -98,6 +98,25 @@ const toSlug = (value: string) =>
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+/** Typing a name on a brand new house fills the web address for you. */
+function applyName(form: FormState, name: string, isNew: boolean): FormState {
+  return { ...form, name, slug: isNew && !form.slug ? toSlug(name) : form.slug };
+}
+
+/** Changing location can invalidate the chosen estate, so re-check it against the new location. */
+function applyLocation(form: FormState, locationId: string, allEstates: Estate[]): FormState {
+  const stillValid = form.estate_id
+    ? allEstates.some(
+        (estate) => String(estate.id) === form.estate_id && (!locationId || String(estate.location_id) === locationId)
+      )
+    : false;
+  return { ...form, location_id: locationId, estate_id: stillValid ? form.estate_id : '' };
+}
+
+function toggleInList(list: number[], id: number): number[] {
+  return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+}
+
 function houseToForm(house: House): FormState {
   return {
     name: house.name || '',
@@ -142,6 +161,348 @@ function formToPayload(form: FormState): HousePayload {
   };
 }
 
+type HouseFieldContext = {
+  form: FormState;
+  setField: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+  setNameAndSlug: (name: string) => void;
+  setLocation: (locationId: string) => void;
+  toggleAmenity: (id: number) => void;
+  setFailedHeroUrl: (url: string) => void;
+  amenitiesByCategory: Record<string, Amenity[]>;
+  failedHeroUrl: string;
+  locations: Location[];
+  availableEstates: Estate[];
+  houseTypes: string[];
+  statuses: string[];
+  idPrefix: string;
+};
+
+/**
+ * The house fields, shared by the add/edit dialog and the inline editor on the
+ * details view so both stay in sync.
+ */
+function HouseFields({ ctx }: { ctx: HouseFieldContext }) {
+  const {
+    form,
+    setField,
+    setNameAndSlug,
+    setLocation,
+    toggleAmenity,
+    setFailedHeroUrl,
+    amenitiesByCategory,
+    failedHeroUrl,
+    locations,
+    availableEstates,
+    houseTypes,
+    statuses,
+    idPrefix,
+  } = ctx;
+  const uid = (name: string) => `${idPrefix}-${name}`;
+
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass} htmlFor={uid('name')}>
+            House name *
+          </label>
+          <input
+            id={uid('name')}
+            className={inputClass}
+            value={form.name}
+            onChange={(e) => setNameAndSlug(e.target.value)}
+            placeholder="e.g. Mayfair Manor"
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor={uid('slug')}>
+            Web address
+          </label>
+          <input
+            id={uid('slug')}
+            className={`${inputClass} font-mono`}
+            value={form.slug}
+            onChange={(e) => setField('slug', e.target.value)}
+            placeholder="made from the name"
+          />
+          <p className="mt-1.5 text-[10px] text-white/40">
+            Page address: /houses/{form.slug || toSlug(form.name) || '…'}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor={uid('tagline')}>
+          Short tagline
+        </label>
+        <input
+          id={uid('tagline')}
+          className={inputClass}
+          value={form.tagline}
+          onChange={(e) => setField('tagline', e.target.value)}
+          placeholder="A short line shown under the name"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass} htmlFor={uid('location')}>
+            Location *
+          </label>
+          <select
+            id={uid('location')}
+            className={inputClass}
+            value={form.location_id}
+            onChange={(e) => setLocation(e.target.value)}
+          >
+            <option value="">Select a location…</option>
+            {locations.map((loc) => (
+              <option key={loc.id} value={loc.id}>
+                {loc.name}
+                {loc.country ? ` — ${loc.country}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor={uid('estate')}>
+            Estate
+          </label>
+          <select
+            id={uid('estate')}
+            className={inputClass}
+            value={form.estate_id}
+            onChange={(e) => setField('estate_id', e.target.value)}
+          >
+            <option value="">Not part of an estate</option>
+            {availableEstates.map((estate) => (
+              <option key={estate.id} value={estate.id}>
+                {estate.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label className={labelClass} htmlFor={uid('type')}>
+            Property type *
+          </label>
+          <select
+            id={uid('type')}
+            className={inputClass}
+            value={form.house_type}
+            onChange={(e) => setField('house_type', e.target.value)}
+          >
+            {houseTypes.map((type) => (
+              <option key={type} value={type}>
+                {TYPE_LABELS[type] || type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor={uid('status')}>
+            Status *
+          </label>
+          <select
+            id={uid('status')}
+            className={inputClass}
+            value={form.status}
+            onChange={(e) => setField('status', e.target.value)}
+          >
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_LABELS[status] || status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor={uid('order')}>
+            Display order
+          </label>
+          <input
+            id={uid('order')}
+            type="number"
+            className={inputClass}
+            value={form.sort_order}
+            onChange={(e) => setField('sort_order', e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor={uid('address')}>
+          Address *
+        </label>
+        <textarea
+          id={uid('address')}
+          rows={2}
+          className={inputClass}
+          value={form.address}
+          onChange={(e) => setField('address', e.target.value)}
+          placeholder="Street, area, city"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass} htmlFor={uid('lat')}>
+            Latitude
+          </label>
+          <input
+            id={uid('lat')}
+            type="number"
+            step="any"
+            className={inputClass}
+            value={form.latitude}
+            onChange={(e) => setField('latitude', e.target.value)}
+            placeholder="51.5072"
+          />
+        </div>
+        <div>
+          <label className={labelClass} htmlFor={uid('lng')}>
+            Longitude
+          </label>
+          <input
+            id={uid('lng')}
+            type="number"
+            step="any"
+            className={inputClass}
+            value={form.longitude}
+            onChange={(e) => setField('longitude', e.target.value)}
+            placeholder="-0.1276"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor={uid('short')}>
+          Short description <span className="normal-case text-white/40">(up to 500 characters)</span>
+        </label>
+        <textarea
+          id={uid('short')}
+          rows={2}
+          maxLength={500}
+          className={inputClass}
+          value={form.short_description}
+          onChange={(e) => setField('short_description', e.target.value)}
+          placeholder="A short summary used on listing cards"
+        />
+        <p className="mt-1.5 text-[10px] text-white/40 text-right">{form.short_description.length}/500</p>
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor={uid('description')}>
+          Description *
+        </label>
+        <textarea
+          id={uid('description')}
+          rows={6}
+          className={inputClass}
+          value={form.description}
+          onChange={(e) => setField('description', e.target.value)}
+          placeholder="Describe the house, its history and what it offers"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass} htmlFor={uid('hero')}>
+            Main image URL
+          </label>
+          <input
+            id={uid('hero')}
+            className={inputClass}
+            value={form.hero_image}
+            onChange={(e) => setField('hero_image', e.target.value)}
+            placeholder="https://…"
+          />
+          {form.hero_image && failedHeroUrl !== form.hero_image && (
+            <div className="mt-2 h-28 w-full rounded-xl overflow-hidden border border-white/10 bg-stone-900">
+              <img
+                src={form.hero_image}
+                alt="Main image preview"
+                className="w-full h-full object-cover"
+                onError={() => setFailedHeroUrl(form.hero_image)}
+              />
+            </div>
+          )}
+          {form.hero_image && failedHeroUrl === form.hero_image && (
+            <p className="mt-2 text-[10px] text-rose-300/80">
+              This image could not be loaded. It will still be saved as you typed it.
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass} htmlFor={uid('video')}>
+              Video URL
+            </label>
+            <input
+              id={uid('video')}
+              className={inputClass}
+              value={form.hero_video}
+              onChange={(e) => setField('hero_video', e.target.value)}
+              placeholder="https://…"
+            />
+          </div>
+
+          <label className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/10 cursor-pointer transition hover:border-[#C5A880]/40">
+            <input
+              type="checkbox"
+              checked={form.is_featured}
+              onChange={(e) => setField('is_featured', e.target.checked)}
+              className="w-4 h-4 accent-[#C5A880] cursor-pointer"
+            />
+            <span className="text-xs text-white/80">Show on the home page</span>
+            <Star className="w-3.5 h-3.5 text-[#C5A880] ml-auto" />
+          </label>
+        </div>
+      </div>
+
+      {Object.keys(amenitiesByCategory).length > 0 && (
+        <div className="space-y-3">
+          <span className={labelClass}>Amenities</span>
+          <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+            {Object.entries(amenitiesByCategory).map(([category, items]) => (
+              <div key={category} className="space-y-2">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-[#C5A880]/70">{category}</p>
+                <div className="flex flex-wrap gap-2">
+                  {items.map((amenity) => {
+                    const active = form.amenities.includes(amenity.id);
+                    return (
+                      <button
+                        key={amenity.id}
+                        type="button"
+                        onClick={() => toggleAmenity(amenity.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] border transition cursor-pointer ${
+                          active
+                            ? 'bg-[#C5A880]/15 border-[#C5A880]/40 text-[#C5A880]'
+                            : 'bg-white/[0.03] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.06]'
+                        }`}
+                      >
+                        {amenity.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 type Flash = { type: 'success' | 'error'; text: string };
 
 type HouseReference = {
@@ -172,7 +533,7 @@ async function fetchAdminHouses(handlers: {
     handlers.onHouses(res.data || []);
   } catch (err) {
     console.warn('Could not load houses:', err);
-    handlers.onFlash({ type: 'error', text: 'Unable to sync the sanctuary inventory from the SecureGate vault.' });
+    handlers.onFlash({ type: 'error', text: 'Could not load your houses. Check your connection and try again.' });
   } finally {
     handlers.onLoading(false);
   }
@@ -204,6 +565,8 @@ export default function SecureGateHousesPage() {
   const [filterQuery, setFilterQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [inspectHouse, setInspectHouse] = useState<House | null>(null);
+  const [detailEditing, setDetailEditing] = useState(false);
+  const [detailForm, setDetailForm] = useState<FormState>(EMPTY_FORM);
   const [flash, setFlash] = useState<Flash | null>(null);
 
   const [editor, setEditor] = useState<{ isOpen: boolean; isNew: boolean; id: number | null; form: FormState }>({
@@ -261,6 +624,72 @@ export default function SecureGateHousesPage() {
     setEditor({ isOpen: true, isNew: false, id: house.id, form: houseToForm(house) });
   };
 
+  // Opening the details view always starts in read mode; editing is a deliberate action.
+  const openDetails = (house: House) => {
+    setFormError('');
+    setFailedHeroUrl('');
+    setDetailForm(houseToForm(house));
+    setDetailEditing(false);
+    setInspectHouse(house);
+  };
+
+  const closeDetails = () => {
+    setInspectHouse(null);
+    setDetailEditing(false);
+    setFormError('');
+  };
+
+  const cancelDetailEdit = () => {
+    // Discard unsaved changes and fall back to the last saved values.
+    if (inspectHouse) setDetailForm(houseToForm(inspectHouse));
+    setDetailEditing(false);
+    setFormError('');
+    setFailedHeroUrl('');
+  };
+
+  const saveDetail = async () => {
+    if (!inspectHouse) return;
+    setFormError('');
+
+    if (!detailForm.name.trim()) {
+      setFormError('A house name is required.');
+      return;
+    }
+    if (!detailForm.location_id) {
+      setFormError('Please choose a location.');
+      return;
+    }
+    if (!detailForm.address.trim()) {
+      setFormError('An address is required.');
+      return;
+    }
+    if (!detailForm.description.trim()) {
+      setFormError('A description is required.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = formToPayload(detailForm);
+      await api.updateHouse(inspectHouse.id, payload);
+      setFlash({ type: 'success', text: `"${payload.name}" was saved.` });
+      await fetchAdminHouses({ onLoading: setLoading, onHouses: setHouses, onFlash: setFlash });
+      // Re-read from the server so the details view shows what was actually stored.
+      const refreshedList = await api.getAdminHouses();
+      const refreshed = (refreshedList.data || []).find((h: House) => h.id === inspectHouse.id);
+      setHouses(refreshedList.data || []);
+      if (refreshed) {
+        setInspectHouse(refreshed);
+        setDetailForm(houseToForm(refreshed));
+      }
+      setDetailEditing(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'This house could not be saved.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setEditor((prev) => ({ ...prev, form: { ...prev.form, [key]: value } }));
 
@@ -282,19 +711,19 @@ export default function SecureGateHousesPage() {
     setFormError('');
 
     if (!editor.form.name.trim()) {
-      setFormError('A sanctuary name is required.');
+      setFormError('Enter a house name.');
       return;
     }
     if (!editor.form.location_id) {
-      setFormError('Please select a location for this sanctuary.');
+      setFormError('Choose a location.');
       return;
     }
     if (!editor.form.address.trim()) {
-      setFormError('A physical address is required.');
+      setFormError('Enter the address.');
       return;
     }
     if (!editor.form.description.trim()) {
-      setFormError('An architectural description is required.');
+      setFormError('Enter a description.');
       return;
     }
 
@@ -303,15 +732,15 @@ export default function SecureGateHousesPage() {
       const payload = formToPayload(editor.form);
       if (editor.isNew) {
         await api.createHouse(payload);
-        setFlash({ type: 'success', text: `Sanctuary "${payload.name}" was added to the portfolio.` });
+        setFlash({ type: 'success', text: `"${payload.name}" was added.` });
       } else {
         await api.updateHouse(editor.id as number, payload);
-        setFlash({ type: 'success', text: `Sanctuary "${payload.name}" was updated.` });
+        setFlash({ type: 'success', text: `"${payload.name}" was saved.` });
       }
       setEditor((prev) => ({ ...prev, isOpen: false }));
       await fetchAdminHouses({ onLoading: setLoading, onHouses: setHouses, onFlash: setFlash });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'The sanctuary could not be saved.';
+      const message = err instanceof Error ? err.message : 'This house could not be saved.';
       setFormError(message);
     } finally {
       setSaving(false);
@@ -321,17 +750,17 @@ export default function SecureGateHousesPage() {
   const handleDelete = (house: House) => {
     setConfirmModal({
       isOpen: true,
-      title: 'Retire Sanctuary',
-      message: `This will permanently remove "${house.name}" and detach its configured suites, amenities and media from the portfolio. This action cannot be undone.`,
-      confirmLabel: 'Delete Sanctuary',
+      title: 'Delete house',
+      message: `This will permanently delete "${house.name}", including its rooms, amenities and images. This cannot be undone.`,
+      confirmLabel: 'Delete house',
       onConfirm: async () => {
         setConfirmModal(null);
         try {
           await api.deleteHouse(house.id);
-          setFlash({ type: 'success', text: `Sanctuary "${house.name}" was deleted.` });
+          setFlash({ type: 'success', text: `"${house.name}" was deleted.` });
           await fetchAdminHouses({ onLoading: setLoading, onHouses: setHouses, onFlash: setFlash });
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'The sanctuary could not be deleted.';
+          const message = err instanceof Error ? err.message : 'This house could not be deleted.';
           setFlash({ type: 'error', text: message });
         }
       },
@@ -341,21 +770,53 @@ export default function SecureGateHousesPage() {
   const toggleAmenity = (id: number) => {
     setEditor((prev) => ({
       ...prev,
-      form: {
-        ...prev.form,
-        amenities: prev.form.amenities.includes(id)
-          ? prev.form.amenities.filter((a) => a !== id)
-          : [...prev.form.amenities, id],
-      },
+      form: { ...prev.form, amenities: toggleInList(prev.form.amenities, id) },
     }));
   };
 
-  const suitesCount = (house: House) => house.rooms_count || (house.rooms ? house.rooms.length : 0);
+  const roomsCount = (house: House) => house.rooms_count || (house.rooms ? house.rooms.length : 0);
+
+  const baseFieldContext = {
+    setFailedHeroUrl,
+    amenitiesByCategory,
+    failedHeroUrl,
+    locations,
+    houseTypes,
+    statuses,
+  };
+
+  const editorFields: HouseFieldContext = {
+    ...baseFieldContext,
+    form: editor.form,
+    availableEstates,
+    idPrefix: 'house',
+    setField,
+    setNameAndSlug: (name: string) => setEditor((prev) => ({ ...prev, form: applyName(prev.form, name, prev.isNew) })),
+    setLocation: (locationId: string) =>
+      setEditor((prev) => ({ ...prev, form: applyLocation(prev.form, locationId, estates) })),
+    toggleAmenity,
+  };
+
+  const detailAvailableEstates = useMemo(() => {
+    if (!detailForm.location_id) return estates;
+    return estates.filter((estate) => String(estate.location_id) === detailForm.location_id);
+  }, [estates, detailForm.location_id]);
+
+  const detailFields: HouseFieldContext = {
+    ...baseFieldContext,
+    form: detailForm,
+    availableEstates: detailAvailableEstates,
+    idPrefix: 'detail',
+    setField: (key, value) => setDetailForm((prev) => ({ ...prev, [key]: value })),
+    setNameAndSlug: (name: string) => setDetailForm((prev) => applyName(prev, name, false)),
+    setLocation: (locationId: string) => setDetailForm((prev) => applyLocation(prev, locationId, estates)),
+    toggleAmenity: (id: number) => setDetailForm((prev) => ({ ...prev, amenities: toggleInList(prev.amenities, id) })),
+  };
 
   return (
     <SecureGateLayout
-      title="Sanctuaries & Houses Portfolio"
-      subtitle="Executive ledger of physical sanctuaries, private estates, and architectural suites across global capitals."
+      title="Houses"
+      subtitle="Add and update the houses, rooms and details shown on your website."
       actions={
         <div className="flex items-center gap-3">
           <button
@@ -364,13 +825,13 @@ export default function SecureGateHousesPage() {
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>New Sanctuary</span>
+            <span>Add house</span>
           </button>
           <Link
             href="/securegate/cms"
             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition flex items-center gap-2"
           >
-            <span>Manage Editorial Lore in CMS</span>
+            <span>Edit page content</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -411,7 +872,7 @@ export default function SecureGateHousesPage() {
               type="text"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              placeholder="Search by sanctuary name, country or type..."
+              placeholder="Search by name, country or type"
               className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C5A880]"
             />
           </div>
@@ -433,18 +894,18 @@ export default function SecureGateHousesPage() {
           </div>
         </div>
 
-        {/* Executive Houses Table */}
+        {/* House list */}
         <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
           {loading ? (
             <div className="p-16 text-center text-xs text-white/40 font-mono">
-              Synchronizing global sanctuary inventory from SecureGate vault...
+              Loading houses…
             </div>
           ) : filteredHouses.length === 0 ? (
             <div className="p-16 text-center space-y-4">
               <p className="text-white/50 text-xs font-light">
                 {houses.length === 0
-                  ? 'No sanctuaries have been recorded yet. Add the first property to the portfolio.'
-                  : 'No sanctuary properties matched your filter criteria.'}
+                  ? 'No houses yet. Add your first one to get started.'
+                  : 'No houses match your search.'}
               </p>
               {houses.length === 0 && (
                 <button
@@ -452,7 +913,7 @@ export default function SecureGateHousesPage() {
                   onClick={openCreate}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition cursor-pointer"
                 >
-                  Add First Sanctuary
+                  Add your first house
                 </button>
               )}
             </div>
@@ -461,12 +922,12 @@ export default function SecureGateHousesPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-white/[0.03] text-white/40 font-mono uppercase tracking-wider border-b border-white/5">
                   <tr>
-                    <th className="p-4 pl-6">Sanctuary</th>
-                    <th className="p-4">House Name & Key</th>
-                    <th className="p-4">Terroir & Location</th>
-                    <th className="p-4">Sanctuary Type</th>
+                    <th className="p-4 pl-6">Image</th>
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Location</th>
+                    <th className="p-4">Type</th>
                     <th className="p-4">Status</th>
-                    <th className="p-4">Suites Configured</th>
+                    <th className="p-4">Rooms</th>
                     <th className="p-4 pr-6 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -514,23 +975,23 @@ export default function SecureGateHousesPage() {
                           {STATUS_LABELS[house.status] || house.status}
                         </span>
                       </td>
-                      <td className="p-4 font-mono text-white/70">{suitesCount(house)} Suites</td>
+                      <td className="p-4 text-white/70">{roomsCount(house)} rooms</td>
                       <td className="p-4 pr-6 text-right">
                         <div className="inline-flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setInspectHouse(house)}
+                            onClick={() => openDetails(house)}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs transition cursor-pointer"
-                            title="Inspect Sanctuary"
+                            title="View house details"
                           >
                             <Eye className="w-3 h-3 text-[#C5A880]" />
-                            <span>Inspect</span>
+                            <span>View</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => openEdit(house)}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#C5A880]/10 hover:bg-[#C5A880]/20 text-[#C5A880] text-xs transition cursor-pointer"
-                            title="Edit Sanctuary"
+                            title="Edit house"
                           >
                             <Pencil className="w-3 h-3" />
                             <span>Edit</span>
@@ -539,7 +1000,7 @@ export default function SecureGateHousesPage() {
                             href={`/houses/${house.slug}`}
                             target="_blank"
                             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition"
-                            title="Open Public Sanctuary Page"
+                            title="Open this house on the website"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Link>
@@ -547,7 +1008,7 @@ export default function SecureGateHousesPage() {
                             type="button"
                             onClick={() => handleDelete(house)}
                             className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition cursor-pointer"
-                            title="Delete Sanctuary"
+                            title="Delete house"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -562,7 +1023,7 @@ export default function SecureGateHousesPage() {
         </div>
       </div>
 
-      {/* Sanctuary Editor Modal */}
+      {/* Add / edit house dialog */}
       {editor.isOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#121212] border border-white/10 rounded-2xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
@@ -570,7 +1031,7 @@ export default function SecureGateHousesPage() {
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#C5A880]" />
                 <h3 className="font-serif-luxury text-lg text-white">
-                  {editor.isNew ? 'Register New Sanctuary' : `Edit ${editor.form.name || 'Sanctuary'}`}
+                  {editor.isNew ? 'Add a house' : `Edit ${editor.form.name || 'house'}`}
                 </h3>
               </div>
               <button
@@ -592,340 +1053,12 @@ export default function SecureGateHousesPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass} htmlFor="house-name">
-                      Sanctuary Name *
-                    </label>
-                    <input
-                      id="house-name"
-                      className={inputClass}
-                      value={editor.form.name}
-                      onChange={(e) => {
-                        const name = e.target.value;
-                        setEditor((prev) => ({
-                          ...prev,
-                          form: {
-                            ...prev.form,
-                            name,
-                            slug: prev.isNew && !prev.form.slug ? toSlug(name) : prev.form.slug,
-                          },
-                        }));
-                      }}
-                      placeholder="e.g. Mayfair Manor"
-                    />
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="house-slug">
-                      Public Key (slug)
-                    </label>
-                    <input
-                      id="house-slug"
-                      className={`${inputClass} font-mono`}
-                      value={editor.form.slug}
-                      onChange={(e) => setField('slug', e.target.value)}
-                      placeholder="auto-generated from name"
-                    />
-                    <p className="mt-1.5 text-[10px] font-mono text-white/30">Public route: /houses/{editor.form.slug || toSlug(editor.form.name) || '…'}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass} htmlFor="house-tagline">
-                    Tagline
-                  </label>
-                  <input
-                    id="house-tagline"
-                    className={inputClass}
-                    value={editor.form.tagline}
-                    onChange={(e) => setField('tagline', e.target.value)}
-                    placeholder="A short editorial hook shown beneath the name"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass} htmlFor="house-location">
-                      Location *
-                    </label>
-                    <select
-                      id="house-location"
-                      className={inputClass}
-                      value={editor.form.location_id}
-                      onChange={(e) => {
-                        const locationId = e.target.value;
-                        setEditor((prev) => {
-                          // Check against the newly chosen location, not the
-                          // previous one that `availableEstates` was built from.
-                          const stillValid = prev.form.estate_id
-                            ? estates.some(
-                                (estate) =>
-                                  String(estate.id) === prev.form.estate_id &&
-                                  (!locationId || String(estate.location_id) === locationId)
-                              )
-                            : false;
-                          return {
-                            ...prev,
-                            form: {
-                              ...prev.form,
-                              location_id: locationId,
-                              estate_id: stillValid ? prev.form.estate_id : '',
-                            },
-                          };
-                        });
-                      }}
-                    >
-                      <option value="">Select a territory...</option>
-                      {locations.map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                          {loc.country ? ` — ${loc.country}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="house-estate">
-                      Parent Estate
-                    </label>
-                    <select
-                      id="house-estate"
-                      className={inputClass}
-                      value={editor.form.estate_id}
-                      onChange={(e) => setField('estate_id', e.target.value)}
-                    >
-                      <option value="">Standalone property</option>
-                      {availableEstates.map((estate) => (
-                        <option key={estate.id} value={estate.id}>
-                          {estate.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className={labelClass} htmlFor="house-type">
-                      Sanctuary Type *
-                    </label>
-                    <select
-                      id="house-type"
-                      className={inputClass}
-                      value={editor.form.house_type}
-                      onChange={(e) => setField('house_type', e.target.value)}
-                    >
-                      {houseTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {TYPE_LABELS[type] || type}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="house-status">
-                      Status *
-                    </label>
-                    <select
-                      id="house-status"
-                      className={inputClass}
-                      value={editor.form.status}
-                      onChange={(e) => setField('status', e.target.value)}
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {STATUS_LABELS[status] || status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="house-order">
-                      Sort Order
-                    </label>
-                    <input
-                      id="house-order"
-                      type="number"
-                      className={inputClass}
-                      value={editor.form.sort_order}
-                      onChange={(e) => setField('sort_order', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass} htmlFor="house-address">
-                    Physical Address *
-                  </label>
-                  <textarea
-                    id="house-address"
-                    rows={2}
-                    className={inputClass}
-                    value={editor.form.address}
-                    onChange={(e) => setField('address', e.target.value)}
-                    placeholder="Street, district, city"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="col-span-2 sm:col-span-2">
-                    <label className={labelClass} htmlFor="house-lat">
-                      Latitude
-                    </label>
-                    <input
-                      id="house-lat"
-                      type="number"
-                      step="any"
-                      className={inputClass}
-                      value={editor.form.latitude}
-                      onChange={(e) => setField('latitude', e.target.value)}
-                      placeholder="51.5072"
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-2">
-                    <label className={labelClass} htmlFor="house-lng">
-                      Longitude
-                    </label>
-                    <input
-                      id="house-lng"
-                      type="number"
-                      step="any"
-                      className={inputClass}
-                      value={editor.form.longitude}
-                      onChange={(e) => setField('longitude', e.target.value)}
-                      placeholder="-0.1276"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass} htmlFor="house-short">
-                    Short Description <span className="normal-case text-white/25">(max 500 characters)</span>
-                  </label>
-                  <textarea
-                    id="house-short"
-                    rows={2}
-                    maxLength={500}
-                    className={inputClass}
-                    value={editor.form.short_description}
-                    onChange={(e) => setField('short_description', e.target.value)}
-                    placeholder="A concise summary used on listing cards"
-                  />
-                  <p className="mt-1.5 text-[10px] font-mono text-white/30 text-right">
-                    {editor.form.short_description.length}/500
-                  </p>
-                </div>
-
-                <div>
-                  <label className={labelClass} htmlFor="house-description">
-                    Architectural Description *
-                  </label>
-                  <textarea
-                    id="house-description"
-                    rows={6}
-                    className={inputClass}
-                    value={editor.form.description}
-                    onChange={(e) => setField('description', e.target.value)}
-                    placeholder="Describe the estate, its provenance and the experience it offers"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass} htmlFor="house-hero">
-                      Hero Image URL
-                    </label>
-                    <input
-                      id="house-hero"
-                      className={inputClass}
-                      value={editor.form.hero_image}
-                      onChange={(e) => setField('hero_image', e.target.value)}
-                      placeholder="https://…"
-                    />
-                    {editor.form.hero_image && failedHeroUrl !== editor.form.hero_image && (
-                      <div className="mt-2 h-28 w-full rounded-xl overflow-hidden border border-white/10 bg-stone-900">
-                        <img
-                          src={editor.form.hero_image}
-                          alt="Hero preview"
-                          className="w-full h-full object-cover"
-                          onError={() => setFailedHeroUrl(editor.form.hero_image)}
-                        />
-                      </div>
-                    )}
-                    {editor.form.hero_image && failedHeroUrl === editor.form.hero_image && (
-                      <p className="mt-2 text-[10px] font-mono text-rose-300/80">
-                        Could not load this image URL — it will be saved as entered.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className={labelClass} htmlFor="house-video">
-                        Hero Video URL
-                      </label>
-                      <input
-                        id="house-video"
-                        className={inputClass}
-                        value={editor.form.hero_video}
-                        onChange={(e) => setField('hero_video', e.target.value)}
-                        placeholder="https://…"
-                      />
-                    </div>
-
-                    <label className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/10 cursor-pointer transition hover:border-[#C5A880]/40">
-                      <input
-                        type="checkbox"
-                        checked={editor.form.is_featured}
-                        onChange={(e) => setField('is_featured', e.target.checked)}
-                        className="w-4 h-4 accent-[#C5A880] cursor-pointer"
-                      />
-                      <span className="text-xs text-white/80">Feature on the public portfolio</span>
-                      <Star className="w-3.5 h-3.5 text-[#C5A880] ml-auto" />
-                    </label>
-                  </div>
-                </div>
-
-                {amenities.length > 0 && (
-                  <div className="space-y-3">
-                    <span className={labelClass}>Configured Amenities</span>
-                    <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
-                      {Object.entries(amenitiesByCategory).map(([category, items]) => (
-                        <div key={category} className="space-y-2">
-                          <p className="text-[10px] font-mono uppercase tracking-wider text-[#C5A880]/70">{category}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {items.map((amenity) => {
-                              const active = editor.form.amenities.includes(amenity.id);
-                              return (
-                                <button
-                                  key={amenity.id}
-                                  type="button"
-                                  onClick={() => toggleAmenity(amenity.id)}
-                                  className={`px-2.5 py-1 rounded-lg text-[11px] border transition cursor-pointer ${
-                                    active
-                                      ? 'bg-[#C5A880]/15 border-[#C5A880]/40 text-[#C5A880]'
-                                      : 'bg-white/[0.03] border-white/10 text-white/50 hover:text-white hover:bg-white/[0.06]'
-                                  }`}
-                                >
-                                  {amenity.name}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <HouseFields ctx={editorFields} />
               </div>
 
               <div className="p-5 border-t border-white/10 flex items-center justify-between shrink-0 bg-[#121212]">
                 <span className="text-[11px] font-mono text-white/30">
-                  {editor.isNew ? 'New record — audit trail will log house.created' : `Editing record #${editor.id}`}
+                  {editor.isNew ? 'New house' : 'Changes are saved when you click Save' }
                 </span>
                 <div className="flex items-center gap-3">
                   <button
@@ -942,7 +1075,7 @@ export default function SecureGateHousesPage() {
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition disabled:opacity-60 cursor-pointer"
                   >
                     {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>{saving ? 'Saving' : editor.isNew ? 'Register Sanctuary' : 'Save Changes'}</span>
+                    <span>{saving ? 'Saving' : editor.isNew ? 'Add house' : 'Save changes'}</span>
                   </button>
                 </div>
               </div>
@@ -951,10 +1084,14 @@ export default function SecureGateHousesPage() {
         </div>
       )}
 
-      {/* Inspect House Modal */}
+      {/* House details, viewable and editable in place */}
       {inspectHouse && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121212] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
+          <div
+              className={`bg-[#121212] border border-white/10 rounded-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in ${
+                detailEditing ? 'max-w-3xl' : 'max-w-2xl'
+              }`}
+            >
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#C5A880]" />
@@ -970,106 +1107,160 @@ export default function SecureGateHousesPage() {
               </button>
             </div>
 
-            <div className="p-6 space-y-5 overflow-y-auto">
-              {inspectHouse.hero_image && (
-                <div className="h-52 w-full rounded-xl overflow-hidden border border-white/10 relative">
-                  <img src={inspectHouse.hero_image} alt={inspectHouse.name} className="w-full h-full object-cover" />
-                  <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-white border border-white/10">
-                    {TYPE_LABELS[inspectHouse.house_type] || inspectHouse.house_type || 'House'}
-                  </div>
+            <div className="p-6 space-y-5 overflow-y-auto grow">
+              {formError && detailEditing && (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-xs">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{formError}</span>
                 </div>
               )}
 
-              {inspectHouse.tagline && (
-                <p className="font-serif-luxury text-base text-[#C5A880] italic">{inspectHouse.tagline}</p>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-mono text-white/40 uppercase">Location & Address</span>
-                  <p className="text-xs text-white font-medium flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#C5A880]" />
-                    {inspectHouse.location?.name || inspectHouse.address}, {inspectHouse.location?.country}
+              {detailEditing ? (
+                <div className="space-y-5">
+                  <p className="text-xs text-white/50">
+                    Change anything you need, then choose <span className="text-white/80">Save changes</span> at the
+                    bottom. Nothing is saved until you do.
                   </p>
-                  {inspectHouse.address && (
-                    <p className="text-[11px] text-white/50 font-light">{inspectHouse.address}</p>
+                  <HouseFields ctx={detailFields} />
+                </div>
+              ) : (
+                <>
+                  {inspectHouse.hero_image && (
+                    <div className="h-52 w-full rounded-xl overflow-hidden border border-white/10 relative">
+                      <img
+                        src={inspectHouse.hero_image}
+                        alt={inspectHouse.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] text-white border border-white/10">
+                        {TYPE_LABELS[inspectHouse.house_type] || inspectHouse.house_type || 'House'}
+                      </div>
+                    </div>
                   )}
-                </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-mono text-white/40 uppercase">Accommodation Suites</span>
-                  <p className="text-xs text-white font-medium">{suitesCount(inspectHouse)} Suites Configured</p>
-                  <p className="text-[11px] text-white/50 font-light">
-                    {STATUS_LABELS[inspectHouse.status] || inspectHouse.status}
-                    {inspectHouse.is_featured ? ' · Featured' : ''}
-                    {inspectHouse.estate ? ` · ${inspectHouse.estate.name}` : ''}
-                  </p>
-                </div>
-              </div>
+                  {inspectHouse.tagline && <p className="text-base text-[#C5A880] italic">{inspectHouse.tagline}</p>}
 
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono text-white/40 uppercase">Architectural Description</span>
-                <p className="text-xs text-white/70 leading-relaxed font-light whitespace-pre-line">
-                  {inspectHouse.description || inspectHouse.short_description || 'No detailed lore recorded.'}
-                </p>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <span className="text-[10px] text-white/50">Location and address</span>
+                      <p className="text-xs text-white font-medium flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#C5A880]" />
+                        {inspectHouse.location?.name || inspectHouse.address}, {inspectHouse.location?.country}
+                      </p>
+                      {inspectHouse.address && (
+                        <p className="text-[11px] text-white/60">{inspectHouse.address}</p>
+                      )}
+                    </div>
 
-              {inspectHouse.amenities && inspectHouse.amenities.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-[10px] font-mono text-white/40 uppercase">Configured Amenities</span>
-                  <div className="flex flex-wrap gap-2">
-                    {inspectHouse.amenities.map((amenity) => (
-                      <span
-                        key={amenity.id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono bg-white/5 border border-white/10 text-[#C5A880]"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        {amenity.name}
-                      </span>
-                    ))}
+                    <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <span className="text-[10px] text-white/50">Rooms</span>
+                      <p className="text-xs text-white font-medium">{roomsCount(inspectHouse)} rooms</p>
+                      <p className="text-[11px] text-white/60">
+                        {STATUS_LABELS[inspectHouse.status] || inspectHouse.status}
+                        {inspectHouse.is_featured ? ' · Shown on home page' : ''}
+                        {inspectHouse.estate ? ` · Part of ${inspectHouse.estate.name}` : ''}
+                      </p>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-white/50">Description</span>
+                    <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">
+                      {inspectHouse.description || inspectHouse.short_description || 'No description yet.'}
+                    </p>
+                  </div>
+
+                  {inspectHouse.short_description && inspectHouse.description && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-white/50">Short description</span>
+                      <p className="text-xs text-white/70 leading-relaxed whitespace-pre-line">
+                        {inspectHouse.short_description}
+                      </p>
+                    </div>
+                  )}
+
+                  {inspectHouse.amenities && inspectHouse.amenities.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[10px] text-white/50">Amenities</span>
+                      <div className="flex flex-wrap gap-2">
+                        {inspectHouse.amenities.map((amenity) => (
+                          <span
+                            key={amenity.id}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] bg-white/5 border border-white/10 text-[#C5A880]"
+                          >
+                            <Sparkles className="w-2.5 h-2.5" />
+                            {amenity.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
+            </div>
 
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
-                <span className="text-[11px] font-mono text-[#C5A880]">Public Route: /houses/{inspectHouse.slug}</span>
+            <div className="p-4 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap shrink-0">
+              <span className="text-[11px] text-white/50">
+                {detailEditing ? 'Unsaved changes' : `Website address: /houses/${inspectHouse.slug}`}
+              </span>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setInspectHouse(null)}
-                    className="px-4 py-2 rounded-xl text-xs text-white/60 hover:text-white transition cursor-pointer"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const target = inspectHouse;
-                      setInspectHouse(null);
-                      if (target) openEdit(target);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-xs uppercase tracking-wider transition cursor-pointer"
-                  >
-                    <Pencil className="w-3 h-3" />
-                    <span>Edit</span>
-                  </button>
-                  <Link
-                    href={`/houses/${inspectHouse.slug}`}
-                    target="_blank"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition"
-                  >
-                    <span>View Live House</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={closeDetails}
+                  className="px-4 py-2 rounded-xl text-xs text-white/70 hover:text-white transition cursor-pointer"
+                  disabled={saving}
+                >
+                  Close
+                </button>
+
+                {detailEditing ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={cancelDetailEdit}
+                      className="px-4 py-2 rounded-xl text-xs text-white/70 hover:text-white transition cursor-pointer"
+                      disabled={saving}
+                    >
+                      Cancel changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={saveDetail}
+                      disabled={saving}
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs hover:opacity-90 transition disabled:opacity-60 cursor-pointer"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      <span>{saving ? 'Saving' : 'Save changes'}</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setDetailEditing(true)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C5A880]/15 hover:bg-[#C5A880]/25 text-[#C5A880] font-medium text-xs transition cursor-pointer"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span>Edit details</span>
+                    </button>
+                    <Link
+                      href={`/houses/${inspectHouse.slug}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-xs transition cursor-pointer"
+                    >
+                      <span>View on website</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Luxury Custom Confirmation Modal */}
+      {/* Delete confirmation */}
       {confirmModal && confirmModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="bg-[#121212] border border-[#2A2620] rounded-2xl max-w-md w-full p-6 text-white shadow-2xl space-y-4 animate-scale-up">
@@ -1080,7 +1271,7 @@ export default function SecureGateHousesPage() {
                 </div>
                 <div>
                   <h3 className="font-serif-luxury text-lg text-white">{confirmModal.title}</h3>
-                  <p className="text-xs text-white/50">Irreversible steward action</p>
+                  <p className="text-xs text-white/50">This cannot be undone</p>
                 </div>
               </div>
               <button
@@ -1106,7 +1297,7 @@ export default function SecureGateHousesPage() {
                 onClick={confirmModal.onConfirm}
                 className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs uppercase tracking-wider transition shadow-lg cursor-pointer"
               >
-                {confirmModal.confirmLabel || 'Confirm Delete'}
+                {confirmModal.confirmLabel || 'Delete'}
               </button>
             </div>
           </div>

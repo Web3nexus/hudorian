@@ -77,7 +77,7 @@ export default function SecureGatePaymentsPage() {
     transactionRef: null,
     amount: null,
     currency: null,
-    reason: 'Refund authorized via SecureGate Admin',
+    reason: 'Refund authorized by an administrator',
   });
 
   // Settings State
@@ -100,7 +100,7 @@ export default function SecureGatePaymentsPage() {
     manual_iban: 'GB29BARC20000088291048',
     manual_swift_bic: 'BARCGB22',
     manual_sort_code: '20-00-00',
-    manual_instructions: 'Please quote your Full Name or Membership Dossier Reference as the wire transfer reference.',
+    manual_instructions: 'Please quote your Full Name or Membership Number as the wire transfer reference.',
 
     default_currency: 'NGN',
   });
@@ -168,7 +168,7 @@ export default function SecureGatePaymentsPage() {
     setProcessingAction(true);
     setActionMsg(null);
     try {
-      await api.approveManualPayment(paymentId, approvalNotes || 'Approved via SecureGate Admin Treasury');
+      await api.approveManualPayment(paymentId, approvalNotes || 'Approved by an administrator');
       setActionMsg({ type: 'success', text: `Payment #${paymentId} confirmed. Official invoice issued and membership activated.` });
       setReviewPayment(null);
       setInspectPayment(null);
@@ -220,7 +220,7 @@ export default function SecureGatePaymentsPage() {
       transactionRef: payment.transaction_id,
       amount: Number(payment.amount),
       currency: payment.currency,
-      reason: 'Refund authorized via SecureGate Admin',
+      reason: 'Refund authorized by an administrator',
     });
   };
 
@@ -293,8 +293,8 @@ export default function SecureGatePaymentsPage() {
     const headers = [
       'Transaction ID',
       'Transaction Ref',
-      'Patron Name',
-      'Patron Email',
+      'Member Name',
+      'Member Email',
       'Amount',
       'Currency',
       'Status',
@@ -329,8 +329,8 @@ export default function SecureGatePaymentsPage() {
 
   return (
     <SecureGateLayout
-      title="Transactions & Treasury Ledger"
-      subtitle="Audited financial ledger of membership contributions, suite bookings, gateway settlements, and bank wires."
+      title="Payments"
+      subtitle="View membership payments, room bookings and bank transfers."
       actions={
         <div className="flex items-center gap-3">
           {/* Currency Switcher */}
@@ -398,7 +398,7 @@ export default function SecureGatePaymentsPage() {
               {formatPrice(metrics.paidVol)}
             </div>
             <div className="text-[11px] font-mono text-emerald-400/80">
-              Cleared into vault
+              Cleared
             </div>
           </div>
 
@@ -412,7 +412,7 @@ export default function SecureGatePaymentsPage() {
               {formatPrice(metrics.pendingVol)}
             </div>
             <div className="text-[11px] font-mono text-amber-400/80 flex items-center gap-1">
-              <span>{metrics.pendingCount} awaiting steward clearance</span>
+              <span>{metrics.pendingCount} awaiting approval</span>
             </div>
           </div>
 
@@ -506,7 +506,7 @@ export default function SecureGatePaymentsPage() {
               type="button"
               onClick={fetchPayments}
               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
-              title="Refresh ledger"
+              title="Refresh"
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -517,7 +517,7 @@ export default function SecureGatePaymentsPage() {
         <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
           {loading ? (
             <div className="p-16 text-center text-xs text-white/40 font-mono">
-              Loading financial transactions from SecureGate vault...
+              Loading payments...
             </div>
           ) : filteredPayments.length === 0 ? (
             <div className="p-16 text-center text-white/50 text-xs font-light">
@@ -529,7 +529,7 @@ export default function SecureGatePaymentsPage() {
                 <thead className="bg-white/[0.03] text-white/40 font-mono uppercase tracking-wider border-b border-white/5">
                   <tr>
                     <th className="p-4 pl-6">Transaction Ref</th>
-                    <th className="p-4">Patron / Candidate</th>
+                    <th className="p-4">Member / Applicant</th>
                     <th className="p-4">Amount</th>
                     <th className="p-4">Gateway / Method</th>
                     <th className="p-4">Date & Time</th>
@@ -600,7 +600,7 @@ export default function SecureGatePaymentsPage() {
                             </span>
                           )}
                           {!isFlutterwave && !isPaystack && !isManual && (
-                            <span className="text-white/60 text-[11px] capitalize">{p.provider || 'Vault Card'}</span>
+                            <span className="text-white/60 text-[11px] capitalize">{p.provider || 'Card'}</span>
                           )}
                         </td>
 
@@ -638,7 +638,7 @@ export default function SecureGatePaymentsPage() {
                           <button
                             onClick={() => setInspectPayment(p)}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs transition cursor-pointer"
-                            title="Inspect dossier"
+                            title="View details"
                           >
                             <Eye className="w-3 h-3 text-[#C5A880]" />
                             <span>Inspect</span>
@@ -703,7 +703,7 @@ export default function SecureGatePaymentsPage() {
               <div className="flex items-center gap-2.5">
                 <CreditCard className="w-5 h-5 text-[#C5A880]" />
                 <div>
-                  <h3 className="font-serif-luxury text-lg text-white">Transaction Dossier</h3>
+                  <h3 className="font-serif-luxury text-lg text-white">Transaction Details</h3>
                   <p className="text-[10px] font-mono text-white/40">
                     ID #{inspectPayment.id} • Ref: {inspectPayment.transaction_id || `TX-HUD-${inspectPayment.id}`}
                   </p>
@@ -747,10 +747,10 @@ export default function SecureGatePaymentsPage() {
                 </div>
               </div>
 
-              {/* Patron & Purpose Info */}
+              {/* Member & Purpose Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <span className="text-[10px] font-mono text-white/40 uppercase">Patron Details</span>
+                  <span className="text-[10px] font-mono text-white/40 uppercase">Member Details</span>
                   <p className="font-medium text-white text-sm">
                     {inspectPayment.user?.name || inspectPayment.metadata?.user_name || 'Guest / Candidate'}
                   </p>
@@ -859,7 +859,7 @@ export default function SecureGatePaymentsPage() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Landmark className="w-5 h-5 text-amber-400" />
-                <h3 className="font-serif-luxury text-lg text-white">Manual Wire Transfer Clearance</h3>
+                <h3 className="font-serif-luxury text-lg text-white">Approve bank transfer</h3>
               </div>
               <button
                 onClick={() => setReviewPayment(null)}
@@ -871,7 +871,7 @@ export default function SecureGatePaymentsPage() {
 
             <div className="space-y-3 bg-white/[0.02] p-4 rounded-xl border border-white/5 text-xs text-white/80 font-mono">
               <div className="flex justify-between">
-                <span className="text-white/40">Patron:</span>
+                <span className="text-white/40">Member:</span>
                 <span className="text-white">{reviewPayment.user?.name || reviewPayment.metadata?.user_name || 'Guest / Candidate'}</span>
               </div>
               <div className="flex justify-between">
@@ -885,11 +885,11 @@ export default function SecureGatePaymentsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs text-white/50 font-mono">Steward Verification Notes (Optional)</label>
+              <label className="block text-xs text-white/50 font-mono">Verification notes (Optional)</label>
               <textarea
                 value={approvalNotes}
                 onChange={(e) => setApprovalNotes(e.target.value)}
-                placeholder="e.g. Verified on Barclays Private Bank ledger at 14:30 UTC"
+                placeholder="e.g. Confirmed on the bank statement at 14:30 UTC"
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C5A880] resize-none h-20"
               />
             </div>
@@ -923,7 +923,7 @@ export default function SecureGatePaymentsPage() {
           <div className="bg-[#0f1115] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div>
-                <h3 className="font-serif-luxury text-lg text-white">Payment Gateway & Treasury Settings</h3>
+                <h3 className="font-serif-luxury text-lg text-white">Payment Gateway & Currency Settings</h3>
                 <p className="text-xs text-white/50">Manage Flutterwave, Paystack, and Manual Wire bank accounts.</p>
               </div>
               <button
@@ -1079,17 +1079,17 @@ export default function SecureGatePaymentsPage() {
                 )}
               </div>
 
-              {/* Treasury Base Currency Section */}
+              {/* Base Currency Section */}
               <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-[#C5A880]" />
-                  <span className="font-semibold text-white">Treasury Default Operating Currency</span>
+                  <span className="font-semibold text-white">Default operating currency</span>
                 </div>
                 <p className="text-white/50 text-[11px] leading-relaxed">
-                  The primary ledger denomination for membership fee calculations, local payment gateways, and banking reconciliations.
+                  Used to work out membership prices, local payment gateways, and banking reconciliations.
                 </p>
                 <div>
-                  <label className="block text-white/40 mb-1 font-mono text-[10px]">Default Ledger Currency</label>
+                  <label className="block text-white/40 mb-1 font-mono text-[10px]">Default currency</label>
                   <select
                     value={settings.default_currency || 'NGN'}
                     onChange={(e) => setSettings({ ...settings, default_currency: e.target.value })}
@@ -1097,8 +1097,8 @@ export default function SecureGatePaymentsPage() {
                   >
                     <option value="NGN">NGN (₦ - Nigerian Naira) - Domestic & Pan-African Standard</option>
                     <option value="USD">USD ($ - US Dollar) - Global Trade Standard</option>
-                    <option value="EUR">EUR (€ - Euro) - European Sanctuaries Standard</option>
-                    <option value="GBP">GBP (£ - British Pound) - UK Enclaves Standard</option>
+                    <option value="EUR">EUR (€ - Euro)</option>
+                    <option value="GBP">GBP (British Pound)</option>
                   </select>
                 </div>
               </div>
@@ -1146,7 +1146,7 @@ export default function SecureGatePaymentsPage() {
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif-luxury text-lg text-white">Reject Treasury Wire Payment</h3>
+                  <h3 className="font-serif-luxury text-lg text-white">Reject Wire Transfer</h3>
                   <p className="text-xs text-white/50">Transaction #{rejectModal.payment.id} • {rejectModal.payment.transaction_id}</p>
                 </div>
               </div>
@@ -1161,8 +1161,8 @@ export default function SecureGatePaymentsPage() {
             {/* Payment Summary */}
             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-2 text-xs">
               <div className="flex justify-between items-center">
-                <span className="text-white/50">Patron Candidate:</span>
-                <span className="text-white font-medium">{rejectModal.payment.user?.name || rejectModal.payment.metadata?.user_name || 'Anonymous Patron'}</span>
+                <span className="text-white/50">Applicant:</span>
+                <span className="text-white font-medium">{rejectModal.payment.user?.name || rejectModal.payment.metadata?.user_name || 'Unknown member'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-white/50">Amount Submitted:</span>
@@ -1214,7 +1214,7 @@ export default function SecureGatePaymentsPage() {
                 className="w-full bg-white/[0.04] border border-white/10 focus:border-rose-500/50 rounded-xl p-3 text-xs text-white placeholder:text-white/30 focus:outline-none transition resize-none"
               />
               <p className="text-[10px] text-white/40">
-                This reason will be recorded in the treasury audit logs and visible on the patron's payment status ledger.
+                This reason will be recorded in the treasury audit logs and visible on the patron's payment history.
               </p>
             </div>
 
@@ -1252,7 +1252,7 @@ export default function SecureGatePaymentsPage() {
                   <RefreshCw className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif-luxury text-lg text-white">Authorize Treasury Refund</h3>
+                  <h3 className="font-serif-luxury text-lg text-white">Authorize Refund</h3>
                   <p className="text-xs text-white/50">Transaction #{refundModal.paymentId}</p>
                 </div>
               </div>

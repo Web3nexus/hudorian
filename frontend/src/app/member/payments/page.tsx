@@ -143,7 +143,7 @@ function MemberPaymentsContent() {
       if (selectedGateway === 'manual') {
         setFeedbackMsg({
           type: 'success',
-          text: 'Your manual bank wire details have been submitted to HUDORIAN Treasury. Clearance will be reflected upon bank confirmation.',
+          text: 'Your bank transfer details have been submitted and are awaiting confirmation from our bank.',
         });
         setPayModalOpen(false);
         fetchLedger();
@@ -229,7 +229,7 @@ function MemberPaymentsContent() {
                 Wire Transfer Clearance Pending (Ref: {pendingManual.metadata?.transfer_reference || pendingManual.transaction_id})
               </span>
               <p className="font-light text-amber-800">
-                Your manual bank transfer of {formatPrice(Number(pendingManual.amount))} is currently under review with the HUDORIAN Treasury. Once settled on our account ledger, your digital credentials and VAT invoice will be issued automatically.
+                Your bank transfer of {formatPrice(Number(pendingManual.amount))} is currently being confirmed. Once it settles, your membership card and VAT invoice will be issued automatically.
               </p>
             </div>
           </div>
@@ -239,11 +239,11 @@ function MemberPaymentsContent() {
         <div className="bg-white rounded-xs border border-[#E8E2D8] shadow-xs overflow-hidden">
           <div className="p-6 border-b border-[#E8E2D8] flex items-center justify-between">
             <h2 className="font-serif-luxury text-2xl text-[#141414]">Transaction Records</h2>
-            <span className="text-xs text-black/50">Protected by HUDORIAN Pay Vault</span>
+            <span className="text-xs text-black/50">Payments secured with encryption</span>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs text-black/50 font-mono">Loading ledger...</div>
+            <div className="p-12 text-center text-xs text-black/50 font-mono">Loading payments...</div>
           ) : payments.length === 0 ? (
             <div className="p-12 text-center text-black/60 font-light">
               No transactions currently recorded. Click "Pay / Renew Dues" above to submit annual membership dues.
@@ -311,7 +311,7 @@ function MemberPaymentsContent() {
                             <Download className="w-3 h-3" /> PDF Receipt
                           </button>
                         ) : (
-                          <span className="text-[11px] text-black/40 italic">Awaiting clearance</span>
+                          <span className="text-[11px] text-black/40 italic">Awaiting confirmation</span>
                         )}
                       </td>
                     </tr>
@@ -437,7 +437,7 @@ function MemberPaymentsContent() {
                 <div className="bg-white p-5 rounded-xs border border-[#E8E2D8] space-y-4 text-xs">
                   <div className="flex items-center gap-2 border-b border-[#E8E2D8] pb-2 text-black/80 font-medium">
                     <Landmark className="w-4 h-4 text-[#96754B]" />
-                    <span>HUDORIAN Treasury Banking Coordinates</span>
+                    <span>Our bank account details</span>
                   </div>
 
                   <div className="space-y-2 font-mono text-[11px] bg-[#FAF8F5] p-3 rounded-xs">

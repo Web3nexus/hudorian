@@ -223,11 +223,11 @@ export default function Navbar() {
               </ul>
             </div>
 
-            {/* Column 2: Houses & Sanctuaries */}
+            {/* Column 2: Houses & Stays */}
             <div className="space-y-5">
               <span className="text-xs uppercase tracking-[0.25em] text-[#C5A880] font-semibold flex items-center gap-2">
                 <Compass className="w-3.5 h-3.5 text-[#C5A880]" />
-                <span>Sanctuaries & Stays</span>
+                <span>Houses & Stays</span>
               </span>
               <ul className="space-y-4 text-xl sm:text-2xl font-serif-luxury font-light">
                 <li>
@@ -291,7 +291,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="hover:text-[#C5A880] transition block"
                   >
-                    Apply for Candidacy
+                    Apply for Membership
                   </Link>
                 </li>
                 <li>

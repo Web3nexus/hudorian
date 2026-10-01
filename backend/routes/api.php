@@ -66,10 +66,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/cms/blocks/{key}', [CmsController::class, 'show']);
 
     // Public Authentication
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:password-flow');
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-flow');
+    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-flow');
 
     // Public Security Configuration (for Cloudflare / reCAPTCHA widget on login)
     Route::get('/security/config', [AdminAuthController::class, 'getPublicConfig']);
@@ -95,8 +95,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/library/verify', [BookCheckoutController::class, 'verify']);
 
     // Admin SecureGate Authentication Checkpoints
-    Route::post('/admin/auth/login', [AdminAuthController::class, 'login']);
-    Route::post('/admin/auth/verify-mfa', [AdminAuthController::class, 'verifyMfa']);
+    Route::post('/admin/auth/login', [AdminAuthController::class, 'login'])->middleware('throttle:admin-login');
+    Route::post('/admin/auth/verify-mfa', [AdminAuthController::class, 'verifyMfa'])->middleware('throttle:mfa');
 
     // ==========================================
     // MEMBER PROTECTED ENDPOINTS (Sanctum)

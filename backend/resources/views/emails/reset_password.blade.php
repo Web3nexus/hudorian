@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HUDORIAN Security Clearance — Reset Keyphrase</title>
+  <title>HUDORIAN — Reset your password</title>
   <style>
     body {
       margin: 0;
@@ -117,7 +117,7 @@
       <div class="header">
         <img src="https://hudorian.com/images/hudorian-seal.png" alt="HUDORIAN Royal Seal" class="seal">
         <h1 class="brand-title">HUDORIAN</h1>
-        <div class="subtitle">Private Members Club & Dynastic Sanctuaries</div>
+        <div class="subtitle">Private Members Club</div>
       </div>
 
       <!-- Main Content -->
@@ -125,7 +125,7 @@
         <div class="salutation">Greetings, {{ $userName }}</div>
         
         <p class="body-text">
-          A request has been initiated to reset the clearance keyphrase associated with your HUDORIAN membership dossier (<strong>{{ $userEmail }}</strong>).
+          A request was made to reset the password for your HUDORIAN membership (<strong>{{ $userEmail }}</strong>).
         </p>
 
         <p class="body-text">
@@ -134,7 +134,7 @@
 
         <div class="button-container">
           <a href="{{ $resetUrl }}" class="cta-button" target="_blank">
-            Establish New Keyphrase
+            Set new password
           </a>
         </div>
 
@@ -144,7 +144,7 @@
         </p>
 
         <div class="security-notice">
-          <strong>SECURITY PROTOCOL:</strong> If you did not initiate this request, no action is required. Your current keyphrase remains cryptographically secure. For urgent security inquiries, contact your dedicated House Concierge.
+          <strong>SECURITY NOTICE:</strong> If you did not request this, no action is required and your password has not changed. If you need help, contact us.
         </div>
       </div>
 

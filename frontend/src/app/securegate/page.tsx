@@ -74,8 +74,8 @@ export default function SecureGateDashboardPage() {
 
   return (
     <SecureGateLayout
-      title="Sanctuary Stewardship & Governance"
-      subtitle="Discreet oversight of member sanctuaries, admissions dossiers, and editorial publications."
+      title="Dashboard"
+      subtitle="An overview of member records, membership applications, and published content."
       actions={
         <div className="flex flex-wrap items-center gap-3">
           {/* Currency Switcher */}
@@ -83,7 +83,7 @@ export default function SecureGateDashboardPage() {
             <button
               onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-mono transition"
-              title="Change Stewardship Currency"
+              title="Change currency"
             >
               <Coins className="w-3.5 h-3.5 text-[#C5A880]" />
               <span>{currencyConfig.flag} {currencyConfig.code} ({currencyConfig.symbol})</span>
@@ -173,10 +173,10 @@ export default function SecureGateDashboardPage() {
             </div>
           </div>
 
-          {/* Card 3: Global Sanctuaries */}
+          {/* Card 3: Houses */}
           <div className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/5 relative overflow-hidden group hover:border-[#B8976C]/30 transition duration-300">
             <div className="flex items-center justify-between text-white/50 mb-3">
-              <span className="text-xs font-mono uppercase tracking-wider">Sanctuaries & Houses</span>
+              <span className="text-xs font-mono uppercase tracking-wider">Houses</span>
               <div className="p-2 rounded-lg bg-white/5 text-[#C5A880]">
                 <Building2 className="w-4 h-4" />
               </div>
@@ -185,7 +185,7 @@ export default function SecureGateDashboardPage() {
               <span className="font-serif-luxury text-3xl font-medium text-white">
                 {loading ? '...' : (stats?.total_houses ?? 0)}
               </span>
-              <span className="text-[11px] font-mono text-white/40">Verified Enclaves</span>
+              <span className="text-[11px] font-mono text-white/40">Active listings</span>
             </div>
           </div>
 
@@ -205,7 +205,7 @@ export default function SecureGateDashboardPage() {
                 href="/securegate/payments"
                 className="text-[11px] font-mono text-[#C5A880] hover:underline flex items-center gap-0.5"
               >
-                Treasury Ledger <ArrowUpRight className="w-3 h-3" />
+                All transactions <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -216,13 +216,13 @@ export default function SecureGateDashboardPage() {
           <div className="space-y-2 relative z-10 max-w-xl">
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#B8976C]/20 border border-[#B8976C]/40 text-[#C5A880] text-[10px] font-mono uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-pulse" />
-              <span>Editorial & Brand Engine Active</span>
+              <span>Website Content Manager</span>
             </div>
             <h3 className="font-serif-luxury text-xl md:text-2xl text-white">
               Instant Site Customization & Brand Management
             </h3>
             <p className="text-xs text-white/60 font-light leading-relaxed">
-              Update the club emblem, royal houses, allies, private estates, legal charters, and hero imagery across all sanctuaries in real time.
+              Update your logo, houses, partners, estates, legal pages, and banner images across the site in real time.
             </p>
           </div>
 
@@ -239,7 +239,7 @@ export default function SecureGateDashboardPage() {
               target="_blank"
               className="px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-mono transition flex items-center gap-1.5"
             >
-              <span>Preview Live Sanctuary</span>
+              <span>View website</span>
               <ExternalLink className="w-3.5 h-3.5 text-white/50" />
             </Link>
           </div>
@@ -252,10 +252,10 @@ export default function SecureGateDashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-serif-luxury text-xl text-white">
-                  Admissions Dossiers
+                  Membership Applications
                 </h2>
                 <p className="text-xs text-white/50 font-light">
-                  Awaiting Admissions Committee review
+                  Awaiting review by the admissions team
                 </p>
               </div>
               <Link
@@ -273,7 +273,7 @@ export default function SecureGateDashboardPage() {
                 </div>
               ) : (stats?.recent_applications || []).length === 0 ? (
                 <div className="p-8 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-2">
-                  <p className="text-xs text-white/60">No pending admissions dossiers in queue.</p>
+                  <p className="text-xs text-white/60">No pending membership applications.</p>
                   <p className="text-[11px] text-white/40 font-light">All membership inquiries have been reviewed.</p>
                 </div>
               ) : (
@@ -292,7 +292,7 @@ export default function SecureGateDashboardPage() {
                         </span>
                       </div>
                       <p className="text-xs text-white/60 font-light">
-                        {app.profession || 'Patron Candidate'} {app.city ? `• ${app.city}, ${app.country}` : ''}
+                        {app.profession || 'Applicant'} {app.city ? `• ${app.city}, ${app.country}` : ''}
                       </p>
                     </div>
 
@@ -300,7 +300,7 @@ export default function SecureGateDashboardPage() {
                       href={`/securegate/applications?id=${app.id}`}
                       className="px-4 py-2 rounded-lg bg-white/5 hover:bg-[#B8976C] hover:text-black border border-white/10 text-xs font-medium text-white/90 transition duration-200"
                     >
-                      Review Dossier
+                      Review application
                     </Link>
                   </div>
                 ))
@@ -308,11 +308,11 @@ export default function SecureGateDashboardPage() {
             </div>
           </div>
 
-          {/* Right Column: Vault Safeguards & Fast Links */}
+          {/* Right Column: Security & Fast Links */}
           <div className="lg:col-span-5 space-y-4">
             <div>
               <h2 className="font-serif-luxury text-xl text-white">
-                Vault Safeguards & Patron Privacy
+                Security & Privacy
               </h2>
               <p className="text-xs text-white/50 font-light">
                 Data protection integrity and confidential access controls
@@ -321,7 +321,7 @@ export default function SecureGateDashboardPage() {
 
             <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-5">
               <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                <span className="text-xs text-white/60">Steward Authentication</span>
+                <span className="text-xs text-white/60">Your sign-in status</span>
                 <span className="text-xs font-mono text-emerald-400 font-semibold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   Verified & Protected
@@ -329,21 +329,21 @@ export default function SecureGateDashboardPage() {
               </div>
 
               <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                <span className="text-xs text-white/60">Patron Digital Keys</span>
+                <span className="text-xs text-white/60">Digital pass tokens</span>
                 <span className="text-xs font-mono text-[#C5A880] font-semibold">
-                  HMAC Cryptographic Seal
+                  Signed and active
                 </span>
               </div>
 
               <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                <span className="text-xs text-white/60">Reservation Vault</span>
+                <span className="text-xs text-white/60">Bookings</span>
                 <span className="text-xs font-mono text-white/80">
-                  Concurrency Protected
+                  Double-booking protection
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-xs text-white/60">Governance & Activity Ledger</span>
+                <span className="text-xs text-white/60">Recent activity</span>
                 <span className="text-xs font-mono text-emerald-400 font-semibold">
                   Active & Monitored
                 </span>
@@ -355,7 +355,7 @@ export default function SecureGateDashboardPage() {
                   className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white/80 hover:text-white transition flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4 text-[#C5A880]" />
-                  <span>Review Activity Ledger</span>
+                  <span>View activity log</span>
                 </Link>
               </div>
             </div>

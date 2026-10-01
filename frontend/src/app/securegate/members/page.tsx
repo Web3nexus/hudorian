@@ -33,7 +33,7 @@ export default function SecureGateMembersPage() {
   const handleStatusChange = async (memberId: number, newStatus: string) => {
     setActionMsg(null);
     try {
-      await api.updateMemberStatus(memberId, newStatus, `Status updated to ${newStatus} via SecureGate`);
+      await api.updateMemberStatus(memberId, newStatus, `Status updated to ${newStatus} by an administrator`);
       setActionMsg(`Member record #${memberId} updated to '${newStatus}'.`);
       fetchMembers();
     } catch {
@@ -52,7 +52,7 @@ export default function SecureGateMembersPage() {
   return (
     <SecureGateLayout
       title="Members Directory"
-      subtitle="Directory of active club members, issued membership credentials, tier privileges, and sanctuary clearances."
+      subtitle="View your members, their membership details and account status."
     >
       <div className="space-y-6">
         {actionMsg && (
@@ -70,7 +70,7 @@ export default function SecureGateMembersPage() {
               type="text"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              placeholder="Search by patron name, email or card number..."
+              placeholder="Search by member name, email or card number..."
               className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C5A880]"
             />
           </div>
@@ -91,11 +91,11 @@ export default function SecureGateMembersPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-white/[0.03] text-white/40 font-mono uppercase tracking-wider border-b border-white/5">
                   <tr>
-                    <th className="p-4 pl-6">Patron</th>
+                    <th className="p-4 pl-6">Member</th>
                     <th className="p-4">Membership Number</th>
                     <th className="p-4">Tier / Access Plan</th>
                     <th className="p-4">Digital Pass Status</th>
-                    <th className="p-4">Clearance Status</th>
+                    <th className="p-4">Status</th>
                     <th className="p-4 pr-6 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -103,7 +103,7 @@ export default function SecureGateMembersPage() {
                   {filteredMembers.map((m) => (
                     <tr key={m.id} className="hover:bg-white/[0.02] transition">
                       <td className="p-4 pl-6 font-medium text-white">
-                        {m.user?.name || 'Patron'}
+                        {m.user?.name || 'Member'}
                         <span className="block text-[10px] text-white/40 font-mono">{m.user?.email}</span>
                       </td>
                       <td className="p-4 font-mono text-[#C5A880]">
@@ -142,7 +142,7 @@ export default function SecureGateMembersPage() {
                             onClick={() => handleStatusChange(m.id, 'active')}
                             className="px-3 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-medium transition"
                           >
-                            Restore Clearance
+                            Reactivate
                           </button>
                         )}
                       </td>

@@ -30,7 +30,7 @@ const defaultBrand: BrandSettings = {
   logo_type: 'image',
   logo_text: 'HUDORIAN',
   logo_image_url: '/images/hudorian-seal.png',
-  tagline: 'Private Members Club & Global Constellation of Houses',
+  tagline: 'Private Members Club & Global Network of Houses',
   concierge_email: 'concierge@hudorian.com',
   concierge_phone: '+44 (0) 20 7946 0912',
   office_address: '7 Berkeley Square, Mayfair, London W1J 6ES',
@@ -65,18 +65,18 @@ const defaultFooterNav = {
       ],
     },
     {
-      title: 'Houses & Sanctuaries',
+      title: 'Houses & Estates',
       links: [
         { label: 'Global Houses', href: '/houses' },
         { label: 'Private Estates', href: '/estates' },
         { label: 'Suites & Stays', href: '/stays' },
-        { label: 'Curated Gatherings', href: '/experiences' },
+        { label: 'Events & Experiences', href: '/experiences' },
       ],
     },
     {
       title: 'Membership',
       links: [
-        { label: 'Tiers & Privileges', href: '/membership' },
+        { label: 'Levels & Benefits', href: '/membership' },
         { label: 'Apply for Membership', href: '/membership/apply' },
         { label: 'Member Portal', href: '/member' },
       ],

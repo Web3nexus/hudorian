@@ -187,15 +187,15 @@ export default function SecureGateLayout({
   };
 
   const navItems = [
-    { label: 'Sanctuary Overview', href: '/securegate', icon: LayoutDashboard },
-    { label: 'CMS & Editorial Studio', href: '/securegate/cms', icon: Sliders, badge: 'DYNAMIC' },
-    { label: 'Vault & Protection', href: '/securegate/security', icon: ShieldCheck, badge: 'PROTECTED' },
-    { label: 'Membership Applications', href: '/securegate/applications', icon: FileCheck },
-    { label: 'Members Directory', href: '/securegate/members', icon: Users },
-    { label: 'Sanctuaries & Houses', href: '/securegate/houses', icon: Building2 },
-    { label: 'Royal Archive', href: '/securegate/archive', icon: BookOpen },
-    { label: 'Transactions & Treasury', href: '/securegate/payments', icon: CreditCard },
-    { label: 'Audit & Activity Ledger', href: '/securegate/audit-logs', icon: History },
+    { label: 'Dashboard', href: '/securegate', icon: LayoutDashboard },
+    { label: 'Website Content', href: '/securegate/cms', icon: Sliders },
+    { label: 'Security', href: '/securegate/security', icon: ShieldCheck },
+    { label: 'Membership Requests', href: '/securegate/applications', icon: FileCheck },
+    { label: 'Members', href: '/securegate/members', icon: Users },
+    { label: 'Houses', href: '/securegate/houses', icon: Building2 },
+    { label: 'Book Library', href: '/securegate/archive', icon: BookOpen },
+    { label: 'Payments', href: '/securegate/payments', icon: CreditCard },
+    { label: 'Activity Log', href: '/securegate/audit-logs', icon: History },
   ];
 
   if (isVerifying || !isAuthenticated) {
@@ -210,7 +210,7 @@ export default function SecureGateLayout({
               HUDORIAN
             </span>
             <p className="text-xs text-white/40 font-mono tracking-widest uppercase">
-              Verifying Steward Clearance...
+              Checking your access...
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ export default function SecureGateLayout({
       {/* Top Atmospheric Ambient Glow */}
       <div className="fixed top-0 left-0 right-0 h-96 bg-gradient-to-b from-[#B8976C]/5 via-transparent to-transparent pointer-events-none z-0" />
 
-      {/* Modern Executive Header */}
+      {/* Header */}
       <header className="sticky top-0 z-40 bg-[#0E0E11]/85 backdrop-blur-xl border-b border-white/5 px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -247,26 +247,26 @@ export default function SecureGateLayout({
                   HUDORIAN
                 </span>
                 <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-sm bg-[#B8976C]/15 text-[#C5A880] border border-[#B8976C]/30 tracking-widest">
-                  SECUREGATE
+                  ADMIN
                 </span>
               </div>
             </div>
           </Link>
         </div>
 
-        {/* Center / Right Executive Status Indicators */}
+        {/* Header status */}
         <div className="flex items-center gap-3 md:gap-5">
           {/* Live UTC Clock */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-[11px] font-mono text-white/60">
             <Clock className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>{currentTime || 'SYNCHRONIZING'}</span>
+            <span>{currentTime || 'Loading'}</span>
           </div>
 
           {/* Database Health Pill */}
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <Database className="w-3 h-3 text-emerald-400/80" />
-            <span className="font-mono">Sanctuary Vault // Protected</span>
+            <span>Website and database connected</span>
           </div>
 
           {/* Public Portal Switcher */}
@@ -276,14 +276,14 @@ export default function SecureGateLayout({
             className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-white/80 hover:text-white transition"
           >
             <ExternalLink className="w-3 h-3 text-white/50" />
-            <span>Live Sanctuary</span>
+            <span>View website</span>
           </Link>
 
           {/* Admin User Profile Trigger & Logout */}
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
             <button
               onClick={handleOpenProfileModal}
-              title="Edit Steward Profile & Name"
+              title="Edit your profile"
               className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-white/5 transition cursor-pointer text-left group"
             >
               <div className="w-8 h-8 rounded-lg bg-[#C5A880]/15 border border-[#C5A880]/30 flex items-center justify-center text-[#C5A880] group-hover:scale-105 transition">
@@ -291,18 +291,18 @@ export default function SecureGateLayout({
               </div>
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-medium text-white leading-tight flex items-center gap-1">
-                  <span>{adminUser?.name || 'Club Steward'}</span>
+                  <span>{adminUser?.name || 'Administrator'}</span>
                   <Edit2 className="w-2.5 h-2.5 text-[#C5A880] opacity-0 group-hover:opacity-100 transition" />
                 </p>
                 <p className="text-[10px] font-mono text-[#C5A880] tracking-wider">
-                  HOUSE DIRECTOR
+                  ADMINISTRATOR
                 </p>
               </div>
             </button>
 
             <button
               onClick={handleLogout}
-              title="Secure Logout"
+              title="Log out"
               className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 transition cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
@@ -317,7 +317,7 @@ export default function SecureGateLayout({
         <aside className="hidden md:flex flex-col w-64 shrink-0 py-8 pr-6 border-r border-white/5">
           <div className="space-y-1 mb-8">
             <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.2em] text-white/40 px-3 block mb-3">
-              Core Command
+              Menu
             </span>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -346,14 +346,7 @@ export default function SecureGateLayout({
                     />
                     <span>{item.label}</span>
                   </div>
-                  {item.badge && (
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-sm bg-[#B8976C]/20 text-[#C5A880] border border-[#B8976C]/30">
-                      {item.badge}
-                    </span>
-                  )}
-                  {isActive && !item.badge && (
-                    <ChevronRight className="w-3.5 h-3.5 text-[#C5A880]/70" />
-                  )}
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-[#C5A880]/70" />}
                 </Link>
               );
             })}
@@ -362,21 +355,21 @@ export default function SecureGateLayout({
           {/* Quick System Badge & Edit Profile Trigger */}
           <div className="mt-auto p-4 rounded-xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/5 space-y-2">
             <div className="flex items-center justify-between text-[11px] text-white/50">
-              <span className="font-mono">Security Clearance</span>
-              <span className="text-[#C5A880] font-semibold">Tier 4 Clearance</span>
+              <span>Your access level</span>
+              <span className="text-[#C5A880] font-semibold">Full access</span>
             </div>
             <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
               <div className="bg-[#C5A880] h-full w-full" />
             </div>
             <p className="text-[10px] text-white/40 leading-relaxed font-light">
-              MFA Hardware Enforced • Dual cryptographic session active.
+              Two-step verification is on. You are signed in on this device.
             </p>
             <button
               onClick={handleOpenProfileModal}
               className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-mono transition flex items-center justify-center gap-1.5 cursor-pointer mt-2 border border-white/5"
             >
               <Edit2 className="w-3 h-3 text-[#C5A880]" />
-              <span>Edit Steward Profile</span>
+              <span>Edit your profile</span>
             </button>
           </div>
         </aside>
@@ -386,7 +379,7 @@ export default function SecureGateLayout({
           <div className="md:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col p-6 animate-fade-in">
             <div className="flex items-center justify-between pb-6 border-b border-white/10">
               <span className="font-serif-luxury text-xl tracking-[0.2em] text-white">
-                HUDORIAN // SECUREGATE
+                HUDORIAN ADMIN
               </span>
               <button
                 onClick={() => setMobileSidebarOpen(false)}
@@ -418,11 +411,6 @@ export default function SecureGateLayout({
                       <Icon className="w-4 h-4 text-[#C5A880]" />
                       <span>{item.label}</span>
                     </div>
-                    {item.badge && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-[#B8976C]/20 text-[#C5A880]">
-                        {item.badge}
-                      </span>
-                    )}
                   </Link>
                 );
               })}
@@ -436,7 +424,7 @@ export default function SecureGateLayout({
                   className="w-full p-3 rounded-lg bg-white/5 text-white text-xs font-mono flex items-center justify-center gap-2"
                 >
                   <Edit2 className="w-4 h-4 text-[#C5A880]" />
-                  <span>Edit Steward Profile Name</span>
+                  <span>Edit your profile</span>
                 </button>
               </div>
             </div>
@@ -468,7 +456,7 @@ export default function SecureGateLayout({
       </div>
 
       {/* ======================================================== */}
-      {/* MODAL: STEWARD PROFILE & CREDENTIALS EDIT MODAL         */}
+      {/* MODAL: EDIT PROFILE         */}
       {/* ======================================================== */}
       {profileModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -479,9 +467,9 @@ export default function SecureGateLayout({
                   <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-serif-luxury text-lg text-white">Steward Profile & Clearance</h3>
+                  <h3 className="font-serif-luxury text-lg text-white">Your profile</h3>
                   <p className="text-[10px] font-mono text-white/40">
-                    Update administrative name, email, and security credentials
+                    Update your name, email and password
                   </p>
                 </div>
               </div>
@@ -511,10 +499,10 @@ export default function SecureGateLayout({
                 </div>
               )}
 
-              {/* Steward Name Input */}
+              {/* Name input */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
-                  Steward Full Name *
+                  Your full name *
                 </label>
                 <input
                   type="text"
@@ -526,10 +514,10 @@ export default function SecureGateLayout({
                 />
               </div>
 
-              {/* Steward Email Input */}
+              {/* Email input */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
-                  Administrative Email *
+                  Email address *
                 </label>
                 <input
                   type="email"
@@ -541,11 +529,11 @@ export default function SecureGateLayout({
                 />
               </div>
 
-              {/* Clearance Role Badge */}
+              {/* Role */}
               <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-mono text-white/40 uppercase block">Administrative Rank</span>
-                  <span className="font-serif-luxury text-sm text-[#C5A880]">House Director & Sovereign Super Admin</span>
+                  <span className="text-[10px] text-white/50 block">Your role</span>
+                  <span className="font-serif-luxury text-sm text-[#C5A880]">Administrator</span>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   ACTIVE
@@ -560,7 +548,7 @@ export default function SecureGateLayout({
                   className="text-xs text-[#C5A880] hover:underline flex items-center gap-1.5 font-mono cursor-pointer"
                 >
                   <KeyRound className="w-3.5 h-3.5" />
-                  <span>{showPasswordChange ? 'Cancel Password Change' : 'Change Vault Password (Optional)'}</span>
+                  <span>{showPasswordChange ? 'Cancel Password Change' : 'Change password'}</span>
                 </button>
               </div>
 
@@ -581,7 +569,7 @@ export default function SecureGateLayout({
 
                   <div className="space-y-1">
                     <label className="block text-[10px] font-mono uppercase tracking-wider text-white/40">
-                      New Password (Min. 8 characters) *
+                      New password (at least 8 characters) *
                     </label>
                     <input
                       type="password"

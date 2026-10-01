@@ -40,8 +40,8 @@
   "/signin/page": "app/signin/page.js",
   "/stays/page": "app/stays/page.js",
   "/terms/page": "app/terms/page.js",
-  "/journal/[slug]/page": "app/journal/[slug]/page.js",
   "/houses/[slug]/page": "app/houses/[slug]/page.js",
+  "/journal/[slug]/page": "app/journal/[slug]/page.js",
   "/royal-archive/[slug]/page": "app/royal-archive/[slug]/page.js",
   "/royal-archive/my-archive/page": "app/royal-archive/my-archive/page.js",
   "/stays/[slug]/page": "app/stays/[slug]/page.js"

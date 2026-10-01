@@ -267,7 +267,7 @@ export default function AdminArchivePage() {
       .catch((err) => {
         if (cancelled) return;
         console.error(err);
-        setBooksResult({ key, books: [], error: 'The title ledger could not be loaded.' });
+        setBooksResult({ key, books: [], error: 'The books could not be loaded.' });
       });
 
     return () => {
@@ -293,7 +293,7 @@ export default function AdminArchivePage() {
       .catch((err) => {
         if (cancelled) return;
         console.error(err);
-        setLoansResult({ key, loans: [], error: 'The loan ledger could not be loaded.' });
+        setLoansResult({ key, loans: [], error: 'The loans could not be loaded.' });
       });
 
     return () => {
@@ -374,7 +374,7 @@ export default function AdminArchivePage() {
         showToast('success', 'Title updated.');
       } else {
         await api.createBook(payload);
-        showToast('success', 'Title added to the Royal Archive.');
+        showToast('success', 'Title added to the library.');
       }
 
       setForm(null);
@@ -471,10 +471,10 @@ export default function AdminArchivePage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
           <div>
-            <h1 className="font-serif-luxury text-3xl text-white">Royal Archive</h1>
+            <h1 className="font-serif-luxury text-3xl text-white">Library</h1>
             <p className="text-xs text-white/40 font-light mt-2 max-w-2xl leading-relaxed">
-              Curate the private press, govern the loan ledger, and set the terms on which volumes are
-              acquired and lent.
+              Manage the books in the library, track loans, and set the terms on which titles are
+              sold and borrowed.
             </p>
           </div>
           {tab === 'titles' && (
@@ -484,7 +484,7 @@ export default function AdminArchivePage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition text-xs uppercase tracking-wider"
               >
                 <ExternalLink className="w-3 h-3" />
-                View Public Archive
+                View Public Library
               </Link>
               <button
                 onClick={openCreate}
@@ -576,7 +576,7 @@ export default function AdminArchivePage() {
             ) : books.length === 0 ? (
               <div className="text-center py-24 border border-dashed border-white/10 rounded-2xl">
                 <BookOpen className="w-10 h-10 text-white/15 mx-auto mb-4" strokeWidth={1} />
-                <p className="text-sm text-white/40">No titles in the catalogue yet.</p>
+                <p className="text-sm text-white/40">No books in the library yet.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -810,7 +810,7 @@ export default function AdminArchivePage() {
                   className={inputClass}
                 />
                 <p className="text-[10px] text-white/30 mt-1.5">
-                  Ceiling a steward may grant by hand.
+                  Longest loan an administrator can grant manually.
                 </p>
               </div>
             </div>
@@ -858,10 +858,10 @@ export default function AdminArchivePage() {
                 </div>
                 <div>
                   <h3 className="font-serif-luxury text-lg text-white">
-                    {editing ? 'Edit Title' : 'Add to the Royal Archive'}
+                    {editing ? 'Edit Title' : 'Add to the library'}
                   </h3>
                   <p className="text-[10px] text-white/35 font-mono uppercase tracking-wider">
-                    {editing ? editing.slug : 'New catalogue entry'}
+                    {editing ? editing.slug : 'New book entry'}
                   </p>
                 </div>
               </div>
@@ -1047,11 +1047,11 @@ export default function AdminArchivePage() {
                       max={365}
                       value={form.rental_days}
                       onChange={(e) => update('rental_days', e.target.value)}
-                      placeholder={policy ? `default ${policy.default_rental_days}` : 'archive default'}
+                      placeholder={policy ? `default ${policy.default_rental_days}` : 'library default'}
                       className={inputClass}
                     />
                     <p className="text-[10px] text-white/30 mt-1.5">
-                      Leave blank to follow the archive default.
+                      Leave blank to use the library default.
                     </p>
                   </div>
 
@@ -1078,7 +1078,7 @@ export default function AdminArchivePage() {
                 </div>
 
                 <p className="text-[10px] text-white/30 leading-relaxed">
-                  A mode with no price is withheld from the catalogue automatically.
+                  A pricing option with no price is hidden from the catalog automatically.
                 </p>
               </div>
 
@@ -1125,7 +1125,7 @@ export default function AdminArchivePage() {
                     onChange={(e) => update('is_featured', e.target.checked)}
                     className="w-3.5 h-3.5 accent-[#C5A880]"
                   />
-                  <span className="text-xs text-white/70">Feature on the catalogue</span>
+                  <span className="text-xs text-white/70">Feature on the catalog</span>
                 </label>
               </div>
             </div>
@@ -1148,7 +1148,7 @@ export default function AdminArchivePage() {
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition cursor-pointer"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                {editing ? 'Save Changes' : 'Add to Archive'}
+                {editing ? 'Save Changes' : 'Add to Library'}
               </button>
             </div>
           </div>
@@ -1243,7 +1243,7 @@ export default function AdminArchivePage() {
               </div>
 
               <div>
-                <label className={labelClass}>Note for the Ledger</label>
+                <label className={labelClass}>Note</label>
                 <textarea
                   rows={2}
                   value={grantForm.note}
@@ -1286,7 +1286,7 @@ export default function AdminArchivePage() {
                 </div>
                 <div>
                   <h3 className="font-serif-luxury text-lg text-white">{confirm.title}</h3>
-                  <p className="text-xs text-white/50">Steward action</p>
+                  <p className="text-xs text-white/50">Admin action</p>
                 </div>
               </div>
               <button

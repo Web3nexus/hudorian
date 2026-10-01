@@ -82,11 +82,11 @@ export default function Footer() {
               &ldquo;{footerNav.tagline || 'Places for a richer life.'}&rdquo;
             </p>
             <p className="text-sm text-[#FAF8F5]/60 max-w-sm font-light leading-relaxed pt-2">
-              {brand.tagline || 'A private constellation of Houses, Estates, and Sanctuaries crafted for contemplation, fellowship, and extraordinary stays across the world.'}
+              {brand.tagline || 'A private collection of Houses and Estates around the world, crafted for relaxation, friendship, and extraordinary stays.'}
             </p>
             <div className="pt-2 text-xs space-y-1">
               <p className="text-[#B8976C] font-mono tracking-wider">
-                Direct Concierge: {brand.concierge_phone || '+234 (0) 1 888 4836'} • {brand.concierge_email || 'concierge@hudorian.com'}
+                Contact us: {brand.concierge_phone || '+234 (0) 1 888 4836'} • {brand.concierge_email || 'concierge@hudorian.com'}
               </p>
               <p className="text-white/40 text-[11px] font-light">
                 Headquarters: {brand.office_address || brand.address || 'Victoria Island, Lagos, Nigeria'}
@@ -146,7 +146,7 @@ export default function Footer() {
                 <ul className="space-y-3 font-light text-[#FAF8F5]/70">
                   <li><Link href="/houses" className="hover:text-white transition">Global Houses</Link></li>
                   <li><Link href="/estates" className="hover:text-white transition">Private Estates</Link></li>
-                  <li><Link href="/stays" className="hover:text-white transition">Sanctuary Suites</Link></li>
+                  <li><Link href="/stays" className="hover:text-white transition">Suites & Rooms</Link></li>
                   <li><Link href="/experiences" className="hover:text-white transition">Cultural Gatherings</Link></li>
                 </ul>
               </div>
@@ -157,10 +157,10 @@ export default function Footer() {
                   Membership
                 </h4>
                 <ul className="space-y-3 font-light text-[#FAF8F5]/70">
-                  <li><Link href="/membership" className="hover:text-white transition">Tiers & Privileges</Link></li>
+                  <li><Link href="/membership" className="hover:text-white transition">Levels & Benefits</Link></li>
                   <li><Link href="/membership/apply" className="hover:text-white transition">Apply for Membership</Link></li>
                   <li><Link href="/member" className="hover:text-white transition">Member Portal</Link></li>
-                  <li><Link href="/membership" className="hover:text-white transition">Private Concierge</Link></li>
+                  <li><Link href="/membership" className="hover:text-white transition">Member Support</Link></li>
                 </ul>
               </div>
 

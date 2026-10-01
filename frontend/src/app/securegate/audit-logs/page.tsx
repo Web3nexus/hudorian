@@ -37,8 +37,8 @@ export default function SecureGateAuditLogsPage() {
 
   return (
     <SecureGateLayout
-      title="Immutable Audit Ledger"
-      subtitle="Cryptographically sealed log of administrative state mutations, membership approvals, and CMS updates."
+      title="Activity log"
+      subtitle="A record of administrative changes, membership approvals, and website content updates."
     >
       <div className="space-y-6">
         {/* Search */}
@@ -58,7 +58,7 @@ export default function SecureGateAuditLogsPage() {
         <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
           {loading ? (
             <div className="p-16 text-center text-xs text-white/40 font-mono">
-              Loading cryptographic audit trail...
+              Loading activity log...
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="p-16 text-center text-white/50 text-xs font-light">

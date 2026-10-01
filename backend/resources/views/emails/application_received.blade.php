@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Candidacy Dossier Received — HUDORIAN</title>
+  <title>Application received — HUDORIAN</title>
   <style>
     body {
       margin: 0; padding: 0; background-color: #0b0b0e;
@@ -56,11 +56,11 @@
         <div class="salutation">Dear {{ $applicantName }},</div>
         
         <p class="body-text">
-          We have received your dossier for candidacy consideration to HUDORIAN Private Members Club for the <strong>{{ $planName }}</strong> patronage tier.
+          We have received your application to join HUDORIAN Private Members Club at the <strong>{{ $planName }}</strong> membership level.
         </p>
 
         <p class="body-text">
-          In keeping with our founding charter, candidate dossiers undergo confidential deliberation by the admissions committee to preserve our intimate fellowship of creators, patrons, and collectors.
+          All applications are reviewed confidentially by our admissions committee.
         </p>
 
         <div class="dossier-card">

@@ -51,7 +51,7 @@ export default function GlobalError({
               <span className="italic font-serif text-[#96754B]">Condition Arose</span>
             </h1>
             <p className="text-sm sm:text-base text-black/70 font-light max-w-md mx-auto leading-relaxed">
-              The digital chamber encountered a momentary rendering issue. You can attempt to restore this session or return to the main sanctuary.
+              Something went wrong while rendering this page. Try again, or return to the home page.
             </p>
           </div>
 
@@ -70,7 +70,7 @@ export default function GlobalError({
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full border border-[#141414]/20 hover:border-[#141414] text-[#141414] bg-white/60 hover:bg-white text-xs uppercase tracking-[0.2em] font-semibold transition duration-300 shadow-xs"
             >
               <Home className="w-3.5 h-3.5 text-[#96754B]" />
-              <span>Sanctuary Home</span>
+              <span>Back to home</span>
             </Link>
           </div>
         </div>

@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordMail;
+use App\Mail\WelcomeMemberMail;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-
-use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -46,15 +46,15 @@ class AuthController extends Controller
             'role' => 'member',
         ]);
 
-        $token = $user->createToken('hudorian-member-session')->plainTextToken;
+        $token = $user->createToken('hudorian-member-session', ['member'], now()->addHours(8))->plainTextToken;
 
         $this->auditLogger->log($user, 'user.registered', 'User', $user->id);
 
         try {
             Mail::to($user->email)->send(
-                new \App\Mail\WelcomeMemberMail(
+                new WelcomeMemberMail(
                     $user,
-                    'HUD-' . date('Y') . '-' . strtoupper(Str::random(5)),
+                    'HUD-'.date('Y').'-'.strtoupper(Str::random(5)),
                     'Member Patron'
                 )
             );
@@ -94,7 +94,10 @@ class AuthController extends Controller
             ], 403);
         }
 
-        $token = $user->createToken('hudorian-member-session')->plainTextToken;
+        // Member sessions were previously minted with no expiry, so a leaked
+        // token stayed valid forever. Eight hours matches the SecureGate
+        // clearance window and forces a real sign-in after a long absence.
+        $token = $user->createToken('hudorian-member-session', ['member'], now()->addHours(8))->plainTextToken;
 
         $this->auditLogger->log($user, 'user.login', 'User', $user->id);
 
@@ -146,12 +149,12 @@ class AuthController extends Controller
             );
 
             $frontendUrl = config('app.frontend_url', config('app.url', 'https://hudorian.com'));
-            $resetUrl = rtrim($frontendUrl, '/') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+            $resetUrl = rtrim($frontendUrl, '/').'/reset-password?token='.$token.'&email='.urlencode($user->email);
 
             try {
                 Mail::to($user->email)->send(new ResetPasswordMail($user, $token, $resetUrl));
             } catch (\Exception $e) {
-                Log::warning('Password reset email dispatch error: ' . $e->getMessage());
+                Log::warning('Password reset email dispatch error: '.$e->getMessage());
             }
 
             $this->auditLogger->log($user, 'user.forgot_password_requested', 'User', $user->id);
@@ -183,6 +186,7 @@ class AuthController extends Controller
 
         if (now()->diffInMinutes($record->created_at) > 60) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
             return response()->json([
                 'message' => 'This password reset link has expired. Please initiate a new request.',
             ], 422);
@@ -309,4 +313,3 @@ class AuthController extends Controller
         ]);
     }
 }
-

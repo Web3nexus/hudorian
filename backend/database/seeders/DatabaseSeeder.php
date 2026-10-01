@@ -21,16 +21,47 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Resolve a seeded account's password.
+     *
+     * `password123` is a published default, so it is only ever acceptable while
+     * developing locally. Seeding a reachable environment without an explicit
+     * secret would hand over a known administrator login, so that is refused
+     * outright rather than quietly creating a backdoor.
+     */
+    protected function seedPassword(string $variable, string $fallback): string
+    {
+        $configured = env($variable);
+
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        if (app()->environment('production')) {
+            throw new RuntimeException(
+                "Refusing to seed {$variable} in production. Set the variable to a strong "
+                .'secret before seeding a reachable environment.'
+            );
+        }
+
+        return $fallback;
+    }
+
     public function run(): void
     {
+        $adminPassword = $this->seedPassword('SEED_ADMIN_PASSWORD', 'password123');
+        $memberPassword = $this->seedPassword('SEED_MEMBER_PASSWORD', 'password123');
+        $applicantPassword = $this->seedPassword('SEED_APPLICANT_PASSWORD', 'password123');
+
         // 1. Users
         $admin = User::create([
             'name' => 'Alexander Vance',
             'email' => 'admin@hudorian.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($adminPassword),
             'role' => 'super_admin',
             'phone' => '+44 20 7946 0912',
             'city' => 'London',
@@ -41,7 +72,7 @@ class DatabaseSeeder extends Seeder
         $demoUser = User::create([
             'name' => 'Elena Rostova',
             'email' => 'member@hudorian.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($memberPassword),
             'role' => 'member',
             'phone' => '+34 91 123 4567',
             'city' => 'Madrid',
@@ -52,7 +83,7 @@ class DatabaseSeeder extends Seeder
         $applicantUser = User::create([
             'name' => 'Julian Croft',
             'email' => 'applicant@hudorian.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make($applicantPassword),
             'role' => 'member',
             'phone' => '+1 415 555 2671',
             'city' => 'San Francisco',

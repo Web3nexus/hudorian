@@ -44,7 +44,7 @@ export default function DigitalMemberCard({ initialData }: DigitalMemberCardProp
 
   const memberName = cardData?.member?.name || initialData?.name || 'Member';
   const memberNumber = cardData?.member?.membership_number || initialData?.membership_number || 'Awaiting Allocation';
-  const planName = cardData?.member?.plan_name || initialData?.plan_name || 'Membership Privilege';
+  const planName = cardData?.member?.plan_name || initialData?.plan_name || 'Member';
   const status = cardData?.member?.status || initialData?.status || 'Active';
   const expiresAt = cardData?.member?.expires_at || initialData?.expires_at || 'Annual Renewal';
 
@@ -52,7 +52,7 @@ export default function DigitalMemberCard({ initialData }: DigitalMemberCardProp
     if (!cardData?.card?.token) return;
     try {
       const res = await api.verifyCard(cardData.card.token);
-      setVerificationResult(`✓ House Concierge: ${res.message}`);
+      setVerificationResult(`✓ Verified: ${res.message}`);
     } catch {
       setVerificationResult('Verification failed.');
     }
@@ -85,7 +85,7 @@ export default function DigitalMemberCard({ initialData }: DigitalMemberCardProp
         {/* Card Center: Plan Designation & Holographic Chip */}
         <div className="relative z-10 flex items-center justify-between my-2">
           <div className="space-y-1">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-white/50 block">Tier Privilege</span>
+            <span className="text-[9px] uppercase tracking-[0.2em] text-white/50 block">Membership</span>
             <p className="font-serif-luxury text-lg md:text-xl text-[#FAF8F5] tracking-wide">
               {planName}
             </p>
@@ -124,14 +124,14 @@ export default function DigitalMemberCard({ initialData }: DigitalMemberCardProp
           className="flex items-center gap-2 text-black/60 hover:text-black font-medium transition"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh cryptographic token</span>
+          <span>Refresh pass token</span>
         </button>
 
         <button
           onClick={testVerify}
           className="px-4 py-2 rounded-full border border-black/20 bg-white hover:bg-black hover:text-white transition duration-300 text-xs font-medium"
         >
-          Test Concierge Scan
+          Test pass scan
         </button>
       </div>
 

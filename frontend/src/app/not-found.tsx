@@ -30,17 +30,17 @@ export default function NotFound() {
           {/* Status Badge */}
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#96754B]/10 border border-[#96754B]/20 text-[#96754B] text-[11px] uppercase tracking-[0.25em] font-medium shadow-xs">
             <Compass className="w-3.5 h-3.5 text-[#96754B] animate-spin-slow" />
-            <span>404 • Registry Exception</span>
+            <span>404 • Page not found</span>
           </div>
 
           {/* Headline */}
           <div className="space-y-4">
             <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-[#141414] leading-[1.08]">
-              The Sanctuary Path <br />
+              Page Not Found <br />
               <span className="italic font-serif text-[#96754B]">Remains Uncharted</span>
             </h1>
             <p className="text-base sm:text-lg text-black/70 font-light max-w-xl mx-auto leading-relaxed">
-              The private chamber, estate archive, or journal publication you are seeking does not exist or has been relocated within the sanctuary registry.
+              The page you are looking for does not exist or has been moved.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default function NotFound() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#141414] text-[#FAF8F5] text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#96754B] transition duration-300 shadow-md group"
             >
               <Home className="w-4 h-4 text-[#FAF8F5]/80 group-hover:text-white" />
-              <span>Return to Sanctuary</span>
+              <span>Back to home</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
 
@@ -64,10 +64,10 @@ export default function NotFound() {
             </Link>
           </div>
 
-          {/* Directory Checkpoints */}
+          {/* Directories */}
           <div className="pt-10 border-t border-[#E8E2D8] mt-12">
             <p className="text-[11px] uppercase tracking-[0.25em] text-[#96754B] font-semibold mb-6">
-              Verified Destinations & Concierge Portals
+              Popular destinations and member portals
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-left">
@@ -131,7 +131,7 @@ export default function NotFound() {
                   Membership
                 </h3>
                 <p className="text-xs text-black/60 font-light leading-relaxed">
-                  Submit candidacy dossier for global house admission.
+                  Apply for membership at a house near you.
                 </p>
               </Link>
             </div>

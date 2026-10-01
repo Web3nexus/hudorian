@@ -38,8 +38,10 @@ declare global {
 export default function SecureGateLoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<'credentials' | 'mfa'>('credentials');
-  const [email, setEmail] = useState('admin@hudorian.com');
-  const [password, setPassword] = useState('password123');
+  // The form must never arrive pre-filled: shipping the admin email or
+  // password in the bundle hands the panel to anyone who opens devtools.
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -168,8 +170,11 @@ export default function SecureGateLoginPage() {
         router.push('/securegate');
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid SecureGate administrator credentials.';
+      const msg = err instanceof Error ? err.message : 'Invalid administrator email or password.';
       setError(msg);
+      // A rejected password is never worth keeping in the DOM, especially on a
+      // shared machine where the next person would find it still typed.
+      setPassword('');
       // Reset captcha on failure if applicable
       if (captchaProvider === 'cloudflare_turnstile' && window.turnstile && widgetIdRef.current !== null) {
         window.turnstile.reset(widgetIdRef.current as string);
@@ -195,26 +200,10 @@ export default function SecureGateLoginPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid Google Authenticator verification code.';
       setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemoLogin = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.adminLogin('admin@hudorian.com', 'password123', captchaToken || undefined);
-      if (res.requires_mfa && res.mfa_token) {
-        setMfaToken(res.mfa_token);
-        setStep('mfa');
-        setError('Google Authenticator 2FA is active on this administrator account. Please enter your 6-digit code.');
-      } else {
-        router.push('/securegate');
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Quick sign-in failed. Please verify credentials.';
-      setError(msg);
+      // Clear the code so a retry starts clean. The challenge itself is capped
+      // and single-use server-side, and "start over" is offered below for when
+      // that cap burns it.
+      setMfaCode('');
     } finally {
       setLoading(false);
     }
@@ -237,13 +226,13 @@ export default function SecureGateLoginPage() {
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#B8976C]/15 border border-[#B8976C]/30 text-[#C5A880] text-[11px] font-mono font-medium uppercase tracking-widest">
             <ShieldCheck className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span>SecureGate Checkpoint</span>
+            <span>Administrator Sign In</span>
           </div>
           <h1 className="font-serif-luxury text-3xl md:text-4xl tracking-[0.25em] uppercase text-white font-medium">
             HUDORIAN
           </h1>
           <p className="text-xs text-white/50 font-light max-w-xs mx-auto leading-relaxed">
-            Restricted administrative command center. Multi-factor cryptographic clearance required.
+            Administrator sign-in. Two-step verification is recommended.
           </p>
         </div>
 
@@ -256,15 +245,21 @@ export default function SecureGateLoginPage() {
 
         {/* Step 1: Credentials */}
         {step === 'credentials' ? (
-          <form onSubmit={handleCredentialsSubmit} className="space-y-5">
+          <form onSubmit={handleCredentialsSubmit} autoComplete="off" className="space-y-5">
             <div>
               <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2">
-                Administrator Identifier
+                Email address
               </label>
               <div className="relative">
                 <input
                   type="email"
+                  name="admin_identifier"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
                   required
+                  autoFocus
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@hudorian.com"
@@ -275,11 +270,19 @@ export default function SecureGateLoginPage() {
 
             <div>
               <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2">
-                Clearance Keyphrase
+                Password
               </label>
               <div className="relative">
                 <input
                   type="password"
+                  name="admin_password"
+                  // Browsers ignore autocomplete="off" on password fields and
+                  // refill them anyway, so "new-password" is what actually
+                  // suppresses the stored-credential prompt.
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -308,10 +311,10 @@ export default function SecureGateLoginPage() {
               className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-95 transition duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#B8976C]/10 disabled:opacity-50"
             >
               {loading ? (
-                <span>Validating Clearance...</span>
+                <span>Signing in...</span>
               ) : (
                 <>
-                  <span>Authenticate Session</span>
+                  <span>Sign in</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -319,7 +322,7 @@ export default function SecureGateLoginPage() {
           </form>
         ) : (
           /* Step 2: MFA */
-          <form onSubmit={handleMfaVerify} className="space-y-6">
+          <form onSubmit={handleMfaVerify} autoComplete="off" className="space-y-6">
             <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 text-center space-y-2">
               <KeyRound className="w-6 h-6 text-[#C5A880] mx-auto" />
               <p className="text-xs text-white/80 font-medium">Google Authenticator Verification</p>
@@ -334,15 +337,21 @@ export default function SecureGateLoginPage() {
               </label>
               <input
                 type="text"
+                name="mfa_code"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                autoComplete="one-time-code"
+                data-1p-ignore
+                data-lpignore="true"
                 required
                 maxLength={6}
                 value={mfaCode}
-                onChange={(e) => setMfaCode(e.target.value)}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
                 placeholder="123456"
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-center text-xl tracking-[0.5em] font-mono text-white focus:outline-none focus:border-[#C5A880] transition"
               />
               <p className="text-[10px] text-white/40 text-center mt-2 font-mono">
-                Cryptographic RFC 6238 time-based authentication.
+                Enter the 6-digit code from your authenticator app.
               </p>
             </div>
 
@@ -351,27 +360,30 @@ export default function SecureGateLoginPage() {
               disabled={loading}
               className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-95 transition duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? <span>Verifying Code...</span> : <span>Confirm Clearance</span>}
+              {loading ? <span>Verifying Code...</span> : <span>Sign in</span>}
+            </button>
+
+            {/* A burned challenge cannot be recovered, so offer a clean restart
+                instead of leaving the administrator retyping a dead code. */}
+            <button
+              type="button"
+              onClick={() => {
+                setStep('credentials');
+                setMfaToken(null);
+                setMfaCode('');
+                setError(null);
+              }}
+              disabled={loading}
+              className="w-full text-center text-[11px] font-mono uppercase tracking-wider text-white/40 hover:text-white/70 transition disabled:opacity-40 cursor-pointer"
+            >
+              Start over
             </button>
           </form>
         )}
 
-        {/* 1-Click Demo Shortcut */}
-        <div className="pt-4 border-t border-white/10">
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/80 hover:text-white text-xs font-mono tracking-wider transition flex items-center justify-center gap-2 group"
-          >
-            <KeyRound className="w-3.5 h-3.5 text-[#C5A880] group-hover:scale-110 transition" />
-            <span>1-Click Executive Access</span>
-          </button>
-        </div>
-
         {/* Footer Note */}
         <div className="text-center text-[10px] font-mono text-white/30 space-y-1">
-          <p>HUDORIAN Security Architecture // SecureGate v2.6</p>
+          <p>HUDORIAN Admin Console</p>
           <p>All administrative requests are cryptographically audited.</p>
         </div>
       </div>

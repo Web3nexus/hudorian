@@ -111,14 +111,14 @@
       <div class="header">
         <img src="https://hudorian.com/images/hudorian-seal.png" alt="HUDORIAN Royal Seal" class="seal">
         <h1 class="brand-title">HUDORIAN</h1>
-        <div class="subtitle">Private Members Club & Dynastic Sanctuaries</div>
+        <div class="subtitle">Private Members Club</div>
       </div>
 
       <div class="content">
         <div class="salutation">Welcome, {{ $userName }}</div>
         
         <p class="body-text">
-          It is our distinct privilege to confirm your election into the fellowship of HUDORIAN. You now hold access to our global constellation of Houses, country Estates, private suites, and curated cultural gatherings.
+          Welcome to HUDORIAN. You now have access to our Houses, Estates, private suites, and cultural events around the world.
         </p>
 
         <div class="dossier-card">
@@ -128,12 +128,12 @@
               <td style="color: #C5A880; font-size: 12px; padding: 6px 0; text-align: right; font-family: monospace; font-weight: bold;">{{ $membershipNumber }}</td>
             </tr>
             <tr>
-              <td style="color: rgba(250,248,245,0.5); font-size: 12px; padding: 6px 0; font-family: monospace;">PATRONAGE TIER:</td>
+              <td style="color: rgba(250,248,245,0.5); font-size: 12px; padding: 6px 0; font-family: monospace;">MEMBERSHIP LEVEL:</td>
               <td style="color: #FAF8F5; font-size: 12px; padding: 6px 0; text-align: right; font-weight: 500;">{{ $planName }}</td>
             </tr>
             <tr>
               <td style="color: rgba(250,248,245,0.5); font-size: 12px; padding: 6px 0; font-family: monospace;">STATUS:</td>
-              <td style="color: #34D399; font-size: 12px; padding: 6px 0; text-align: right; font-family: monospace; text-transform: uppercase;">Active Patron</td>
+              <td style="color: #34D399; font-size: 12px; padding: 6px 0; text-align: right; font-family: monospace; text-transform: uppercase;">Active Member</td>
             </tr>
           </table>
         </div>

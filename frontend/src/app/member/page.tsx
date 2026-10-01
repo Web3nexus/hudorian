@@ -50,7 +50,7 @@ export default function MemberDashboardPage() {
   };
 
   const memberName = userData?.name || (loading ? 'Loading...' : 'Member');
-  const planName = userData?.member?.plan?.name || (loading ? '...' : (userData?.role === 'admin' ? 'Administrator Clearance' : 'Pending Membership'));
+  const planName = userData?.member?.plan?.name || (loading ? '...' : (userData?.role === 'admin' ? 'Administrator' : 'Pending Membership'));
   const memberNumber = userData?.member?.membership_number || (loading ? '...' : 'Awaiting Allocation');
 
   return (
@@ -62,7 +62,7 @@ export default function MemberDashboardPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-[#E8E2D8] pb-10 mb-14 gap-6">
           <div>
             <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#96754B] block mb-2">
-              RESIDENCY DASHBOARD
+              MEMBER DASHBOARD
             </span>
             <h1 className="font-serif-luxury text-3xl sm:text-5xl text-[#141414] leading-tight">
               Welcome Back, {memberName}
@@ -181,7 +181,7 @@ export default function MemberDashboardPage() {
                     >
                       <div>
                         <span className="text-xs uppercase tracking-wider text-[#96754B] font-semibold block">
-                          {stay.house?.name || 'HUDORIAN Sanctuary'}
+                          {stay.house?.name || 'HUDORIAN House'}
                         </span>
                         <h4 className="font-serif-luxury text-xl text-[#141414]">
                           {stay.room?.name || 'Horizon Suite'}

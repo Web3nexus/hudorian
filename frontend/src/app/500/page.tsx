@@ -36,17 +36,17 @@ export default function ServerErrorPage() {
           {/* Status Badge */}
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-800 text-[11px] uppercase tracking-[0.25em] font-medium shadow-xs">
             <AlertTriangle className="w-3.5 h-3.5 text-rose-700" />
-            <span>500 • Vault Interruption</span>
+            <span>500 • Server error</span>
           </div>
 
           {/* Headline */}
           <div className="space-y-4">
             <h1 className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-[#141414] leading-[1.08]">
-              Sanctuary Vault <br />
+              Server Error <br />
               <span className="italic font-serif text-[#96754B]">Interruption</span>
             </h1>
             <p className="text-base sm:text-lg text-black/70 font-light max-w-lg mx-auto leading-relaxed">
-              Our private servers encountered an unexpected condition while fulfilling this request. The Sanctuary technical stewards and concierge have been notified.
+              Our servers encountered an unexpected error while loading this page. Our technical team has been notified.
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export default function ServerErrorPage() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-[#141414] text-[#FAF8F5] text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#96754B] transition duration-300 shadow-md group cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500 text-[#FAF8F5]/80" />
-              <span>Retry Chamber</span>
+              <span>Try again</span>
             </button>
 
             <Link
@@ -65,11 +65,11 @@ export default function ServerErrorPage() {
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full border border-[#141414]/20 hover:border-[#141414] text-[#141414] bg-white/60 hover:bg-white text-xs uppercase tracking-[0.2em] font-semibold transition duration-300 shadow-xs"
             >
               <Home className="w-3.5 h-3.5 text-[#96754B]" />
-              <span>Sanctuary Home</span>
+              <span>Back to home</span>
             </Link>
           </div>
 
-          {/* Concierge Assistance Card */}
+          {/* Support Card */}
           <div className="pt-8 border-t border-[#E8E2D8] mt-10">
             <div className="p-6 bg-white/80 border border-[#E8E2D8] rounded-xs shadow-2xs max-w-md mx-auto text-center space-y-3">
               <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-[#96754B] block">

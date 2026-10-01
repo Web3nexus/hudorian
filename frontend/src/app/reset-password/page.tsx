@@ -31,12 +31,12 @@ function ResetPasswordContent() {
     }
 
     if (password.length < 8) {
-      setError('Keyphrase must be at least 8 characters in length.');
+      setError('Password must be at least 8 characters in length.');
       return;
     }
 
     if (password !== passwordConfirmation) {
-      setError('Keyphrase confirmations do not match.');
+      setError('Passwords do not match.');
       return;
     }
 
@@ -51,7 +51,7 @@ function ResetPasswordContent() {
       });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to reset keyphrase. The link may have expired.';
+      const msg = err instanceof Error ? err.message : 'Could not reset your password. The link may have expired.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -70,13 +70,13 @@ function ResetPasswordContent() {
           />
         </div>
         <span className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#96754B] block">
-          Cryptographic Clearance
+          Account Security
         </span>
         <h1 className="font-serif-luxury text-3xl font-light text-[#141414]">
-          Set New Keyphrase
+          Set new password
         </h1>
         <p className="text-xs text-[#141414]/60 font-light leading-relaxed">
-          Establish a new clearance password for your HUDORIAN membership account.
+          Choose a new password for your HUDORIAN membership account.
         </p>
       </div>
 
@@ -92,10 +92,10 @@ function ResetPasswordContent() {
           <div className="p-6 rounded-xs bg-emerald-50/70 border border-emerald-200/60 text-emerald-950 space-y-3">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
             <h3 className="font-serif-luxury text-lg font-medium text-emerald-900">
-              Keyphrase Established
+              Password updated
             </h3>
             <p className="text-xs text-emerald-800/80 font-light leading-relaxed">
-              Your security clearance keyphrase has been updated successfully. All active sessions have been terminated.
+              Your password has been updated successfully. All active sessions have been signed out.
             </p>
           </div>
 
@@ -127,7 +127,7 @@ function ResetPasswordContent() {
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-black/60 mb-2 font-medium">
-              New Keyphrase (Min 8 Characters)
+              New password (min 8 characters)
             </label>
             <input
               type="password"
@@ -142,7 +142,7 @@ function ResetPasswordContent() {
 
           <div>
             <label className="block text-xs uppercase tracking-wider text-black/60 mb-2 font-medium">
-              Confirm New Keyphrase
+              Confirm new password
             </label>
             <input
               type="password"
@@ -164,7 +164,7 @@ function ResetPasswordContent() {
               <span>Updating Credentials...</span>
             ) : (
               <>
-                <span>Confirm & Update Keyphrase</span>
+                <span>Update password</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -191,7 +191,7 @@ export default function ResetPasswordPage() {
       <Navbar />
 
       <main className="grow flex items-center justify-center py-36 px-6">
-        <Suspense fallback={<div className="p-8 text-center text-xs font-mono">Loading security checkpoint...</div>}>
+        <Suspense fallback={<div className="p-8 text-center text-xs font-mono">Loading...</div>}>
           <ResetPasswordContent />
         </Suspense>
       </main>
