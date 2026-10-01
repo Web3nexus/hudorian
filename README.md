@@ -242,17 +242,33 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+`frontend/out/` and `frontend/.next/` are build output. They are git-ignored —
+edit only `frontend/src` and `frontend/public`.
+
 ---
 
 ## 11. Production Deployment Instructions
 
-1. **Backend**:
-   - Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`
-   - Point web server root to `backend/public`
-   - Configure MySQL connection and run `php artisan migrate --force`
-2. **Frontend**:
-   - Run `npm run build`
-   - Deploy as a standalone Node.js server (`next start`) or on Vercel/AWS.
+The site builds to **static files**. There is no Node process on the server and
+no port 3000.
+
+```bash
+# from the repository root — builds, then publishes into the web root
+./scripts/deploy.sh ~/public_html
+```
+
+1. **Frontend** — `./scripts/deploy.sh <web-root>` runs `npm run build` and
+   rsyncs `frontend/out/` (plus the root `.htaccess`) into the document root.
+2. **Backend** — upload `backend/` alongside it, then run
+   `php artisan config:cache && php artisan route:cache && php artisan view:cache`
+   and `php artisan migrate --force`. Create `backend/.env` on the server; never
+   commit it.
+3. **Web root** — the document root is the *parent* of `backend/`. The root
+   `.htaccess` locks down `backend/`, forwards `/api` and `/sanctum` to Laravel,
+   and serves the static export.
+
+Full instructions, including the Nginx equivalent and troubleshooting, are in
+[DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
