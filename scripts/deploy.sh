@@ -59,6 +59,25 @@ case "$TARGET" in
     */backend|*/backend/) fail "refusing to publish into backend/" ;;
 esac
 
+# rsync --delete against a target that contains the repository would wipe
+# frontend/, backend/ and .git. Refuse outright rather than rely on --exclude.
+TARGET_ABS="$(cd "$TARGET" && pwd)"
+if [ "$TARGET_ABS" = "$REPO_ROOT" ] \
+   || [ -d "$TARGET_ABS/backend" ] || [ -d "$TARGET_ABS/frontend" ]; then
+    fail "refusing to publish into $TARGET_ABS
+
+    That directory holds the repository itself, and --delete would destroy
+    backend/ and frontend/.
+
+    To refresh a site served straight from the repository root, publish
+    additively instead:
+
+        rsync -a --exclude='backend/' --exclude='frontend/' \\
+              --exclude='.git/' --exclude='node_modules/' \\
+              frontend/out/ ./
+    "
+fi
+
 bold "Publishing to $TARGET"
 
 # --delete removes stale chunks from the previous build. Without it the
