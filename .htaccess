@@ -1,18 +1,16 @@
 # ======================================================================
-# HUDORIAN — Apache / LiteSpeed web root configuration
+# HUDORIAN — Apache / LiteSpeed Web Root Configuration
 # ======================================================================
-# Assumes the cPanel document root (public_html) is laid out as:
-#
-#   public_html/
-#   ├── .htaccess      <- this file
-#   ├── index.html     <- published from frontend/dist by scripts/deploy.sh
-#   ├── assets/        <- published from frontend/dist
-#   ├── images/
-#   └── backend/       <- the Laravel application
-#
-# Nginx hosts ignore this file entirely; configure the equivalent
-# location blocks in the vhost there instead.
-# ======================================================================
+
+DirectoryIndex index.html index.php
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -20,33 +18,27 @@
     # ------------------------------------------------------------------
     # 1. FORCE HTTPS
     # ------------------------------------------------------------------
-    # Must run before any other rule. The catch-all in section 6 ends the
-    # rewrite pass with [L], so a redirect placed later would never match.
     <IfModule mod_ssl.c>
         RewriteCond %{HTTPS} off
         RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     </IfModule>
 
     # ------------------------------------------------------------------
-    # 2. LOCK DOWN THE LARAVEL SOURCE
+    # 2. LOCK DOWN SENSITIVE BACKEND & SOURCE FILES
     # ------------------------------------------------------------------
-    # The document root is the parent of backend/, so nothing under
-    # backend/ is protected by backend/.htaccess. Deny it here first,
-    # before any Laravel request is allowed to resolve.
     RewriteRule ^backend/(\.env|composer\.(json|lock)|package\.(json|lock)|artisan|phpunit\.xml) - [F,L,NC]
     RewriteRule ^backend/(app|bootstrap|config|database|resources|routes|storage|tests|vendor|node_modules)/ - [F,L,NC]
+    RewriteRule ^frontend/(src|node_modules|\.env|package\.(json|lock)|tsconfig\.json|vite\.config\.ts)/ - [F,L,NC]
 
     # ------------------------------------------------------------------
-    # 3. LARAVEL API + SANCTUM
+    # 3. LARAVEL API, SANCTUM & STORAGE
     # ------------------------------------------------------------------
-    # Hand the whole request to the Laravel front controller. REQUEST_URI is
-    # left untouched (QSA, no substitution) so Laravel still resolves the
-    # original /api/v1/... path from its route table.
     RewriteRule ^api(/.*)?$ backend/public/index.php [L,QSA]
     RewriteRule ^sanctum(/.*)?$ backend/public/index.php [L,QSA]
+    RewriteRule ^storage(/.*)?$ backend/public/index.php [L,QSA]
 
     # ------------------------------------------------------------------
-    # 4. PRESERVE AUTH HEADERS FOR SANCTUM / BEARER
+    # 4. PRESERVE AUTH HEADERS (Sanctum / Bearer)
     # ------------------------------------------------------------------
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -55,29 +47,30 @@
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # ------------------------------------------------------------------
-    # 5. SERVE STATIC ASSETS
+    # 5. SERVE EXISTING STATIC FILES DIRECTLY
     # ------------------------------------------------------------------
-    # Static build assets are served directly from disk.
-    <IfModule mod_negotiation.c>
-        Options -MultiViews
-    </IfModule>
-
-    # Anything that exists on disk is served as-is.
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
     # ------------------------------------------------------------------
-    # 6. SPA / STATIC-EXPORT FALLBACK
+    # 6. SERVE STATIC ASSETS FROM frontend/dist IF AVAILABLE
     # ------------------------------------------------------------------
-    RewriteRule ^ index.html [L]
-</IfModule>
+    RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ frontend/dist/$1 [L]
 
-# ----------------------------------------------------------------------
-# 7. PREVENT DIRECTORY LISTINGS OF THE WEB ROOT
-# ----------------------------------------------------------------------
-<IfModule mod_autoindex.c>
-    Options -Indexes
+    # ------------------------------------------------------------------
+    # 7. SPA CLIENT-SIDE ROUTING FALLBACK
+    # ------------------------------------------------------------------
+    # If index.html exists in web root (published site)
+    RewriteCond %{DOCUMENT_ROOT}/index.html -f
+    RewriteRule ^ index.html [L]
+
+    # If index.html exists in frontend/dist (built directly in repo)
+    RewriteCond %{DOCUMENT_ROOT}/frontend/dist/index.html -f
+    RewriteRule ^ frontend/dist/index.html [L]
+
+    # Fallback to index.html
+    RewriteRule ^ index.html [L]
 </IfModule>
 
 # ----------------------------------------------------------------------
@@ -88,10 +81,6 @@
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-
-    # The frontend is same-origin with the API on shared hosting, so the
-    # CORS headers that backend/public/.htaccess sets for direct access
-    # are intentionally not duplicated here.
 </IfModule>
 
 # ----------------------------------------------------------------------
@@ -114,7 +103,7 @@
     ExpiresActive On
     ExpiresDefault "access plus 1 week"
 
-    # Webpack chunks are content-hashed, so they can be cached forever.
+    # Static assets with hash
     ExpiresByType application/javascript "access plus 1 year"
     ExpiresByType text/css "access plus 1 year"
 
@@ -125,7 +114,7 @@
     ExpiresByType image/svg+xml "access plus 1 year"
     ExpiresByType image/x-icon "access plus 1 year"
 
-    # API responses must never be cached in the browser.
+    # API responses must never be cached
     ExpiresByType application/json "access plus 0 seconds"
 </IfModule>
 
