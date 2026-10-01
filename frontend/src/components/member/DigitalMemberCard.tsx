@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, RefreshCw, QrCode } from 'lucide-react';
 import { api } from '@/lib/api';

@@ -1,5 +1,3 @@
-'use client';
-
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from './api';
 import { CmsBlock, BrandSettings, HeaderNavItem, FooterSection } from '../types';

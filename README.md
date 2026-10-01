@@ -18,24 +18,34 @@ hudorian/
 │   │   ├── Models/                     # Eloquent Entities & Relationships
 │   │   ├── Services/                   # Domain Business Logic
 │   │   │   ├── SecureGate/             # SecureGateServiceInterface & SecureGateAdapter
-│   │   │   ├── Payments/               # PaymentGatewayInterface, MockPaymentGateway, Stripe
+│   │   │   ├── Payments/               # PaymentGatewayInterface, Flutterwave, Paystack
 │   │   │   ├── Booking/                # AvailabilityService (Atomic Locks & Overlap Checks)
 │   │   │   ├── Membership/             # MembershipService & DigitalCardService (HMAC QR)
 │   │   │   └── Audit/                  # AuditLogger (Immutable Activity Ledger)
 │   │   └── Providers/AppServiceProvider.php
-│   ├── database/migrations/           # Normalized Schema (9 Migrations)
+│   ├── database/migrations/           # Normalized Schema (Migrations)
 │   ├── database/seeders/              # Rich Luxury Constellation Dataset
-│   └── routes/api.php                 # 57 RESTful API Endpoints
+│   └── routes/api.php                 # RESTful API Endpoints (/api/v1/...)
 │
-└── frontend/               # Next.js 16+ App Router (TypeScript & Tailwind CSS)
+└── frontend/               # React 19 + Vite SPA (TypeScript & Tailwind CSS)
     ├── src/
-    │   ├── app/
-    │   │   ├── (public)/              # Homepage, /houses, /estates, /stays, /experiences, /membership, /journal, /shop, /signin
-    │   │   ├── (member)/              # /member, /member/bookings, /member/payments, /member/profile
-    │   │   └── (admin)/               # /admin/login (MFA), /admin, /admin/applications, /admin/members, /admin/houses, /admin/payments, /admin/audit-logs
-    │   ├── components/                # Luxury Design System, Navigation, Footers, Digital Cards, Carousels
-    │   ├── lib/api.ts                 # Full-Featured API Client with Sanctum & Admin Tokens
-    │   └── types/index.ts             # Domain TypeScript Types
+    │   ├── api/                   # API client and endpoints
+    │   ├── assets/                # Styling and globals
+    │   ├── components/            # Design System, Navigation, Footers, Cards, Modals
+    │   ├── context/               # Cms and Currency Context Providers
+    │   ├── hooks/                 # Navigation and auth state hooks
+    │   ├── layouts/               # RootLayout and template wrappers
+    │   ├── pages/                 # Public, Member, Legal, and SecureGate Admin Pages
+    │   ├── services/              # Domain service abstractions
+    │   ├── types/                 # TypeScript interfaces and domain models
+    │   ├── utils/                 # Utility helpers
+    │   ├── App.tsx                # React Router v7 routes definition
+    │   └── main.tsx               # Client entry point
+    ├── public/                    # Static brand assets and favicons
+    ├── index.html                 # Single page application root mount
+    ├── package.json
+    ├── tsconfig.json
+    └── vite.config.ts             # Vite configuration with Tailwind CSS & API proxy
 ```
 
 ---
@@ -234,7 +244,7 @@ php artisan serve --port=8000
 - **Member**: `member@hudorian.com` / `SEED_MEMBER_PASSWORD`
 - **Applicant**: `applicant@hudorian.com` / `SEED_APPLICANT_PASSWORD`
 
-### Running Frontend (Next.js)
+### Running Frontend (React + Vite)
 ```bash
 cd frontend
 npm install
@@ -242,23 +252,21 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-`frontend/out/` and `frontend/.next/` are build output. They are git-ignored —
-edit only `frontend/src` and `frontend/public`.
+`frontend/dist/` is the build output. It is git-ignored — edit only `frontend/src` and `frontend/public`.
 
 ---
 
 ## 11. Production Deployment Instructions
 
-The site builds to **static files**. There is no Node process on the server and
-no port 3000.
+The frontend builds to high-performance static SPA files. There is no Node process on the server.
 
 ```bash
 # from the repository root — builds, then publishes into the web root
 ./scripts/deploy.sh ~/public_html
 ```
 
-1. **Frontend** — `./scripts/deploy.sh <web-root>` runs `npm run build` and
-   rsyncs `frontend/out/` (plus the root `.htaccess`) into the document root.
+1. **Frontend** — `./scripts/deploy.sh <web-root>` runs `npm run build` in `frontend/` and
+   rsyncs `frontend/dist/` (plus the root `.htaccess`) into the document root.
 2. **Backend** — upload `backend/` alongside it, then run
    `php artisan config:cache && php artisan route:cache && php artisan view:cache`
    and `php artisan migrate --force`. Create `backend/.env` on the server; never

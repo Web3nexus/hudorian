@@ -1,8 +1,6 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter } from '@/hooks/useRouter';
+import Link from '@/components/common/Link';
 import { ArrowLeft, BookOpen, Check, Download, Shield } from 'lucide-react';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';

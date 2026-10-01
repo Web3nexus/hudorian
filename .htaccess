@@ -5,8 +5,8 @@
 #
 #   public_html/
 #   ├── .htaccess      <- this file
-#   ├── index.html     <- published from frontend/out by scripts/deploy.sh
-#   ├── _next/         <- published from frontend/out
+#   ├── index.html     <- published from frontend/dist by scripts/deploy.sh
+#   ├── assets/        <- published from frontend/dist
 #   ├── images/
 #   └── backend/       <- the Laravel application
 #
@@ -55,11 +55,9 @@
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # ------------------------------------------------------------------
-    # 5. SERVE THE STATIC EXPORT
+    # 5. SERVE STATIC ASSETS
     # ------------------------------------------------------------------
-    # next.config uses trailingSlash:true, so every route is already a real
-    # directory containing an index.html. Apache's MultiViews must stay off
-    # or it will silently rewrite /houses into /houses/index.html.html.
+    # Static build assets are served directly from disk.
     <IfModule mod_negotiation.c>
         Options -MultiViews
     </IfModule>

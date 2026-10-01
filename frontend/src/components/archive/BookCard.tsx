@@ -1,7 +1,5 @@
-'use client';
-
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/common/Link';
 import { BookAccess } from '@/types';
 import { Book } from '@/types';
 

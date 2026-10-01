@@ -1,0 +1,391 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from '@/hooks';
+import { ShieldCheck, KeyRound, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { api } from '@/lib/api';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'error-callback'?: () => void;
+          'expired-callback'?: () => void;
+          theme?: 'light' | 'dark' | 'auto';
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+    };
+    grecaptcha?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'expired-callback'?: () => void;
+          theme?: 'light' | 'dark';
+        }
+      ) => number;
+      reset: (widgetId?: number) => void;
+    };
+  }
+}
+
+export default function SecureGateLoginPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<'credentials' | 'mfa'>('credentials');
+  // The form must never arrive pre-filled: shipping the admin email or
+  // password in the bundle hands the panel to anyone who opens devtools.
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Bot Protection / CAPTCHA
+  const [captchaProvider, setCaptchaProvider] = useState<'none' | 'cloudflare_turnstile' | 'google_recaptcha'>('none');
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string>('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaContainerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | number | null>(null);
+
+  // 1. Fetch public security configuration
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await api.getSecurityConfig();
+        if (config.captcha_provider === 'cloudflare_turnstile' && config.cloudflare_site_key) {
+          setCaptchaProvider('cloudflare_turnstile');
+          setCaptchaSiteKey(config.cloudflare_site_key);
+        } else if (config.captcha_provider === 'google_recaptcha' && config.google_recaptcha_site_key) {
+          setCaptchaProvider('google_recaptcha');
+          setCaptchaSiteKey(config.google_recaptcha_site_key);
+        } else {
+          setCaptchaProvider('none');
+        }
+      } catch (err) {
+        console.warn('Could not fetch security config, defaulting to none:', err);
+        setCaptchaProvider('none');
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  // 2. Load CAPTCHA scripts dynamically if enabled
+  useEffect(() => {
+    if (captchaProvider === 'cloudflare_turnstile' && captchaSiteKey) {
+      const scriptId = 'cf-turnstile-script';
+      const existingScript = document.getElementById(scriptId);
+
+      const renderTurnstile = () => {
+        if (window.turnstile && captchaContainerRef.current) {
+          captchaContainerRef.current.innerHTML = '';
+          try {
+            widgetIdRef.current = window.turnstile.render(captchaContainerRef.current, {
+              sitekey: captchaSiteKey,
+              theme: 'dark',
+              callback: (token: string) => {
+                setCaptchaToken(token);
+                setError(null);
+              },
+              'error-callback': () => setError('Security verification error. Please retry.'),
+              'expired-callback': () => setCaptchaToken(null),
+            });
+          } catch (e) {
+            console.error('Turnstile render error:', e);
+          }
+        }
+      };
+
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = renderTurnstile;
+        document.head.appendChild(script);
+      } else if (window.turnstile) {
+        renderTurnstile();
+      }
+    } else if (captchaProvider === 'google_recaptcha' && captchaSiteKey) {
+      const scriptId = 'google-recaptcha-script';
+      const existingScript = document.getElementById(scriptId);
+
+      const renderRecaptcha = () => {
+        if (window.grecaptcha && captchaContainerRef.current) {
+          captchaContainerRef.current.innerHTML = '';
+          try {
+            widgetIdRef.current = window.grecaptcha.render(captchaContainerRef.current, {
+              sitekey: captchaSiteKey,
+              theme: 'dark',
+              callback: (token: string) => {
+                setCaptchaToken(token);
+                setError(null);
+              },
+              'expired-callback': () => setCaptchaToken(null),
+            });
+          } catch (e) {
+            console.error('reCAPTCHA render error:', e);
+          }
+        }
+      };
+
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = renderRecaptcha;
+        document.head.appendChild(script);
+      } else if (window.grecaptcha) {
+        renderRecaptcha();
+      }
+    }
+  }, [captchaProvider, captchaSiteKey]);
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (captchaProvider !== 'none' && !captchaToken) {
+      setError('Please complete the security challenge before authenticating.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await api.adminLogin(email, password, captchaToken || undefined);
+      if (res.requires_mfa && res.mfa_token) {
+        setMfaToken(res.mfa_token);
+        setStep('mfa');
+      } else {
+        router.push('/securegate');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid administrator email or password.';
+      setError(msg);
+      // A rejected password is never worth keeping in the DOM, especially on a
+      // shared machine where the next person would find it still typed.
+      setPassword('');
+      // Reset captcha on failure if applicable
+      if (captchaProvider === 'cloudflare_turnstile' && window.turnstile && widgetIdRef.current !== null) {
+        window.turnstile.reset(widgetIdRef.current as string);
+        setCaptchaToken(null);
+      } else if (captchaProvider === 'google_recaptcha' && window.grecaptcha && widgetIdRef.current !== null) {
+        window.grecaptcha.reset(widgetIdRef.current as number);
+        setCaptchaToken(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfaVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaToken) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      await api.adminVerifyMfa(mfaToken, mfaCode);
+      router.push('/securegate');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid Google Authenticator verification code.';
+      setError(msg);
+      // Clear the code so a retry starts clean. The challenge itself is capped
+      // and single-use server-side, and "start over" is offered below for when
+      // that cap burns it.
+      setMfaCode('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#070709] text-[#FAF8F5] flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#B8976C]/30 selection:text-white">
+      {/* Background radial atmosphere */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-[#B8976C]/10 via-[#B8976C]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-md w-full relative z-10 bg-[#101014]/90 backdrop-blur-2xl p-8 md:p-10 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-20 h-20 relative mb-2 flex items-center justify-center">
+            <img
+              src="/images/hudorian-seal.png"
+              alt="HUDORIAN Royal Seal"
+              className="w-full h-full object-contain drop-shadow-2xl"
+            />
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#B8976C]/15 border border-[#B8976C]/30 text-[#C5A880] text-[11px] font-mono font-medium uppercase tracking-widest">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#C5A880]" />
+            <span>Administrator Sign In</span>
+          </div>
+          <h1 className="font-serif-luxury text-3xl md:text-4xl tracking-[0.25em] uppercase text-white font-medium">
+            HUDORIAN
+          </h1>
+          <p className="text-xs text-white/50 font-light max-w-xs mx-auto leading-relaxed">
+            Administrator sign-in. Two-step verification is recommended.
+          </p>
+        </div>
+
+        {error && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Step 1: Credentials */}
+        {step === 'credentials' ? (
+          <form onSubmit={handleCredentialsSubmit} autoComplete="off" className="space-y-5">
+            <div>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2">
+                Email address
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  name="admin_identifier"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
+                  required
+                  autoFocus
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@hudorian.com"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] transition placeholder:text-white/20"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  name="admin_password"
+                  // Browsers ignore autocomplete="off" on password fields and
+                  // refill them anyway, so "new-password" is what actually
+                  // suppresses the stored-credential prompt.
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] transition placeholder:text-white/20"
+                />
+              </div>
+            </div>
+
+            {/* Dynamic Bot Protection Challenge (Only shown if enabled in panel) */}
+            {captchaProvider !== 'none' && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-white/60">
+                  <span>Bot Verification</span>
+                  <span className="text-[#C5A880] capitalize">{captchaProvider.replace('_', ' ')}</span>
+                </div>
+                <div className="p-3 bg-white/[0.02] border border-white/10 rounded-xl flex items-center justify-center">
+                  <div ref={captchaContainerRef} className="min-h-[65px] flex items-center justify-center" />
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-95 transition duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#B8976C]/10 disabled:opacity-50"
+            >
+              {loading ? (
+                <span>Signing in...</span>
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          /* Step 2: MFA */
+          <form onSubmit={handleMfaVerify} autoComplete="off" className="space-y-6">
+            <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 text-center space-y-2">
+              <KeyRound className="w-6 h-6 text-[#C5A880] mx-auto" />
+              <p className="text-xs text-white/80 font-medium">Google Authenticator Verification</p>
+              <p className="text-[11px] text-white/50">
+                Enter the current 6-digit TOTP verification code from your authenticator app.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2 text-center">
+                6-Digit Security Code
+              </label>
+              <input
+                type="text"
+                name="mfa_code"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                autoComplete="one-time-code"
+                data-1p-ignore
+                data-lpignore="true"
+                required
+                maxLength={6}
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="123456"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-center text-xl tracking-[0.5em] font-mono text-white focus:outline-none focus:border-[#C5A880] transition"
+              />
+              <p className="text-[10px] text-white/40 text-center mt-2 font-mono">
+                Enter the 6-digit code from your authenticator app.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#C5A880] to-[#A3855E] text-black font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-95 transition duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? <span>Verifying Code...</span> : <span>Sign in</span>}
+            </button>
+
+            {/* A burned challenge cannot be recovered, so offer a clean restart
+                instead of leaving the administrator retyping a dead code. */}
+            <button
+              type="button"
+              onClick={() => {
+                setStep('credentials');
+                setMfaToken(null);
+                setMfaCode('');
+                setError(null);
+              }}
+              disabled={loading}
+              className="w-full text-center text-[11px] font-mono uppercase tracking-wider text-white/40 hover:text-white/70 transition disabled:opacity-40 cursor-pointer"
+            >
+              Start over
+            </button>
+          </form>
+        )}
+
+        {/* Footer Note */}
+        <div className="text-center text-[10px] font-mono text-white/30 space-y-1">
+          <p>HUDORIAN Admin Console</p>
+          <p>All administrative requests are cryptographically audited.</p>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/hooks/useRouter';
 import { X, Loader2, Check, Shield, Landmark, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useIsSignedIn, storeToken } from '@/lib/auth';

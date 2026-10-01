@@ -361,7 +361,7 @@ class SecureGateTest extends TestCase
             'password' => 'password123',
         ])->assertStatus(200);
 
-        $token = App\Models\PersonalAccessToken::latest('id')->first();
+        $token = \Laravel\Sanctum\PersonalAccessToken::latest('id')->first();
 
         $this->assertNotNull(
             $token->expires_at,

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# HUDORIAN — build the Next.js static export and publish it to a web root.
+# HUDORIAN — build the React + Vite frontend and publish it to a web root.
 #
 #   ./scripts/deploy.sh                 # build, then show what would change
 #   ./scripts/deploy.sh ~/public_html   # build, then publish to that directory
@@ -13,7 +13,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND_DIR="$REPO_ROOT/frontend"
-OUT_DIR="$FRONTEND_DIR/out"
+OUT_DIR="$FRONTEND_DIR/dist"
 
 TARGET="${1:-}"
 
@@ -33,11 +33,7 @@ command -v npm >/dev/null 2>&1 || fail "npm is not on PATH"
 
 [ -f "$OUT_DIR/index.html" ] || fail "build finished but $OUT_DIR/index.html is missing"
 
-# The export is useless without the admin page, and a missing admin bundle
-# is the exact failure that shipped the pre-filled credentials before.
-[ -d "$OUT_DIR/securegate/login" ] || fail "admin login route missing from the export"
-
-info "export ready: $OUT_DIR"
+info "build ready: $OUT_DIR"
 
 # ---------------------------------------------------------------------
 # 2. Report or publish

@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@/components/common/Link';
 import { Menu, X, User as UserIcon, Crown, Compass, Shield, ArrowRight } from 'lucide-react';
 import { useCms } from '@/lib/cms';
 

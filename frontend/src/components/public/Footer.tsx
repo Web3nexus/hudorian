@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import Link from '@/components/common/Link';
 import { Globe, ChevronDown, Check, Shield } from 'lucide-react';
 import { useCms } from '@/lib/cms';
 import { useCurrency, CurrencyCode } from '@/context/CurrencyContext';
