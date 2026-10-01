@@ -55,13 +55,13 @@ export interface AdminHouseReference {
 }
 
 const getBaseUrl = (): string => {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
   if (typeof window !== 'undefined') {
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       return '/api/v1';
     }
+  }
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
   return 'http://localhost:8000/api/v1';
 };
@@ -80,13 +80,13 @@ class ApiClient {
   }
 
   private getBaseUrl(): string {
-    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
-      return import.meta.env.VITE_API_URL;
-    }
     if (typeof window !== 'undefined') {
       if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         return '/api/v1';
       }
+    }
+    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL;
     }
     return 'http://localhost:8000/api/v1';
   }
