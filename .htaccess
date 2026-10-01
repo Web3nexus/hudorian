@@ -47,7 +47,7 @@ DirectoryIndex index.html index.php
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # ------------------------------------------------------------------
-    # 5. SERVE EXISTING STATIC FILES DIRECTLY
+    # 5. SERVE EXISTING STATIC FILES IN WEB ROOT DIRECTLY
     # ------------------------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
@@ -55,21 +55,39 @@ DirectoryIndex index.html index.php
     # ------------------------------------------------------------------
     # 6. SERVE STATIC ASSETS FROM frontend/dist IF AVAILABLE
     # ------------------------------------------------------------------
-    RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f
+    # Relative path match
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond frontend/dist/$1 -f
+    RewriteRule ^(.*)$ frontend/dist/$1 [L]
+
+    # DOCUMENT_ROOT match
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{DOCUMENT_ROOT}/frontend/dist/$1 -f
     RewriteRule ^(.*)$ frontend/dist/$1 [L]
 
     # ------------------------------------------------------------------
     # 7. SPA CLIENT-SIDE ROUTING FALLBACK
     # ------------------------------------------------------------------
-    # If index.html exists in web root (published site)
+    # Try root index.html (published site)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond index.html -f
+    RewriteRule ^ index.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{DOCUMENT_ROOT}/index.html -f
     RewriteRule ^ index.html [L]
 
-    # If index.html exists in frontend/dist (built directly in repo)
+    # Try frontend/dist/index.html (built in-repo)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond frontend/dist/index.html -f
+    RewriteRule ^ frontend/dist/index.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{DOCUMENT_ROOT}/frontend/dist/index.html -f
     RewriteRule ^ frontend/dist/index.html [L]
 
-    # Fallback to index.html
+    # Ultimate fallback
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.html [L]
 </IfModule>
 

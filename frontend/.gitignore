@@ -4,7 +4,6 @@
 .pnp.*
 
 # Build output
-/dist
 /build
 
 # Environment files

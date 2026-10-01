@@ -3,7 +3,6 @@
 # ======================================================================
 
 # --- Frontend (React + Vite) -----------------------------------------
-frontend/dist/
 frontend/node_modules/
 frontend/.env
 frontend/.env.local
